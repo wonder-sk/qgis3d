@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ap.tif</file>
+        <file>dtm.tif</file>
+    </qresource>
+</RCC>
