@@ -1,12 +1,13 @@
 TEMPLATE = app
 
-QT += qml quick 3dcore 3dquick 3dquickextras
+QT += 3dcore 3drender 3dinput 3dextras
 CONFIG += c++11
 
 SOURCES += main.cpp \
     mymesh.cpp \
     mygeometry.cpp \
-    cameracontroller.cpp
+    cameracontroller.cpp \
+    window3d.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -36,4 +37,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     mymesh.h \
     mygeometry.h \
-    cameracontroller.h
+    cameracontroller.h \
+    window3d.h

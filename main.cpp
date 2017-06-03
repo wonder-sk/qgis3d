@@ -1,27 +1,19 @@
 
-#include <Qt3DQuickExtras/qt3dquickwindow.h>
-#include <Qt3DQuick/QQmlAspectEngine>
 #include <QGuiApplication>
-#include <QQmlContext>
 
-#include "mymesh.h"
-#include "cameracontroller.h"
+#include <Qt3DRender>
+#include <Qt3DExtras>
+
+#include "window3d.h"
+
 
 int main(int argc, char *argv[])
 {
   QGuiApplication app(argc, argv);
 
-  qmlRegisterType<MyMesh>("qgis3d", 1, 0, "MyMesh");
-  qmlRegisterType<CameraController>("qgis3d", 1, 0, "CameraController");
-
-  Qt3DExtras::Quick::Qt3DQuickWindow view;
-  view.resize(1600, 800);
-  view.engine()->qmlEngine()->rootContext()->setContextProperty("_window", &view);
-  view.setSource(QUrl("qrc:/main.qml"));
+  Window3D view;
+  view.resize(800/2,600/2);
   view.show();
-
-  //QQmlApplicationEngine engine;
-  //engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
   return app.exec();
 }
