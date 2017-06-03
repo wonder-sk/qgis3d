@@ -5,7 +5,8 @@ CONFIG += c++11
 
 SOURCES += main.cpp \
     mymesh.cpp \
-    mygeometry.cpp
+    mygeometry.cpp \
+    cameracontroller.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -34,4 +35,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     mymesh.h \
-    mygeometry.h
+    mygeometry.h \
+    cameracontroller.h

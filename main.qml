@@ -33,8 +33,10 @@ Entity {
         InputSettings { }
     ]
 
-    FirstPersonCameraController { camera: mainCamera }
-
+    CameraController{
+        camera: mainCamera
+        viewport: Qt.rect(0, 0, _window.width, _window.height)
+    }
 
     // our custom mesh
 

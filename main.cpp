@@ -5,12 +5,14 @@
 #include <QQmlContext>
 
 #include "mymesh.h"
+#include "cameracontroller.h"
 
 int main(int argc, char *argv[])
 {
   QGuiApplication app(argc, argv);
 
   qmlRegisterType<MyMesh>("qgis3d", 1, 0, "MyMesh");
+  qmlRegisterType<CameraController>("qgis3d", 1, 0, "CameraController");
 
   Qt3DExtras::Quick::Qt3DQuickWindow view;
   view.resize(1600, 800);
