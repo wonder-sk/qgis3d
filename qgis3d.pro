@@ -1,13 +1,14 @@
 TEMPLATE = app
 
-QT += 3dcore 3drender 3dinput 3dextras
+QT += 3dcore 3drender 3dinput 3dextras widgets
 CONFIG += c++11
 
 SOURCES += main.cpp \
     mymesh.cpp \
     mygeometry.cpp \
     cameracontroller.cpp \
-    window3d.cpp
+    window3d.cpp \
+    sidepanel.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -38,4 +39,5 @@ HEADERS += \
     mymesh.h \
     mygeometry.h \
     cameracontroller.h \
-    window3d.h
+    window3d.h \
+    sidepanel.h
