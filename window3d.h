@@ -6,12 +6,13 @@
 #include <QTimer>
 
 class CameraController;
+class MapTextureGenerator;
 class SidePanel;
 
 class Window3D : public Qt3DExtras::Qt3DWindow
 {
 public:
-  Window3D(SidePanel* p);
+  Window3D(SidePanel* p, MapTextureGenerator* mapGen);
 
   Qt3DCore::QEntity *createScene();
 
@@ -26,6 +27,7 @@ private slots:
 private:
   CameraController* cc;
   SidePanel* panel;
+  MapTextureGenerator* mapGen;   //!< provider of rendered map tiles
 
   QTimer timer;
   int frames = 0;

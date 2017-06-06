@@ -8,10 +8,27 @@ SOURCES += main.cpp \
     mygeometry.cpp \
     cameracontroller.cpp \
     window3d.cpp \
-    sidepanel.cpp
+    sidepanel.cpp \
+    maptexturegenerator.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
+
+QGIS_SOURCE_PATH = /home/martin/qgis/git-master
+QGIS_BUILD_PATH = $${QGIS_SOURCE_PATH}/creator
+
+INCLUDEPATH += \
+  $${QGIS_SOURCE_PATH}/src/core \
+  $${QGIS_SOURCE_PATH}/src/core/expression \
+  $${QGIS_SOURCE_PATH}/src/core/geometry \
+  $${QGIS_SOURCE_PATH}/src/core/metadata \
+  $${QGIS_SOURCE_PATH}/src/core/raster \
+  $${QGIS_BUILD_PATH} \
+  $${QGIS_BUILD_PATH}/src/core
+
+LIBS += -L$${QGIS_BUILD_PATH}/output/lib -lqgis_core
+
+QT += xml
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -40,4 +57,5 @@ HEADERS += \
     mygeometry.h \
     cameracontroller.h \
     window3d.h \
-    sidepanel.h
+    sidepanel.h \
+    maptexturegenerator.h

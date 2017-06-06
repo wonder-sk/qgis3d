@@ -2,11 +2,13 @@
 
 #include "mymesh.h"
 #include "cameracontroller.h"
+#include "maptexturegenerator.h"
 #include "sidepanel.h"
 
 
-Window3D::Window3D(SidePanel* p)
+Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen)
   : panel(p)
+  , mapGen(mapGen)
 {
   defaultFrameGraph()->setClearColor(QColor(Qt::black));
 
@@ -38,22 +40,35 @@ Window3D::Window3D(SidePanel* p)
 class MapTextureImageDataGenerator : public Qt3DRender::QTextureImageDataGenerator
 {
 public:
+    int x, y, z;
+    QImage img;
+
+    static QImage placeholderImage()
+    {
+      // simple placeholder image
+      QImage i(2, 2, QImage::Format_RGB32);
+      i.setPixelColor(0, 0, Qt::darkGray);
+      i.setPixelColor(1, 0, Qt::lightGray);
+      i.setPixelColor(0, 1, Qt::lightGray);
+      i.setPixelColor(1, 1, Qt::darkGray);
+      return i;
+    }
+
+    MapTextureImageDataGenerator(int x, int y, int z, const QImage& img)
+      : x(x), y(y), z(z), img(img) {}
+
     virtual Qt3DRender::QTextureImageDataPtr operator()() override
     {
-      QImage img;
-      bool res = img.load(":/ap.tif", "tif");
-      Q_ASSERT(res);
-
       Qt3DRender::QTextureImageDataPtr dataPtr = Qt3DRender::QTextureImageDataPtr::create();
-      dataPtr->setImage(img);  // will copy image data to the internal byte array
+      dataPtr->setImage(img.isNull() ? placeholderImage() : img);  // will copy image data to the internal byte array
       return dataPtr;
     }
 
     virtual bool operator ==(const QTextureImageDataGenerator &other) const override
     {
-      // TODO
-      Q_UNUSED(other);
-      return true;
+      const MapTextureImageDataGenerator *otherFunctor = functor_cast<MapTextureImageDataGenerator>(&other);
+      return otherFunctor != nullptr && otherFunctor->img.isNull() == img.isNull() &&
+          x == otherFunctor->x && y == otherFunctor->y && z == otherFunctor->z;
     }
 
     QT3D_FUNCTOR(MapTextureImageDataGenerator)
@@ -64,15 +79,32 @@ public:
 class MapTextureImage : public Qt3DRender::QAbstractTextureImage
 {
 public:
-  MapTextureImage(Qt3DCore::QNode *parent = nullptr)
+  MapTextureImage(MapTextureGenerator* mapGen, int x, int y, int z, Qt3DCore::QNode *parent = nullptr)
     : Qt3DRender::QAbstractTextureImage(parent)
+    , mapGen(mapGen)
+    , x(x), y(y), z(z)
   {
+    connect(mapGen, &MapTextureGenerator::tileReady, [this, mapGen](int x, int y, int z, const QImage& img)
+    {
+      if (x == this->x && y == this->y && z == this->z)
+      {
+        this->img = img;
+        this->notifyDataGeneratorChanged();
+      }
+    } );
+
+    // request image
+    mapGen->render(x, y, z);
   }
 
   virtual Qt3DRender::QTextureImageDataGeneratorPtr dataGenerator() const override
   {
-    return Qt3DRender::QTextureImageDataGeneratorPtr(new MapTextureImageDataGenerator());
+    return Qt3DRender::QTextureImageDataGeneratorPtr(new MapTextureImageDataGenerator(x, y, z, img));
   }
+
+  MapTextureGenerator* mapGen;
+  int x, y, z;
+  QImage img;
 };
 
 Qt3DCore::QEntity *Window3D::createScene()
@@ -91,7 +123,7 @@ Qt3DCore::QEntity *Window3D::createScene()
 
   Qt3DExtras::QDiffuseMapMaterial* planeMaterial = new Qt3DExtras::QDiffuseMapMaterial(rootEntity);
   Qt3DRender::QTexture2D* texture = new Qt3DRender::QTexture2D(planeMaterial);
-  MapTextureImage* image = new MapTextureImage();
+  MapTextureImage* image = new MapTextureImage(mapGen, 0, 0, 0);
   texture->addTextureImage(image);
   texture->setMinificationFilter(Qt3DRender::QTexture2D::Linear);
   texture->setMagnificationFilter(Qt3DRender::QTexture2D::Linear);
@@ -121,6 +153,7 @@ void Window3D::onTimeout()
 
 void Window3D::onFrameTriggered(float dt)
 {
+  Q_UNUSED(dt);
   //qDebug() << dt*1000;
   frames++;
 }

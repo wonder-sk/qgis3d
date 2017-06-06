@@ -4,18 +4,40 @@
 #include <Qt3DRender>
 #include <Qt3DExtras>
 
+#include "maptexturegenerator.h"
 #include "sidepanel.h"
 #include "window3d.h"
+
+#include <qgsapplication.h>
+#include <qgsrasterlayer.h>
+#include <qgsproject.h>
 
 #include <QBoxLayout>
 
 int main(int argc, char *argv[])
 {
-  QApplication app(argc, argv);
+  // TODO: why it does not work to create ordinary QApplication and then just call initQgis()
+
+  qputenv("QGIS_PREFIX_PATH", "/home/martin/qgis/git-master/creator/output");
+  QgsApplication app(argc, argv, true);
+  QgsApplication::initQgis();
+
+  QgsRasterLayer* rlDtm = new QgsRasterLayer("/home/martin/tmp/qgis3d/dtm.tif", "dtm", "gdal");
+  Q_ASSERT( rlDtm->isValid() );
+
+  QgsRasterLayer* rlSat = new QgsRasterLayer("/home/martin/tmp/qgis3d/ap.tif", "ap", "gdal");
+  Q_ASSERT( rlSat->isValid() );
+
+  QgsProject* prj = new QgsProject();
+  prj->addMapLayer(rlSat);
+  prj->setCrs(rlSat->crs());
+
+  MapTextureGenerator* mapGen = new MapTextureGenerator(prj);
+  //TerrainGenerator tGen(rlDtm);
 
   SidePanel* sidePanel = new SidePanel;
 
-  Window3D* view = new Window3D(sidePanel);
+  Window3D* view = new Window3D(sidePanel, mapGen);
   QWidget *container = QWidget::createWindowContainer(view);
 
   QSize screenSize = view->screen()->size();
