@@ -25,7 +25,6 @@ class MyGeometry : public Qt3DRender::QGeometry
     Q_PROPERTY(Qt3DRender::QAttribute *positionAttribute READ positionAttribute CONSTANT)
     Q_PROPERTY(Qt3DRender::QAttribute *normalAttribute READ normalAttribute CONSTANT)
     Q_PROPERTY(Qt3DRender::QAttribute *texCoordAttribute READ texCoordAttribute CONSTANT)
-    Q_PROPERTY(Qt3DRender::QAttribute *tangentAttribute READ tangentAttribute CONSTANT)
     Q_PROPERTY(Qt3DRender::QAttribute *indexAttribute READ indexAttribute CONSTANT)
 
 public:
@@ -42,7 +41,6 @@ public:
     Qt3DRender::QAttribute *positionAttribute() const;
     Qt3DRender::QAttribute *normalAttribute() const;
     Qt3DRender::QAttribute *texCoordAttribute() const;
-    Qt3DRender::QAttribute *tangentAttribute() const;
     Qt3DRender::QAttribute *indexAttribute() const;
 
 public Q_SLOTS:
@@ -69,7 +67,6 @@ private:
     Qt3DRender::QAttribute *m_positionAttribute;
     Qt3DRender::QAttribute *m_normalAttribute;
     Qt3DRender::QAttribute *m_texCoordAttribute;
-    Qt3DRender::QAttribute *m_tangentAttribute;
     Qt3DRender::QAttribute *m_indexAttribute;
     Qt3DRender::QBuffer *m_vertexBuffer;
     Qt3DRender::QBuffer *m_indexBuffer;

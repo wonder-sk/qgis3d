@@ -25,7 +25,7 @@ QByteArray createPlaneVertexData(float w, float h, const QSize &resolution, cons
 
     // Populate a buffer with the interleaved per-vertex data with
     // vec3 pos, vec2 texCoord, vec3 normal, vec4 tangent
-    const quint32 elementSize = 3 + 2 + 3 + 4;
+    const quint32 elementSize = 3 + 2 + 3;
     const quint32 stride = elementSize * sizeof(float);
     QByteArray bufferBytes;
     bufferBytes.resize(stride * nVerts);
@@ -61,12 +61,6 @@ QByteArray createPlaneVertexData(float w, float h, const QSize &resolution, cons
             *fptr++ = 0.0f;
             *fptr++ = 1.0f;
             *fptr++ = 0.0f;
-
-            // tangent
-            *fptr++ = 1.0f;
-            *fptr++ = 0.0f;
-            *fptr++ = 0.0f;
-            *fptr++ = 1.0f;
         }
     }
 
@@ -180,7 +174,7 @@ MyGeometry::MyGeometry(MyGeometry::QNode *parent)
     , m_positionAttribute(nullptr)
     , m_normalAttribute(nullptr)
     , m_texCoordAttribute(nullptr)
-    , m_tangentAttribute(nullptr)
+    //, m_tangentAttribute(nullptr)
     , m_indexAttribute(nullptr)
     , m_vertexBuffer(nullptr)
     , m_indexBuffer(nullptr)
@@ -200,7 +194,6 @@ void MyGeometry::updateVertices()
     m_positionAttribute->setCount(nVerts);
     m_normalAttribute->setCount(nVerts);
     m_texCoordAttribute->setCount(nVerts);
-    m_tangentAttribute->setCount(nVerts);
     m_vertexBuffer->setDataGenerator(QSharedPointer<PlaneVertexBufferFunctor>::create(m_width, m_height, m_meshResolution, i));
 }
 
@@ -275,11 +268,6 @@ QAttribute *MyGeometry::texCoordAttribute() const
     return m_texCoordAttribute;
 }
 
-QAttribute *MyGeometry::tangentAttribute() const
-{
-    return m_tangentAttribute;
-}
-
 QAttribute *MyGeometry::indexAttribute() const
 {
     return m_indexAttribute;
@@ -300,13 +288,12 @@ void MyGeometry::init()
     m_positionAttribute = new QAttribute(this);
     m_normalAttribute = new QAttribute(this);
     m_texCoordAttribute = new QAttribute(this);
-    m_tangentAttribute = new QAttribute(this);
     m_indexAttribute = new QAttribute(this);
     m_vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, this);
     m_indexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::IndexBuffer, this);
 
     const int nVerts = m_meshResolution.width() * m_meshResolution.height();
-    const int stride = (3 + 2 + 3 + 4) * sizeof(float);
+    const int stride = (3 + 2 + 3) * sizeof(float);
     const int faces = 2 * (m_meshResolution.width() - 1) * (m_meshResolution.height() - 1);
 
     m_positionAttribute->setName(QAttribute::defaultPositionAttributeName());
@@ -335,15 +322,6 @@ void MyGeometry::init()
     m_normalAttribute->setByteOffset(5 * sizeof(float));
     m_normalAttribute->setCount(nVerts);
 
-    m_tangentAttribute->setName(QAttribute::defaultTangentAttributeName());
-    m_tangentAttribute->setVertexBaseType(QAttribute::Float);
-    m_tangentAttribute->setVertexSize(4);
-    m_tangentAttribute->setAttributeType(QAttribute::VertexAttribute);
-    m_tangentAttribute->setBuffer(m_vertexBuffer);
-    m_tangentAttribute->setByteStride(stride);
-    m_tangentAttribute->setByteOffset(8 * sizeof(float));
-    m_tangentAttribute->setCount(nVerts);
-
     m_indexAttribute->setAttributeType(QAttribute::IndexAttribute);
     m_indexAttribute->setVertexBaseType(QAttribute::UnsignedInt);
     m_indexAttribute->setBuffer(m_indexBuffer);
@@ -357,6 +335,5 @@ void MyGeometry::init()
     addAttribute(m_positionAttribute);
     addAttribute(m_texCoordAttribute);
     addAttribute(m_normalAttribute);
-    addAttribute(m_tangentAttribute);
     addAttribute(m_indexAttribute);
 }

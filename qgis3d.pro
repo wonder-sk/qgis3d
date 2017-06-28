@@ -9,7 +9,8 @@ SOURCES += main.cpp \
     cameracontroller.cpp \
     window3d.cpp \
     sidepanel.cpp \
-    maptexturegenerator.cpp
+    maptexturegenerator.cpp \
+    flatterrain.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -58,4 +59,5 @@ HEADERS += \
     cameracontroller.h \
     window3d.h \
     sidepanel.h \
-    maptexturegenerator.h
+    maptexturegenerator.h \
+    flatterrain.h
