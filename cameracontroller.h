@@ -43,6 +43,15 @@ private:
     float pitch = 0; // aircraft nose up/down (0 = looking straight down to the plane)
     float yaw = 0;   // aircraft nose left/right
 
+    bool operator==(const CamData& other) const
+    {
+      return x == other.x && y == other.y && dist == other.dist && pitch == other.pitch && yaw == other.yaw;
+    }
+    bool operator!=(const CamData& other) const
+    {
+      return !operator==(other);
+    }
+
     void setCamera(Qt3DRender::QCamera* camera)
     {
       // basic scene setup:
@@ -50,7 +59,6 @@ private:
       // - z grows to the bottom
       // - y grows towards camera
       // so a point on the plane (x',y') is transformed to (x,-z) in our 3D world
-
       camera->setUpVector(QVector3D(0,0,-1));
       camera->setPosition(QVector3D(x,dist, y));
       camera->setViewCenter(QVector3D(x,0,y));

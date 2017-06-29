@@ -138,14 +138,27 @@ void CameraController::onFrameTriggered(float dt)
   if (mCamera == nullptr)
     return;
 
+  CamData oldCamData = cd;
+
   int dx = mMousePos.x() - mLastMousePos.x();
   int dy = mMousePos.y() - mLastMousePos.y();
   mLastMousePos = mMousePos;
 
   cd.dist -= cd.dist * mWheelAxis->value() * 10 * dt;
 
-  cd.x += mTxAxis->value() * dt * cd.dist * 1.5;
-  cd.y -= mTyAxis->value() * dt * cd.dist * 1.5;
+  float tx = mTxAxis->value() * dt * cd.dist * 1.5;
+  float ty = -mTyAxis->value() * dt * cd.dist * 1.5;
+
+  if (tx || ty)
+  {
+    // moving with keyboard - take into account yaw of camera
+    float t = sqrt(tx*tx + ty*ty);
+    float a = atan2(ty, tx) - cd.yaw * M_PI / 180;
+    float dx = cos(a) * t;
+    float dy = sin(a) * t;
+    cd.x += dx;
+    cd.y += dy;
+  }
 
   if (mLeftMouseButtonAction->isActive())
   {
@@ -175,7 +188,8 @@ void CameraController::onFrameTriggered(float dt)
   if (cd.dist < 10)
     cd.dist = 10;
 
-  cd.setCamera(mCamera);
+  if (cd != oldCamData)
+    cd.setCamera(mCamera);
 }
 
 void CameraController::onPositionChanged(Qt3DInput::QMouseEvent *mouse)
