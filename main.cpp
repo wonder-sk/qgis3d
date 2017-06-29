@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
   //TerrainGenerator tGen(rlDtm);
 
   SidePanel* sidePanel = new SidePanel;
+  sidePanel->setMinimumWidth(150);
 
   Window3D* view = new Window3D(sidePanel, mapGen);
   QWidget *container = QWidget::createWindowContainer(view);

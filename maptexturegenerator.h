@@ -24,6 +24,8 @@ public:
   //! start async rendering of a tile
   void render(int x, int y, int z);
 
+  double getBaseTileSide() const { return baseTileSide; }
+
 signals:
   void tileReady(int x, int y, int z, const QImage& image);
 

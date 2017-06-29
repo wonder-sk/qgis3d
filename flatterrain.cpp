@@ -94,7 +94,9 @@ void FlatTerrain::cameraViewMatrixChanged()
   Q_FOREACH (QuadTreeNode* n, activeNodes)
   {
     if (!n->tile)
-      n->makeTerrainTile(tileGeometry, mapGen, this);
+    {
+      n->tile = new FlatTerrainTile(n, tileGeometry, mapGen, this);
+    }
     //n->tile->setParent(this);  // crashes if we add/remove tiles like this :-(
     n->tile->setEnabled(true);
   }

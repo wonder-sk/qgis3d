@@ -80,7 +80,7 @@ QgsPointXY MapTextureGenerator::tileToMap(int x, int y, int z)
 {
   double tileSide = baseTileSide / pow(2, z);
   double mx = mapOrigin.x() + x * tileSide;
-  double my = mapOrigin.y() + baseTileSide - y * tileSide;
+  double my = mapOrigin.y() + y * tileSide;
   return QgsPointXY(mx, my);
 }
 

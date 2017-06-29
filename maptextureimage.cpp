@@ -27,7 +27,7 @@ public:
     virtual Qt3DRender::QTextureImageDataPtr operator()() override
     {
       Qt3DRender::QTextureImageDataPtr dataPtr = Qt3DRender::QTextureImageDataPtr::create();
-      dataPtr->setImage(img.isNull() ? placeholderImage() : img.mirrored());  // will copy image data to the internal byte array
+      dataPtr->setImage(img.isNull() ? placeholderImage() : img); // will copy image data to the internal byte array
       return dataPtr;
     }
 

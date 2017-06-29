@@ -3,7 +3,7 @@
 
 #include "qgsrectangle.h"
 
-class FlatTerrainTile;
+class TerrainTile;
 class MapTextureGenerator;
 
 #include <Qt3DExtras/QPlaneGeometry>
@@ -18,14 +18,12 @@ struct QuadTreeNode
 
   ~QuadTreeNode();
 
-  void makeTerrainTile(Qt3DExtras::QPlaneGeometry* tileGeometry, MapTextureGenerator* mapGen, Qt3DCore::QNode* parent);
-
   void makeChildren();
 
   float distance(const QVector3D& pos);
 
   QgsRectangle extent;
-  FlatTerrainTile *tile; //!< null = not yet created
+  TerrainTile *tile; //!< null = not yet created
   float minDistance;  //!< if camera is closer than this distance, we need to switch to children
 
   int level;   //!< how deep are we in the tree (root = level 0)

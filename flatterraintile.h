@@ -4,31 +4,39 @@
 #include <Qt3DCore/QEntity>
 #include <Qt3DCore/QTransform>
 #include <Qt3DExtras/QPlaneGeometry>
-#include <Qt3DExtras/QDiffuseMapMaterial>
+#include <Qt3DExtras/QTextureMaterial>
 
 class MapTextureGenerator;
 struct QuadTreeNode;
 class FlatTerrainTileMesh;
 
-class FlatTerrainTile : public Qt3DCore::QEntity
+//! base class for all kinds of terrain tiles
+class TerrainTile : public Qt3DCore::QEntity
+{
+public:
+  TerrainTile(QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
+
+protected:
+  Qt3DExtras::QTextureMaterial* material;
+};
+
+//! just a simple quad with a map texture
+class FlatTerrainTile : public TerrainTile
 {
 public:
   FlatTerrainTile(QuadTreeNode* node, Qt3DExtras::QPlaneGeometry* tileGeometry, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
 
-#if 0
-  void setY(float y)  // to avoid z-fighting
-  {
-    QVector3D tr = transform->translation();
-    tr.setY(y);
-    transform->setTranslation(tr);
-  }
-#endif
-
 private:
   FlatTerrainTileMesh* mesh;
-  Qt3DExtras::QDiffuseMapMaterial* material;
-  //Qt3DExtras::QPhongMaterial* material;
   Qt3DCore::QTransform* transform;
+};
+
+
+//! tile made from DEM
+class DemTerrainTile : public TerrainTile
+{
+public:
+  // TODO
 };
 
 #endif // FLATTERRAINTILE_H

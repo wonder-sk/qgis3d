@@ -6,6 +6,24 @@
 #include "maptextureimage.h"
 #include "quadtree.h"
 
+
+TerrainTile::TerrainTile(QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent)
+  : Qt3DCore::QEntity(parent)
+{
+  material = new Qt3DExtras::QTextureMaterial;
+  Qt3DRender::QTexture2D* texture = new Qt3DRender::QTexture2D(this);
+  MapTextureImage* image = new MapTextureImage(mapGen, node->x, node->y, node->level);
+  texture->addTextureImage(image);
+  texture->setMinificationFilter(Qt3DRender::QTexture2D::Linear);
+  texture->setMagnificationFilter(Qt3DRender::QTexture2D::Linear);
+  material->setTexture(texture);
+  addComponent(material);  // takes ownership if the component has no parent
+}
+
+
+// ----------------
+
+
 class FlatTerrainTileMesh : public Qt3DRender::QGeometryRenderer
 {
 public:
@@ -18,23 +36,12 @@ public:
 
 
 FlatTerrainTile::FlatTerrainTile(QuadTreeNode *node, Qt3DExtras::QPlaneGeometry *tileGeometry, MapTextureGenerator *mapGen, Qt3DCore::QNode *parent)
-  : Qt3DCore::QEntity(parent)
+  : TerrainTile(node, mapGen, parent)
 {
   mesh = new FlatTerrainTileMesh(tileGeometry);
   addComponent(mesh);  // takes ownership if the component has no parent
 
   QgsRectangle extent = node->extent;
-
-  material = new Qt3DExtras::QDiffuseMapMaterial;
-  Qt3DRender::QTexture2D* texture = new Qt3DRender::QTexture2D(this);
-  MapTextureImage* image = new MapTextureImage(mapGen, node->x, node->y, node->level);
-  texture->addTextureImage(image);
-  texture->setMinificationFilter(Qt3DRender::QTexture2D::Linear);
-  texture->setMagnificationFilter(Qt3DRender::QTexture2D::Linear);
-  material->setDiffuse(texture);
-  material->setAmbient(Qt::white);
-  material->setShininess(0);
-  addComponent(material);  // takes ownership if the component has no parent
 
   transform = new Qt3DCore::QTransform();
   transform->setScale(extent.width());

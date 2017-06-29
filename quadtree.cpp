@@ -2,6 +2,7 @@
 
 #include "flatterraintile.h"
 
+
 QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, QuadTreeNode *par)
   : extent(e), tile(nullptr), parent(par)
 {
@@ -19,7 +20,7 @@ QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, QuadTree
   else
   {
     level = 0;
-    minDistance = 300;  // some ad-hoc min distance
+    minDistance = e.width();   // slightly ad-hoc min. distance - based on size of the tile 0
   }
 }
 
@@ -30,12 +31,6 @@ QuadTreeNode::~QuadTreeNode()
   delete tile;
 }
 
-void QuadTreeNode::makeTerrainTile(Qt3DExtras::QPlaneGeometry *tileGeometry, MapTextureGenerator *mapGen, Qt3DCore::QNode *parent)
-{
-  Q_ASSERT( !tile );
-  //QColor color = tileColors[ level % tileColorsCount ];
-  tile = new FlatTerrainTile(this, tileGeometry, mapGen, parent);
-}
 
 void QuadTreeNode::makeChildren()
 {

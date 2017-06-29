@@ -20,7 +20,8 @@ Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen)
 
   // create terrain entity
 
-  QgsRectangle extent(0, 0, 200, 200); // TODO: this is still just a fake extent (for size of tile 0 in world coordinates)
+  double tile0side = mapGen->getBaseTileSide();
+  QgsRectangle extent(0, 0, tile0side, tile0side); // this is without map origin offset to avoid issues with x/y float precision
 
   FlatTerrain* t = new FlatTerrain(mapGen, extent);
   t->setParent( scene );
@@ -32,13 +33,13 @@ Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen)
   scene->addComponent(mFrameAction);  // takes ownership
 
   // Camera
-  camera()->lens()->setPerspectiveProjection(45.0f, 16.0f/9.0f, 0.1f, 1000.0f);
+  camera()->lens()->setPerspectiveProjection(45.0f, 16.0f/9.0f, 10.f, 10000.0f);
 
   // Camera controlling
   cc = new CameraController(scene); // attaches to the scene
   cc->setViewport(QRect(QPoint(0,0), size()));
   cc->setCamera(camera());
-  cc->setCameraData(extent.center().x(), -extent.center().y(), 200);
+  cc->setCameraData(extent.center().x(), -extent.center().y(), tile0side);
 
   connect(camera(), &Qt3DRender::QCamera::viewMatrixChanged, this, &Window3D::onCameraViewMatrixChanged);
   onCameraViewMatrixChanged();
