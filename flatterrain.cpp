@@ -1,6 +1,102 @@
 #include "flatterrain.h"
 
-FlatTerrain::FlatTerrain()
-{
+#include "qgsrectangle.h"
 
+#include <Qt3DExtras/QPlaneMesh>
+#include <Qt3DExtras/QPlaneGeometry>
+
+#include "maptextureimage.h"
+#include "quadtree.h"
+#include "flatterraintile.h"
+
+
+
+static QColor tileColors[] = {
+  Qt::green,
+  Qt::red,
+  Qt::blue,
+  Qt::cyan,
+  Qt::magenta,
+  Qt::yellow,
+};
+static int tileColorsCount = sizeof(tileColors) / sizeof(QColor);
+
+
+
+
+FlatTerrain::FlatTerrain(MapTextureGenerator* mapGen, const QgsRectangle& extent)
+  : root(nullptr)
+  , mapGen(mapGen)
+{
+  root = new QuadTreeNode(extent, 0, 0, nullptr);
+
+  // simple quad geometry shared by all tiles
+  // QPlaneGeometry by default is 1x1 with mesh resultion QSize(2,2), centered at 0
+  tileGeometry = new Qt3DExtras::QPlaneGeometry(this);
+}
+
+FlatTerrain::~FlatTerrain()
+{
+  delete root;
+}
+
+void FlatTerrain::setCamera(Qt3DRender::QCamera *camera)
+{
+  mCamera = camera;
+  connect(mCamera, &Qt3DRender::QCamera::viewMatrixChanged, this, &FlatTerrain::cameraViewMatrixChanged);
+  cameraViewMatrixChanged();  // initial update
+}
+
+
+static void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes, int maxLevel, const QVector3D& cameraPos)
+{
+  float dist = node->distance(cameraPos);
+
+  if (node->minDistance <= dist || node->level == maxLevel)
+  {
+    // perfect fit
+    activeNodes << node;
+  }
+  else
+  {
+    // needs to use children
+    if (!node->children[0])
+      node->makeChildren();
+
+    for (int i = 0; i < 4; ++i)
+      addActiveNodes(node->children[i], activeNodes, maxLevel, cameraPos);
+  }
+}
+
+
+void FlatTerrain::cameraViewMatrixChanged()
+{
+  QVector3D cameraPos = mCamera->position();
+  float dist = root->distance(cameraPos);
+  qDebug() << "camera view matrix changed " << dist;
+
+  // TODO: ideally do not walk through the whole quadtree, only update the nodes that are being used?
+
+  // TODO: delete cached tiles when they have not been used for a while
+
+  // remove all active nodes from the scene
+  Q_FOREACH (QuadTreeNode* n, activeNodes)
+  {
+    //n->tile->setParent((Qt3DCore::QNode*)nullptr);  // crashes if we add/remove tiles like this :-(
+    n->tile->setEnabled(false);
+  }
+
+  activeNodes.clear();
+
+  addActiveNodes(root, activeNodes, 4, cameraPos);
+
+  // add active nodes to the scene
+  Q_FOREACH (QuadTreeNode* n, activeNodes)
+  {
+    if (!n->tile)
+      n->makeTerrainTile(tileGeometry, mapGen, this);
+    //n->tile->setParent(this);  // crashes if we add/remove tiles like this :-(
+    n->tile->setEnabled(true);
+  }
+  qDebug() << "active nodes " << activeNodes.count();
 }

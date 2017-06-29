@@ -108,6 +108,18 @@ void CameraController::setViewport(const QRect &viewport)
   emit viewportChanged();
 }
 
+void CameraController::setCameraData(float x, float y, float dist, float pitch, float yaw)
+{
+  cd.x = x;
+  cd.y = y;
+  cd.dist = dist;
+  cd.pitch = pitch;
+  cd.yaw = yaw;
+
+  if (mCamera)
+    cd.setCamera(mCamera);
+}
+
 
 float find_x_on_line(float x0, float y0, float x1, float y1, float y)
 {

@@ -10,7 +10,10 @@ SOURCES += main.cpp \
     window3d.cpp \
     sidepanel.cpp \
     maptexturegenerator.cpp \
-    flatterrain.cpp
+    flatterrain.cpp \
+    maptextureimage.cpp \
+    flatterraintile.cpp \
+    quadtree.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -60,4 +63,7 @@ HEADERS += \
     window3d.h \
     sidepanel.h \
     maptexturegenerator.h \
-    flatterrain.h
+    flatterrain.h \
+    maptextureimage.h \
+    flatterraintile.h \
+    quadtree.h

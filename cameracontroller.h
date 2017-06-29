@@ -20,6 +20,8 @@ public:
   void setCamera(Qt3DRender::QCamera *camera);
   void setViewport(const QRect& viewport);
 
+  void setCameraData(float x, float y, float dist, float pitch = 0, float yaw = 0);
+
 signals:
     void cameraChanged();
     void viewportChanged();

@@ -42,6 +42,14 @@ void MapTextureGenerator::onRenderingFinished()
 
   QImage img = mapJob->renderedImage();
 
+  // extra tile information for debugging
+  QPainter p(&img);
+  p.setPen(Qt::white);
+  QString tileText = QString("%1 | %2 | %3").arg(jobData.x).arg(jobData.y).arg(jobData.z);
+  p.drawRect(0,0,img.width()-1, img.height()-1);
+  p.drawText(img.rect(), tileText, QTextOption(Qt::AlignCenter));
+  p.end();
+
   mapJob->deleteLater();
   jobs.remove(mapJob);
 
@@ -72,7 +80,7 @@ QgsPointXY MapTextureGenerator::tileToMap(int x, int y, int z)
 {
   double tileSide = baseTileSide / pow(2, z);
   double mx = mapOrigin.x() + x * tileSide;
-  double my = mapOrigin.y() + y * tileSide;
+  double my = mapOrigin.y() + baseTileSide - y * tileSide;
   return QgsPointXY(mx, my);
 }
 
