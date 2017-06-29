@@ -9,6 +9,7 @@
 #include "window3d.h"
 
 #include <qgsapplication.h>
+#include <qgsmapsettings.h>
 #include <qgsrasterlayer.h>
 #include <qgsproject.h>
 
@@ -32,7 +33,13 @@ int main(int argc, char *argv[])
   prj->addMapLayer(rlSat);
   prj->setCrs(rlSat->crs());
 
-  MapTextureGenerator* mapGen = new MapTextureGenerator(prj);
+  // determine tiling scheme for this project
+  QgsMapSettings ms;
+  ms.setLayers(prj->mapLayers().values());
+  ms.setDestinationCrs(prj->crs());
+  TilingScheme tilingScheme(ms.fullExtent());
+
+  MapTextureGenerator* mapGen = new MapTextureGenerator(prj, tilingScheme);
   //TerrainGenerator tGen(rlDtm);
 
   SidePanel* sidePanel = new SidePanel;

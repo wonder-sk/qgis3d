@@ -20,7 +20,7 @@ Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen)
 
   // create terrain entity
 
-  double tile0side = mapGen->getBaseTileSide();
+  double tile0side = mapGen->getTilingScheme().baseTileSide;
   QgsRectangle extent(0, 0, tile0side, tile0side); // this is without map origin offset to avoid issues with x/y float precision
 
   Terrain* t = new Terrain(mapGen, extent);

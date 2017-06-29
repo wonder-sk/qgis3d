@@ -8,7 +8,8 @@ class QgsRasterLayer;
 
 #include <QObject>
 
-#include <qgspointxy.h>
+#include "tilingscheme.h"
+
 
 /**
  * Responsible for:
@@ -19,12 +20,12 @@ class MapTextureGenerator : public QObject
 {
   Q_OBJECT
 public:
-  MapTextureGenerator(QgsProject* project);
+  MapTextureGenerator(QgsProject* project, const TilingScheme& tilingScheme);
 
   //! start async rendering of a tile
   void render(int x, int y, int z);
 
-  double getBaseTileSide() const { return baseTileSide; }
+  const TilingScheme& getTilingScheme() const { return tilingScheme; }
 
 signals:
   void tileReady(int x, int y, int z, const QImage& image);
@@ -42,8 +43,7 @@ private:
   //! project to be rendered into map
   QgsProject* project;
 
-  QgsPointXY mapOrigin; //!< origin point in map coordinates: (0,0) in the tiling scheme
-  double baseTileSide;  //!< length of tile side at zoom level 0 in map coordinates
+  TilingScheme tilingScheme;
 
   struct JobData
   {

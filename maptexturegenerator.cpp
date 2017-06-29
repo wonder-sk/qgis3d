@@ -4,16 +4,10 @@
 #include <qgsmapsettings.h>
 #include <qgsproject.h>
 
-MapTextureGenerator::MapTextureGenerator(QgsProject* project)
+MapTextureGenerator::MapTextureGenerator(QgsProject* project, const TilingScheme& tilingScheme)
   : project(project)
+  , tilingScheme(tilingScheme)
 {
-  QgsMapSettings mapSettings(baseMapSettings());
-
-  QgsRectangle fullExtent = mapSettings.fullExtent();
-  mapSettings.setExtent(fullExtent);
-
-  mapOrigin = QgsPointXY(fullExtent.xMinimum(), fullExtent.yMinimum());
-  baseTileSide = qMax(fullExtent.width(), fullExtent.height());
 }
 
 void MapTextureGenerator::render(int x, int y, int z)
@@ -68,25 +62,10 @@ QgsMapSettings MapTextureGenerator::baseMapSettings()
 
 QgsMapSettings MapTextureGenerator::mapSettingsForTile(int x, int y, int z)
 {
-  QgsPointXY pt0 = tileToMap(x, y, z);
-  QgsPointXY pt1 = tileToMap(x+1, y+1, z);
+  QgsPointXY pt0 = tilingScheme.tileToMap(x, y, z);
+  QgsPointXY pt1 = tilingScheme.tileToMap(x+1, y+1, z);
 
   QgsMapSettings mapSettings(baseMapSettings());
   mapSettings.setExtent(QgsRectangle(pt0, pt1));
   return mapSettings;
-}
-
-QgsPointXY MapTextureGenerator::tileToMap(int x, int y, int z)
-{
-  double tileSide = baseTileSide / pow(2, z);
-  double mx = mapOrigin.x() + x * tileSide;
-  double my = mapOrigin.y() + y * tileSide;
-  return QgsPointXY(mx, my);
-}
-
-void MapTextureGenerator::mapToTile(const QgsPointXY &pt, int z, float &x, float &y)
-{
-  double tileSide = baseTileSide / pow(2, z);
-  x = (pt.x() - mapOrigin.x()) / tileSide;
-  y = (pt.y() - mapOrigin.y()) / tileSide;
 }

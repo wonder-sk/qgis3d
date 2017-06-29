@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     maptextureimage.cpp \
     quadtree.cpp \
     terrain.cpp \
-    terraintile.cpp
+    terraintile.cpp \
+    tilingscheme.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -66,4 +67,5 @@ HEADERS += \
     maptextureimage.h \
     quadtree.h \
     terrain.h \
-    terraintile.h
+    terraintile.h \
+    tilingscheme.h
