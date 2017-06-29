@@ -18,6 +18,7 @@ public:
 
 protected:
   Qt3DExtras::QTextureMaterial* material;
+  Qt3DCore::QTransform* transform;
 };
 
 //! just a simple quad with a map texture
@@ -28,15 +29,19 @@ public:
 
 private:
   FlatTerrainTileMesh* mesh;
-  Qt3DCore::QTransform* transform;
 };
 
+
+class MyMesh;
 
 //! tile made from DEM
 class DemTerrainTile : public TerrainTile
 {
 public:
-  // TODO
+  DemTerrainTile(QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
+
+private:
+  MyMesh* mesh;
 };
 
 #endif // FLATTERRAINTILE_H

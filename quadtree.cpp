@@ -1,6 +1,6 @@
 #include "quadtree.h"
 
-#include "flatterraintile.h"
+#include "terraintile.h"
 
 
 QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, QuadTreeNode *par)

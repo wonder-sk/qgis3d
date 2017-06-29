@@ -1,4 +1,4 @@
-#include "flatterraintile.h"
+#include "terraintile.h"
 
 #include <Qt3DRender/QGeometryRenderer>
 #include <Qt3DRender/QTexture>
@@ -18,6 +18,10 @@ TerrainTile::TerrainTile(QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCo
   texture->setMagnificationFilter(Qt3DRender::QTexture2D::Linear);
   material->setTexture(texture);
   addComponent(material);  // takes ownership if the component has no parent
+
+  // create transform for derived classes
+  transform = new Qt3DCore::QTransform();
+  addComponent(transform);
 }
 
 
@@ -41,10 +45,25 @@ FlatTerrainTile::FlatTerrainTile(QuadTreeNode *node, Qt3DExtras::QPlaneGeometry 
   mesh = new FlatTerrainTileMesh(tileGeometry);
   addComponent(mesh);  // takes ownership if the component has no parent
 
+  // set up transform according to the extent covered by the quad geometry
   QgsRectangle extent = node->extent;
-
-  transform = new Qt3DCore::QTransform();
   transform->setScale(extent.width());
   transform->setTranslation(QVector3D(extent.xMinimum() + extent.width()/2,0, -extent.yMinimum() - extent.height()/2));
-  addComponent(transform);
+}
+
+
+// ----------------
+
+#include "mymesh.h"
+
+DemTerrainTile::DemTerrainTile(QuadTreeNode *node, MapTextureGenerator *mapGen, Qt3DCore::QNode *parent)
+  : TerrainTile(node, mapGen, parent)
+{
+  mesh = new MyMesh();
+  mesh->setMeshResolution(QSize(150,150));
+  addComponent(mesh);  // takes ownership if the component has no parent
+
+  QgsRectangle extent = node->extent;
+  transform->setScale3D(QVector3D(extent.width(), 50, extent.width()));
+  transform->setTranslation(QVector3D(extent.xMinimum() + extent.width()/2,0, -extent.yMinimum() - extent.height()/2));
 }

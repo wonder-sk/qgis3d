@@ -1,4 +1,4 @@
-#include "flatterrain.h"
+#include "terrain.h"
 
 #include "qgsrectangle.h"
 
@@ -7,7 +7,7 @@
 
 #include "maptextureimage.h"
 #include "quadtree.h"
-#include "flatterraintile.h"
+#include "terraintile.h"
 
 
 
@@ -24,8 +24,10 @@ static int tileColorsCount = sizeof(tileColors) / sizeof(QColor);
 
 
 
-FlatTerrain::FlatTerrain(MapTextureGenerator* mapGen, const QgsRectangle& extent)
-  : root(nullptr)
+Terrain::Terrain(MapTextureGenerator* mapGen, const QgsRectangle& extent)
+  : isFlat(true)
+  , maxLevel(0)
+  , root(nullptr)
   , mapGen(mapGen)
 {
   root = new QuadTreeNode(extent, 0, 0, nullptr);
@@ -35,15 +37,15 @@ FlatTerrain::FlatTerrain(MapTextureGenerator* mapGen, const QgsRectangle& extent
   tileGeometry = new Qt3DExtras::QPlaneGeometry(this);
 }
 
-FlatTerrain::~FlatTerrain()
+Terrain::~Terrain()
 {
   delete root;
 }
 
-void FlatTerrain::setCamera(Qt3DRender::QCamera *camera)
+void Terrain::setCamera(Qt3DRender::QCamera *camera)
 {
   mCamera = camera;
-  connect(mCamera, &Qt3DRender::QCamera::viewMatrixChanged, this, &FlatTerrain::cameraViewMatrixChanged);
+  connect(mCamera, &Qt3DRender::QCamera::viewMatrixChanged, this, &Terrain::cameraViewMatrixChanged);
   cameraViewMatrixChanged();  // initial update
 }
 
@@ -69,7 +71,7 @@ static void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes
 }
 
 
-void FlatTerrain::cameraViewMatrixChanged()
+void Terrain::cameraViewMatrixChanged()
 {
   QVector3D cameraPos = mCamera->position();
   float dist = root->distance(cameraPos);
@@ -88,14 +90,17 @@ void FlatTerrain::cameraViewMatrixChanged()
 
   activeNodes.clear();
 
-  addActiveNodes(root, activeNodes, 4, cameraPos);
+  addActiveNodes(root, activeNodes, maxLevel, cameraPos);
 
   // add active nodes to the scene
   Q_FOREACH (QuadTreeNode* n, activeNodes)
   {
     if (!n->tile)
     {
-      n->tile = new FlatTerrainTile(n, tileGeometry, mapGen, this);
+      if (isFlat)
+        n->tile = new FlatTerrainTile(n, tileGeometry, mapGen, this);
+      else
+        n->tile = new DemTerrainTile(n, mapGen, this);
     }
     //n->tile->setParent(this);  // crashes if we add/remove tiles like this :-(
     n->tile->setEnabled(true);

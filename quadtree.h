@@ -6,8 +6,6 @@
 class TerrainTile;
 class MapTextureGenerator;
 
-#include <Qt3DExtras/QPlaneGeometry>
-
 
 //! Quad tree data structure to keep track of terrain tiles
 struct QuadTreeNode

@@ -50,7 +50,7 @@ QByteArray createPlaneVertexData(float w, float h, const QSize &resolution, cons
 
             // position
             *fptr++ = x;
-            *fptr++ = zBits[i*z_step_w + (z_height-1-j*z_step_h)*z_width] * z_scale;
+            *fptr++ = zBits[i*z_step_w + (j*z_step_h)*z_width] * z_scale;
             *fptr++ = z;
 
             // texture coordinates

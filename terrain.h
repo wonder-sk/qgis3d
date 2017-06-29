@@ -27,21 +27,26 @@ class MapTextureGenerator;
 class QgsRectangle;
 
 //! generates terrain with constant height
-class FlatTerrain : public AbstractTerrain
+class Terrain : public AbstractTerrain
 {
   Q_OBJECT
 public:
-  explicit FlatTerrain(MapTextureGenerator* mapGen, const QgsRectangle& extent);
+  explicit Terrain(MapTextureGenerator* mapGen, const QgsRectangle& extent);
 
-  ~FlatTerrain();
+  ~Terrain();
 
   void setCamera( Qt3DRender::QCamera *camera );
+
+  void setFlat( bool flat ) { isFlat = flat; }
+  void setMaxLevel( int level ) { maxLevel = level; }
 
 
 private slots:
   void cameraViewMatrixChanged();
 
 private:
+  bool isFlat;
+  int maxLevel;
   QuadTreeNode* root;
   MapTextureGenerator* mapGen;
   QList<QuadTreeNode*> activeNodes;
