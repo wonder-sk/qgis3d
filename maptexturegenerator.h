@@ -20,7 +20,7 @@ class MapTextureGenerator : public QObject
 {
   Q_OBJECT
 public:
-  MapTextureGenerator(QgsProject* project, const TilingScheme& tilingScheme);
+  MapTextureGenerator(QgsProject* project, const TilingScheme& tilingScheme, int resolution);
 
   //! start async rendering of a tile
   void render(int x, int y, int z);
@@ -45,6 +45,8 @@ private:
 
   TilingScheme tilingScheme;
 
+  int res;
+
   struct JobData
   {
     QgsMapRendererSequentialJob* job;
@@ -58,13 +60,23 @@ private:
 /**
  * Responsible for creating mesh geometry from raster DTM
  */
-class TerrainGenerator
+class TerrainTextureGenerator
 {
 public:
-  TerrainGenerator(QgsRasterLayer* dtm);
+  TerrainTextureGenerator(QgsRasterLayer* dtm, const TilingScheme& tilingScheme, int resolution);
 
+  //! synchronous terrain read for a tile (array of floats)
+  QByteArray render(int x, int y, int z);
+
+  int resolution() const { return res; }
+
+private:
   //! raster used to build terrain
   QgsRasterLayer* dtm;
+
+  TilingScheme tilingScheme;
+
+  int res;
 };
 
 

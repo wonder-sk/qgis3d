@@ -4,8 +4,6 @@ QT += 3dcore 3drender 3dinput 3dextras widgets
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    mymesh.cpp \
-    mygeometry.cpp \
     cameracontroller.cpp \
     window3d.cpp \
     sidepanel.cpp \
@@ -14,7 +12,8 @@ SOURCES += main.cpp \
     quadtree.cpp \
     terrain.cpp \
     terraintile.cpp \
-    tilingscheme.cpp
+    tilingscheme.cpp \
+    terraintilegeometry.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -58,8 +57,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    mymesh.h \
-    mygeometry.h \
     cameracontroller.h \
     window3d.h \
     sidepanel.h \
@@ -68,4 +65,5 @@ HEADERS += \
     quadtree.h \
     terrain.h \
     terraintile.h \
-    tilingscheme.h
+    tilingscheme.h \
+    terraintilegeometry.h

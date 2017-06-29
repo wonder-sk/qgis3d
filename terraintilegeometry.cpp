@@ -1,5 +1,5 @@
 
-#include "mygeometry.h"
+#include "terraintilegeometry.h"
 #include <Qt3DRender/qattribute.h>
 #include <Qt3DRender/qbuffer.h>
 #include <Qt3DRender/qbufferdatagenerator.h>
@@ -9,19 +9,14 @@
 using namespace Qt3DRender;
 
 
-QByteArray createPlaneVertexData(float w, float h, const QSize &resolution, const QImage& i)
+QByteArray createPlaneVertexData(int res, const QByteArray& heights)
 {
-    Q_ASSERT(w > 0.0f);
-    Q_ASSERT(h > 0.0f);
-    Q_ASSERT(resolution.width() >= 2);
-    Q_ASSERT(resolution.height() >= 2);
+    Q_ASSERT(res >= 2);
+    Q_ASSERT(heights.count() == res*res*sizeof(float));
 
-    const uchar* zBits = i.bits();
-    int z_width = i.width(), z_height = i.height();
-    int z_step_w = z_width / resolution.width(), z_step_h = z_height / resolution.height();
-    double z_scale = 1/15.;
+    const float* zBits = (const float*) heights.constData();
 
-    const int nVerts = resolution.width() * resolution.height();
+    const int nVerts = res * res;
 
     // Populate a buffer with the interleaved per-vertex data with
     // vec3 pos, vec2 texCoord, vec3 normal, vec4 tangent
@@ -31,6 +26,8 @@ QByteArray createPlaneVertexData(float w, float h, const QSize &resolution, cons
     bufferBytes.resize(stride * nVerts);
     float* fptr = reinterpret_cast<float*>(bufferBytes.data());
 
+    float w = 1, h = 1;
+    QSize resolution(res, res);
     const float x0 = -w / 2.0f;
     const float z0 = -h / 2.0f;
     const float dx = w / (resolution.width() - 1);
@@ -50,7 +47,7 @@ QByteArray createPlaneVertexData(float w, float h, const QSize &resolution, cons
 
             // position
             *fptr++ = x;
-            *fptr++ = zBits[i*z_step_w + (j*z_step_h)*z_width] * z_scale;
+            *fptr++ = *zBits++;
             *fptr++ = z;
 
             // texture coordinates
@@ -67,8 +64,10 @@ QByteArray createPlaneVertexData(float w, float h, const QSize &resolution, cons
     return bufferBytes;
 }
 
-QByteArray createPlaneIndexData(const QSize &resolution)
+
+QByteArray createPlaneIndexData(int res)
 {
+    QSize resolution(res, res);
     // Create the index data. 2 triangles per rectangular face
     const int faces = 2 * (resolution.width() - 1) * (resolution.height() - 1);
     const int indices = 3 * faces;
@@ -102,43 +101,38 @@ QByteArray createPlaneIndexData(const QSize &resolution)
 class PlaneVertexBufferFunctor : public QBufferDataGenerator
 {
 public:
-    explicit PlaneVertexBufferFunctor(float w, float h, const QSize &resolution, const QImage& i)
-        : m_width(w)
-        , m_height(h)
-        , m_resolution(resolution)
-        , m_i(i)
+    explicit PlaneVertexBufferFunctor(int resolution, const QByteArray& heightMap)
+        : m_resolution(resolution)
+        , m_heightMap(heightMap)
     {}
 
     ~PlaneVertexBufferFunctor() {}
 
     QByteArray operator()() Q_DECL_FINAL
     {
-        return createPlaneVertexData(m_width, m_height, m_resolution, m_i);
+        return createPlaneVertexData(m_resolution, m_heightMap);
     }
 
     bool operator ==(const QBufferDataGenerator &other) const Q_DECL_FINAL
     {
         const PlaneVertexBufferFunctor *otherFunctor = functor_cast<PlaneVertexBufferFunctor>(&other);
         if (otherFunctor != nullptr)
-            return (otherFunctor->m_width == m_width &&
-                    otherFunctor->m_height == m_height &&
-                    otherFunctor->m_resolution == m_resolution);
+            return (otherFunctor->m_resolution == m_resolution &&
+                    otherFunctor->m_heightMap == m_heightMap);
         return false;
     }
 
     QT3D_FUNCTOR(PlaneVertexBufferFunctor)
 
-    private:
-        float m_width;
-    float m_height;
-    QSize m_resolution;
-    QImage m_i;
+private:
+    int m_resolution;
+    QByteArray m_heightMap;
 };
 
 class PlaneIndexBufferFunctor : public QBufferDataGenerator
 {
 public:
-    explicit PlaneIndexBufferFunctor(const QSize &resolution)
+    explicit PlaneIndexBufferFunctor(int resolution)
         : m_resolution(resolution)
     {}
 
@@ -160,21 +154,19 @@ public:
     QT3D_FUNCTOR(PlaneIndexBufferFunctor)
 
     private:
-        QSize m_resolution;
+        int m_resolution;
 };
 
 
 
 
-MyGeometry::MyGeometry(MyGeometry::QNode *parent)
+TerrainTileGeometry::TerrainTileGeometry(int resolution, const QByteArray& heightMap, TerrainTileGeometry::QNode *parent)
     : QGeometry(parent)
-    , m_width(1.0f)
-    , m_height(1.0f)
-    , m_meshResolution(QSize(2, 2))
+    , m_resolution(resolution)
+    , m_heightMap(heightMap)
     , m_positionAttribute(nullptr)
     , m_normalAttribute(nullptr)
     , m_texCoordAttribute(nullptr)
-    //, m_tangentAttribute(nullptr)
     , m_indexAttribute(nullptr)
     , m_vertexBuffer(nullptr)
     , m_indexBuffer(nullptr)
@@ -182,109 +174,54 @@ MyGeometry::MyGeometry(MyGeometry::QNode *parent)
     init();
 }
 
-MyGeometry::~MyGeometry()
+TerrainTileGeometry::~TerrainTileGeometry()
 {
 }
 
-
+#if 0
 void MyGeometry::updateVertices()
 {
-    const int nVerts = m_meshResolution.width() * m_meshResolution.height();
+    const int nVerts = m_resolution * m_resolution;
 
     m_positionAttribute->setCount(nVerts);
     m_normalAttribute->setCount(nVerts);
     m_texCoordAttribute->setCount(nVerts);
-    m_vertexBuffer->setDataGenerator(QSharedPointer<PlaneVertexBufferFunctor>::create(m_width, m_height, m_meshResolution, i));
+    m_vertexBuffer->setDataGenerator(QSharedPointer<PlaneVertexBufferFunctor>::create(m_resolution, m_heightMap));
 }
-
 
 void MyGeometry::updateIndices()
 {
-    const int faces = 2 * (m_meshResolution.width() - 1) * (m_meshResolution.height() - 1);
+    const int faces = 2 * (m_resolution - 1) * (m_resolution - 1);
     // Each primitive has 3 vertices
     m_indexAttribute->setCount(faces * 3);
-    m_indexBuffer->setDataGenerator(QSharedPointer<PlaneIndexBufferFunctor>::create(m_meshResolution));
+    m_indexBuffer->setDataGenerator(QSharedPointer<PlaneIndexBufferFunctor>::create(m_resolution));
 }
+#endif
 
 
-void MyGeometry::setResolution(const QSize &resolution)
-{
-    if (m_meshResolution == resolution)
-        return;
-    m_meshResolution = resolution;
-    updateVertices();
-    updateIndices();
-    emit resolutionChanged(resolution);
-}
-
-void MyGeometry::setWidth(float width)
-{
-    if (width == m_width)
-        return;
-    m_width = width;
-    updateVertices();
-    emit widthChanged(width);
-}
-
-void MyGeometry::setHeight(float height)
-{
-    if (height == m_height)
-        return;
-    m_height = height;
-    updateVertices();
-    emit heightChanged(height);
-}
-
-
-QSize MyGeometry::resolution() const
-{
-    return m_meshResolution;
-}
-
-
-float MyGeometry::width() const
-{
-    return m_width;
-}
-
-
-float MyGeometry::height() const
-{
-    return m_height;
-}
-
-QAttribute *MyGeometry::positionAttribute() const
+QAttribute *TerrainTileGeometry::positionAttribute() const
 {
     return m_positionAttribute;
 }
 
-QAttribute *MyGeometry::normalAttribute() const
+QAttribute *TerrainTileGeometry::normalAttribute() const
 {
     return m_normalAttribute;
 }
 
-QAttribute *MyGeometry::texCoordAttribute() const
+QAttribute *TerrainTileGeometry::texCoordAttribute() const
 {
     return m_texCoordAttribute;
 }
 
-QAttribute *MyGeometry::indexAttribute() const
+QAttribute *TerrainTileGeometry::indexAttribute() const
 {
     return m_indexAttribute;
 }
 
 
-void MyGeometry::init()
+void TerrainTileGeometry::init()
 {
-  // load img with DTM
-  bool res = i.load(":/dtm.tif");
-  Q_ASSERT(res);
-  qDebug("w %d h %d", i.width(), i.height() );
-  qDebug("format %d", i.format());
-  Q_ASSERT(i.width() == 1800 && i.height() == 1800);
-  Q_ASSERT(i.format() == 24); // greyscale
-
-
     m_positionAttribute = new QAttribute(this);
     m_normalAttribute = new QAttribute(this);
     m_texCoordAttribute = new QAttribute(this);
@@ -292,9 +229,9 @@ void MyGeometry::init()
     m_vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, this);
     m_indexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::IndexBuffer, this);
 
-    const int nVerts = m_meshResolution.width() * m_meshResolution.height();
+    const int nVerts = m_resolution * m_resolution;
     const int stride = (3 + 2 + 3) * sizeof(float);
-    const int faces = 2 * (m_meshResolution.width() - 1) * (m_meshResolution.height() - 1);
+    const int faces = 2 * (m_resolution - 1) * (m_resolution - 1);
 
     m_positionAttribute->setName(QAttribute::defaultPositionAttributeName());
     m_positionAttribute->setVertexBaseType(QAttribute::Float);
@@ -329,8 +266,8 @@ void MyGeometry::init()
     // Each primitive has 3 vertives
     m_indexAttribute->setCount(faces * 3);
 
-    m_vertexBuffer->setDataGenerator(QSharedPointer<PlaneVertexBufferFunctor>::create(m_width, m_height, m_meshResolution, i));
-    m_indexBuffer->setDataGenerator(QSharedPointer<PlaneIndexBufferFunctor>::create(m_meshResolution));
+    m_vertexBuffer->setDataGenerator(QSharedPointer<PlaneVertexBufferFunctor>::create(m_resolution, m_heightMap));
+    m_indexBuffer->setDataGenerator(QSharedPointer<PlaneIndexBufferFunctor>::create(m_resolution));
 
     addAttribute(m_positionAttribute);
     addAttribute(m_texCoordAttribute);

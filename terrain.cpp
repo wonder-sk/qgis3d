@@ -24,11 +24,12 @@ static int tileColorsCount = sizeof(tileColors) / sizeof(QColor);
 
 
 
-Terrain::Terrain(MapTextureGenerator* mapGen, const QgsRectangle& extent)
+Terrain::Terrain(MapTextureGenerator* mapGen, TerrainTextureGenerator* tGen, const QgsRectangle& extent)
   : isFlat(true)
   , maxLevel(0)
   , root(nullptr)
   , mapGen(mapGen)
+  , tGen(tGen)
 {
   root = new QuadTreeNode(extent, 0, 0, nullptr);
 
@@ -98,9 +99,9 @@ void Terrain::cameraViewMatrixChanged()
     if (!n->tile)
     {
       if (isFlat)
-        n->tile = new FlatTerrainTile(n, tileGeometry, mapGen, this);
+        n->tile = new FlatTerrainTile(tileGeometry, n, mapGen, this);
       else
-        n->tile = new DemTerrainTile(n, mapGen, this);
+        n->tile = new DemTerrainTile(tGen, n, mapGen, this);
     }
     //n->tile->setParent(this);  // crashes if we add/remove tiles like this :-(
     n->tile->setEnabled(true);

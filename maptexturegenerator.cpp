@@ -4,9 +4,10 @@
 #include <qgsmapsettings.h>
 #include <qgsproject.h>
 
-MapTextureGenerator::MapTextureGenerator(QgsProject* project, const TilingScheme& tilingScheme)
+MapTextureGenerator::MapTextureGenerator(QgsProject* project, const TilingScheme& tilingScheme, int resolution)
   : project(project)
   , tilingScheme(tilingScheme)
+  , res(resolution)
 {
 }
 
@@ -55,17 +56,45 @@ QgsMapSettings MapTextureGenerator::baseMapSettings()
 {
   QgsMapSettings mapSettings;
   mapSettings.setLayers(project->mapLayers().values());  // TODO: correct ordering
-  mapSettings.setOutputSize(QSize(512,512));
+  mapSettings.setOutputSize(QSize(res,res));
   mapSettings.setDestinationCrs(project->crs());
   return mapSettings;
 }
 
 QgsMapSettings MapTextureGenerator::mapSettingsForTile(int x, int y, int z)
 {
-  QgsPointXY pt0 = tilingScheme.tileToMap(x, y, z);
-  QgsPointXY pt1 = tilingScheme.tileToMap(x+1, y+1, z);
-
   QgsMapSettings mapSettings(baseMapSettings());
-  mapSettings.setExtent(QgsRectangle(pt0, pt1));
+  mapSettings.setExtent(tilingScheme.tileToExtent(x, y, z));
   return mapSettings;
+}
+
+
+// ---------------------
+
+#include <qgsrasterlayer.h>
+
+TerrainTextureGenerator::TerrainTextureGenerator(QgsRasterLayer *dtm, const TilingScheme &tilingScheme, int resolution)
+  : dtm(dtm)
+  , tilingScheme(tilingScheme)
+  , res(resolution)
+{
+}
+
+QByteArray TerrainTextureGenerator::render(int x, int y, int z)
+{
+  // extend the rect by half-pixel on each side? to get the values in "corners"
+  QgsRectangle extent = tilingScheme.tileToExtent(x, y, z);
+  float mapUnitsPerPixel = extent.width() / res;
+  extent.grow( mapUnitsPerPixel / 2);
+  // but make sure not to go beyond the full extent (returns invalid values)
+  QgsRectangle fullExtent = tilingScheme.tileToExtent(0, 0, 0);
+  extent = extent.intersect(&fullExtent);
+
+  std::unique_ptr<QgsRasterBlock> block( dtm->dataProvider()->block(1, extent, res, res) );
+  if (!block)
+    return QByteArray();
+  block->convert(Qgis::Float32);   // currently we expect just floats
+  QByteArray data = block->data();
+  data.data();  // this should make a deep copy
+  return data;
 }

@@ -21,6 +21,9 @@ public:
   //! Returns tile coordinates for given map coordinates and Z level
   void mapToTile(const QgsPointXY& pt, int z, float& x, float& y);
 
+  //! Returns map coordinates of the extent of a tile
+  QgsRectangle tileToExtent(int x, int y, int z);
+
   QgsPointXY mapOrigin; //!< origin point in map coordinates: (0,0) in the tiling scheme
   double baseTileSide;  //!< length of tile side at zoom level 0 in map coordinates
 

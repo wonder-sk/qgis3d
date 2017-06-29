@@ -24,6 +24,8 @@ struct QuadTreeNode;
 #include <Qt3DExtras/QPlaneGeometry>
 
 class MapTextureGenerator;
+class TerrainTextureGenerator;
+
 class QgsRectangle;
 
 //! generates terrain with constant height
@@ -31,7 +33,7 @@ class Terrain : public AbstractTerrain
 {
   Q_OBJECT
 public:
-  explicit Terrain(MapTextureGenerator* mapGen, const QgsRectangle& extent);
+  explicit Terrain(MapTextureGenerator* mapGen, TerrainTextureGenerator* tGen, const QgsRectangle& extent);
 
   ~Terrain();
 
@@ -49,6 +51,7 @@ private:
   int maxLevel;
   QuadTreeNode* root;
   MapTextureGenerator* mapGen;
+  TerrainTextureGenerator* tGen;
   QList<QuadTreeNode*> activeNodes;
   Qt3DExtras::QPlaneGeometry* tileGeometry;
 };

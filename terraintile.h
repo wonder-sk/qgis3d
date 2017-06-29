@@ -7,6 +7,7 @@
 #include <Qt3DExtras/QTextureMaterial>
 
 class MapTextureGenerator;
+class TerrainTextureGenerator;
 struct QuadTreeNode;
 class FlatTerrainTileMesh;
 
@@ -25,23 +26,22 @@ protected:
 class FlatTerrainTile : public TerrainTile
 {
 public:
-  FlatTerrainTile(QuadTreeNode* node, Qt3DExtras::QPlaneGeometry* tileGeometry, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
+  FlatTerrainTile(Qt3DExtras::QPlaneGeometry* tileGeometry, QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
 
 private:
   FlatTerrainTileMesh* mesh;
 };
 
 
-class MyMesh;
 
 //! tile made from DEM
 class DemTerrainTile : public TerrainTile
 {
 public:
-  DemTerrainTile(QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
+  DemTerrainTile(TerrainTextureGenerator* tGen, QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
 
 private:
-  MyMesh* mesh;
+  //Qt3DRender::QGeometryRenderer* mesh;
 };
 
 #endif // FLATTERRAINTILE_H

@@ -7,12 +7,13 @@
 
 class CameraController;
 class MapTextureGenerator;
+class TerrainTextureGenerator;
 class SidePanel;
 
 class Window3D : public Qt3DExtras::Qt3DWindow
 {
 public:
-  Window3D(SidePanel* p, MapTextureGenerator* mapGen);
+  Window3D(SidePanel* p, MapTextureGenerator* mapGen, TerrainTextureGenerator* tGen);
 
   Qt3DCore::QEntity *createScene();
 

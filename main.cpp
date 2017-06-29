@@ -39,13 +39,13 @@ int main(int argc, char *argv[])
   ms.setDestinationCrs(prj->crs());
   TilingScheme tilingScheme(ms.fullExtent());
 
-  MapTextureGenerator* mapGen = new MapTextureGenerator(prj, tilingScheme);
-  //TerrainGenerator tGen(rlDtm);
+  MapTextureGenerator* mapGen = new MapTextureGenerator(prj, tilingScheme, 512);
+  TerrainTextureGenerator* tGen = new TerrainTextureGenerator(rlDtm, tilingScheme, 16);
 
   SidePanel* sidePanel = new SidePanel;
   sidePanel->setMinimumWidth(150);
 
-  Window3D* view = new Window3D(sidePanel, mapGen);
+  Window3D* view = new Window3D(sidePanel, mapGen, tGen);
   QWidget *container = QWidget::createWindowContainer(view);
 
   QSize screenSize = view->screen()->size();

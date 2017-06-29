@@ -3,14 +3,13 @@
 #include "qgsrectangle.h"
 
 #include "terrain.h"
-#include "mymesh.h"
 #include "cameracontroller.h"
 #include "maptexturegenerator.h"
 #include "maptextureimage.h"
 #include "sidepanel.h"
 
 
-Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen)
+Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen, TerrainTextureGenerator* tGen)
   : panel(p)
   , mapGen(mapGen)
 {
@@ -23,9 +22,9 @@ Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen)
   double tile0side = mapGen->getTilingScheme().baseTileSide;
   QgsRectangle extent(0, 0, tile0side, tile0side); // this is without map origin offset to avoid issues with x/y float precision
 
-  Terrain* t = new Terrain(mapGen, extent);
+  Terrain* t = new Terrain(mapGen, tGen, extent);
   t->setParent( scene );
-  t->setFlat(true);
+  t->setFlat(false);
   t->setMaxLevel(4);
   t->setCamera( camera() );
 

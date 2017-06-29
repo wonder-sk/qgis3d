@@ -29,3 +29,10 @@ void TilingScheme::mapToTile(const QgsPointXY &pt, int z, float &x, float &y)
   x = (pt.x() - mapOrigin.x()) / tileSide;
   y = (pt.y() - mapOrigin.y()) / tileSide;
 }
+
+QgsRectangle TilingScheme::tileToExtent(int x, int y, int z)
+{
+  QgsPointXY pt0 = tileToMap(x, y, z);
+  QgsPointXY pt1 = tileToMap(x+1, y+1, z);
+  return QgsRectangle(pt0, pt1);
+}
