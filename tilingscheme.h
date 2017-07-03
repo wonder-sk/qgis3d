@@ -1,6 +1,7 @@
 #ifndef TILINGSCHEME_H
 #define TILINGSCHEME_H
 
+#include <qgscoordinatereferencesystem.h>
 #include <qgspointxy.h>
 
 class QgsRectangle;
@@ -14,7 +15,7 @@ public:
   TilingScheme();
 
   //! Creates tiling scheme where level 0 tile is centered at the full extent and the full extent completely fits into the level 0 tile
-  TilingScheme(const QgsRectangle& fullExtent);
+  TilingScheme(const QgsRectangle& fullExtent, const QgsCoordinateReferenceSystem& crs);
 
   //! Returns map coordinates at tile coordinates (for lower-left corner of the tile)
   QgsPointXY tileToMap(int x, int y, int z);
@@ -24,8 +25,12 @@ public:
   //! Returns map coordinates of the extent of a tile
   QgsRectangle tileToExtent(int x, int y, int z);
 
+  //! Returns coordinates of a tile that most tightly fits the whole extent
+  void extentToTile(const QgsRectangle& extent, int& x, int& y, int& z);
+
   QgsPointXY mapOrigin; //!< origin point in map coordinates: (0,0) in the tiling scheme
   double baseTileSide;  //!< length of tile side at zoom level 0 in map coordinates
+  QgsCoordinateReferenceSystem crs;  //!< CRS of the coordinates
 
 };
 

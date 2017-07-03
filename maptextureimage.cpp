@@ -7,7 +7,8 @@
 class MapTextureImageDataGenerator : public Qt3DRender::QTextureImageDataGenerator
 {
 public:
-    int x, y, z;
+    QgsRectangle extent;
+    QString debugText;
     QImage img;
 
     static QImage placeholderImage()
@@ -21,8 +22,8 @@ public:
       return i;
     }
 
-    MapTextureImageDataGenerator(int x, int y, int z, const QImage& img)
-      : x(x), y(y), z(z), img(img) {}
+    MapTextureImageDataGenerator(const QgsRectangle& extent, const QString& debugText, const QImage& img)
+      : extent(extent), debugText(debugText), img(img) {}
 
     virtual Qt3DRender::QTextureImageDataPtr operator()() override
     {
@@ -35,32 +36,33 @@ public:
     {
       const MapTextureImageDataGenerator *otherFunctor = functor_cast<MapTextureImageDataGenerator>(&other);
       return otherFunctor != nullptr && otherFunctor->img.isNull() == img.isNull() &&
-          x == otherFunctor->x && y == otherFunctor->y && z == otherFunctor->z;
+          extent == otherFunctor->extent;
     }
 
     QT3D_FUNCTOR(MapTextureImageDataGenerator)
 };
 
 
-MapTextureImage::MapTextureImage(MapTextureGenerator *mapGen, int x, int y, int z, Qt3DCore::QNode *parent)
+MapTextureImage::MapTextureImage(MapTextureGenerator *mapGen, const QgsRectangle& extent, const QString& debugText, Qt3DCore::QNode *parent)
   : Qt3DRender::QAbstractTextureImage(parent)
   , mapGen(mapGen)
-  , x(x), y(y), z(z)
+  , extent(extent)
+  , debugText(debugText)
 {
-  connect(mapGen, &MapTextureGenerator::tileReady, [this, mapGen](int x, int y, int z, const QImage& img)
+  connect(mapGen, &MapTextureGenerator::tileReady, [this, mapGen](const QgsRectangle& extent, const QImage& img)
   {
-      if (x == this->x && y == this->y && z == this->z)
-        {
-          this->img = img;
-          this->notifyDataGeneratorChanged();
-        }
-    } );
+    if (extent == this->extent)
+    {
+      this->img = img;
+      this->notifyDataGeneratorChanged();
+    }
+  });
 
   // request image
-  mapGen->render(x, y, z);
+  mapGen->render(extent, debugText);
 }
 
 Qt3DRender::QTextureImageDataGeneratorPtr MapTextureImage::dataGenerator() const
 {
-  return Qt3DRender::QTextureImageDataGeneratorPtr(new MapTextureImageDataGenerator(x, y, z, img));
+  return Qt3DRender::QTextureImageDataGeneratorPtr(new MapTextureImageDataGenerator(extent, debugText, img));
 }

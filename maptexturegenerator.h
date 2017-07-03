@@ -10,6 +10,9 @@ class QgsRasterLayer;
 
 #include "tilingscheme.h"
 
+#include "qgsrectangle.h"
+
+struct Map3D;
 
 /**
  * Responsible for:
@@ -20,37 +23,27 @@ class MapTextureGenerator : public QObject
 {
   Q_OBJECT
 public:
-  MapTextureGenerator(QgsProject* project, const TilingScheme& tilingScheme, int resolution);
+  MapTextureGenerator(const Map3D& map);
 
-  //! start async rendering of a tile
-  void render(int x, int y, int z);
-
-  const TilingScheme& getTilingScheme() const { return tilingScheme; }
+  //! Start async rendering of a map for the given extent (must be a square!)
+  void render(const QgsRectangle& extent, const QString& debugText = QString());
 
 signals:
-  void tileReady(int x, int y, int z, const QImage& image);
+  void tileReady(const QgsRectangle& extent, const QImage& image);
 
 private slots:
   void onRenderingFinished();
 
 private:
   QgsMapSettings baseMapSettings();
-  QgsMapSettings mapSettingsForTile(int x, int y, int z);
 
-  QgsPointXY tileToMap(int x, int y, int z);
-  void mapToTile(const QgsPointXY& pt, int z, float& x, float& y);
-
-  //! project to be rendered into map
-  QgsProject* project;
-
-  TilingScheme tilingScheme;
-
-  int res;
+  const Map3D& map;
 
   struct JobData
   {
     QgsMapRendererSequentialJob* job;
-    int x, y, z;
+    QgsRectangle extent;
+    QString debugText;
   };
 
   QHash<QgsMapRendererSequentialJob*, JobData> jobs;

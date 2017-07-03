@@ -13,7 +13,9 @@ SOURCES += main.cpp \
     terrain.cpp \
     terraintile.cpp \
     tilingscheme.cpp \
-    terraintilegeometry.cpp
+    terraintilegeometry.cpp \
+    quantizedmeshgeometry.cpp \
+    map3d.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -30,7 +32,7 @@ INCLUDEPATH += \
   $${QGIS_BUILD_PATH} \
   $${QGIS_BUILD_PATH}/src/core
 
-LIBS += -L$${QGIS_BUILD_PATH}/output/lib -lqgis_core
+LIBS += -L$${QGIS_BUILD_PATH}/output/lib -lqgis_core -lz
 
 QT += xml
 
@@ -66,4 +68,6 @@ HEADERS += \
     terrain.h \
     terraintile.h \
     tilingscheme.h \
-    terraintilegeometry.h
+    terraintilegeometry.h \
+    quantizedmeshgeometry.h \
+    map3d.h

@@ -2,8 +2,9 @@
 
 #include "terraintile.h"
 
+#include "qgscoordinatetransform.h"
 
-QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, QuadTreeNode *par)
+QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, float minDist, QuadTreeNode *par)
   : extent(e), tile(nullptr), parent(par)
 {
   for (int i = 0; i < 4; ++i)
@@ -11,6 +12,7 @@ QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, QuadTree
 
   x = tileX;
   y = tileY;
+  minDistance = minDist;
 
   if (parent)
   {
@@ -20,7 +22,6 @@ QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, QuadTree
   else
   {
     level = 0;
-    minDistance = e.width();   // slightly ad-hoc min. distance - based on size of the tile 0
   }
 }
 
@@ -44,16 +45,17 @@ void QuadTreeNode::makeChildren()
 
   int baseTileX = x * 2;
   int baseTileY = y * 2;
+  float childMinDist = minDistance/2;
 
-  children[0] = new QuadTreeNode(QgsRectangle(xmin,ymin,xc,yc), baseTileX, baseTileY, this);
-  children[1] = new QuadTreeNode(QgsRectangle(xc,ymin,xmax,yc), baseTileX+1, baseTileY, this);
-  children[2] = new QuadTreeNode(QgsRectangle(xmin,yc,xc,ymax), baseTileX, baseTileY+1, this);
-  children[3] = new QuadTreeNode(QgsRectangle(xc,yc,xmax,ymax), baseTileX+1, baseTileY+1, this);
+  children[0] = new QuadTreeNode(QgsRectangle(xmin,ymin,xc,yc), baseTileX, baseTileY, childMinDist, this);
+  children[1] = new QuadTreeNode(QgsRectangle(xc,ymin,xmax,yc), baseTileX+1, baseTileY, childMinDist, this);
+  children[2] = new QuadTreeNode(QgsRectangle(xmin,yc,xc,ymax), baseTileX, baseTileY+1, childMinDist, this);
+  children[3] = new QuadTreeNode(QgsRectangle(xc,yc,xmax,ymax), baseTileX+1, baseTileY+1, childMinDist, this);
 }
 
-float QuadTreeNode::distance(const QVector3D &pos)
+float QuadTreeNode::distance(const QVector3D &pos, const QgsPointXY& originOffset, const QgsCoordinateTransform& ctTerrainToMap)
 {
-  QgsPointXY c = extent.center();
-  QVector3D tileCenter(c.x(), 0, -c.y());
+  QgsPointXY c = ctTerrainToMap.transform(extent.center());
+  QVector3D tileCenter(c.x()-originOffset.x(), 0, -c.y()+originOffset.y());
   return tileCenter.distanceToPoint(pos);
 }

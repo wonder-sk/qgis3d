@@ -5,6 +5,7 @@
 #include <Qt3DExtras/QPlaneMesh>
 #include <Qt3DExtras/QPlaneGeometry>
 
+#include "map3d.h"
 #include "maptextureimage.h"
 #include "quadtree.h"
 #include "terraintile.h"
@@ -24,14 +25,16 @@ static int tileColorsCount = sizeof(tileColors) / sizeof(QColor);
 
 
 
-Terrain::Terrain(MapTextureGenerator* mapGen, TerrainTextureGenerator* tGen, const QgsRectangle& extent)
-  : isFlat(true)
-  , maxLevel(0)
+Terrain::Terrain(Map3D& map, const QgsRectangle& extent)
+  : maxLevel(0)
   , root(nullptr)
-  , mapGen(mapGen)
-  , tGen(tGen)
+  , map(map)
 {
-  root = new QuadTreeNode(extent, 0, 0, nullptr);
+  float minDist = extent.width();  // slightly ad-hoc min. distance - based on size of the tile 0
+  if (map.terrainType == Map3D::QuantizedMesh)
+    minDist = 5000;  // even more ad-hoc
+
+  root = new QuadTreeNode(extent, 0, 0, minDist, nullptr);
 
   // simple quad geometry shared by all tiles
   // QPlaneGeometry by default is 1x1 with mesh resultion QSize(2,2), centered at 0
@@ -51,9 +54,11 @@ void Terrain::setCamera(Qt3DRender::QCamera *camera)
 }
 
 
-static void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes, int maxLevel, const QVector3D& cameraPos)
+static void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes, int maxLevel, const QVector3D& cameraPos, const QgsPointXY& originOffset, const QgsCoordinateTransform& ctTerrainToMap)
 {
-  float dist = node->distance(cameraPos);
+  float dist = node->distance(cameraPos, originOffset, ctTerrainToMap);
+
+  //qDebug() << "node " << node->x << " " << node->y << " " << node->level << "  | extent " << node->extent.toString(1) << " --> dist " << dist  << " min dist " << node->minDistance;
 
   if (node->minDistance <= dist || node->level == maxLevel)
   {
@@ -67,7 +72,7 @@ static void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes
       node->makeChildren();
 
     for (int i = 0; i < 4; ++i)
-      addActiveNodes(node->children[i], activeNodes, maxLevel, cameraPos);
+      addActiveNodes(node->children[i], activeNodes, maxLevel, cameraPos, originOffset, ctTerrainToMap);
   }
 }
 
@@ -75,7 +80,8 @@ static void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes
 void Terrain::cameraViewMatrixChanged()
 {
   QVector3D cameraPos = mCamera->position();
-  float dist = root->distance(cameraPos);
+  QgsPointXY originOffset(map.originX, map.originY);
+  float dist = root->distance(cameraPos, originOffset, map.ctTerrainToMap);
   qDebug() << "camera view matrix changed " << dist;
 
   // TODO: ideally do not walk through the whole quadtree, only update the nodes that are being used?
@@ -91,17 +97,19 @@ void Terrain::cameraViewMatrixChanged()
 
   activeNodes.clear();
 
-  addActiveNodes(root, activeNodes, maxLevel, cameraPos);
+  addActiveNodes(root, activeNodes, maxLevel, cameraPos, originOffset, map.ctTerrainToMap);
 
   // add active nodes to the scene
   Q_FOREACH (QuadTreeNode* n, activeNodes)
   {
     if (!n->tile)
     {
-      if (isFlat)
-        n->tile = new FlatTerrainTile(tileGeometry, n, mapGen, this);
+      if (map.terrainType == Map3D::Flat)
+        n->tile = new FlatTerrainTile(tileGeometry, n, map, this);
+      else if (map.terrainType == Map3D::Dem)
+        n->tile = new DemTerrainTile(n, map, this);
       else
-        n->tile = new DemTerrainTile(tGen, n, mapGen, this);
+        n->tile = new QuantizedMeshTerrainTile(n, map, this);
     }
     //n->tile->setParent(this);  // crashes if we add/remove tiles like this :-(
     n->tile->setEnabled(true);

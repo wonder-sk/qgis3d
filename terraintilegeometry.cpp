@@ -178,27 +178,6 @@ TerrainTileGeometry::~TerrainTileGeometry()
 {
 }
 
-#if 0
-void MyGeometry::updateVertices()
-{
-    const int nVerts = m_resolution * m_resolution;
-
-    m_positionAttribute->setCount(nVerts);
-    m_normalAttribute->setCount(nVerts);
-    m_texCoordAttribute->setCount(nVerts);
-    m_vertexBuffer->setDataGenerator(QSharedPointer<PlaneVertexBufferFunctor>::create(m_resolution, m_heightMap));
-}
-
-void MyGeometry::updateIndices()
-{
-    const int faces = 2 * (m_resolution - 1) * (m_resolution - 1);
-    // Each primitive has 3 vertices
-    m_indexAttribute->setCount(faces * 3);
-    m_indexBuffer->setDataGenerator(QSharedPointer<PlaneIndexBufferFunctor>::create(m_resolution));
-}
-#endif
-
-
 QAttribute *TerrainTileGeometry::positionAttribute() const
 {
     return m_positionAttribute;

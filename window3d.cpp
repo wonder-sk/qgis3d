@@ -2,6 +2,7 @@
 
 #include "qgsrectangle.h"
 
+#include "map3d.h"
 #include "terrain.h"
 #include "cameracontroller.h"
 #include "maptexturegenerator.h"
@@ -9,24 +10,13 @@
 #include "sidepanel.h"
 
 
-Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen, TerrainTextureGenerator* tGen)
+Window3D::Window3D(SidePanel* p, Map3D& map)
   : panel(p)
-  , mapGen(mapGen)
+  , map(map)
 {
   defaultFrameGraph()->setClearColor(QColor(Qt::black));
 
   Qt3DCore::QEntity *scene = new Qt3DCore::QEntity;
-
-  // create terrain entity
-
-  double tile0side = mapGen->getTilingScheme().baseTileSide;
-  QgsRectangle extent(0, 0, tile0side, tile0side); // this is without map origin offset to avoid issues with x/y float precision
-
-  Terrain* t = new Terrain(mapGen, tGen, extent);
-  t->setParent( scene );
-  t->setFlat(false);
-  t->setMaxLevel(4);
-  t->setCamera( camera() );
 
   mFrameAction = new Qt3DLogic::QFrameAction();
   connect(mFrameAction, &Qt3DLogic::QFrameAction::triggered,
@@ -40,10 +30,27 @@ Window3D::Window3D(SidePanel* p, MapTextureGenerator* mapGen, TerrainTextureGene
   cc = new CameraController(scene); // attaches to the scene
   cc->setViewport(QRect(QPoint(0,0), size()));
   cc->setCamera(camera());
-  cc->setCameraData(extent.center().x(), -extent.center().y(), tile0side);
+  cc->setCameraData(0, 0, 1000);
 
   connect(camera(), &Qt3DRender::QCamera::viewMatrixChanged, this, &Window3D::onCameraViewMatrixChanged);
   onCameraViewMatrixChanged();
+
+  QgsRectangle extentTerrainCrs;
+  if (map.terrainType == Map3D::QuantizedMesh)
+  {
+    extentTerrainCrs = QgsRectangle(map.terrainTilingScheme.tileToExtent(map.terrainBaseX, map.terrainBaseY, map.terrainBaseZ));
+  }
+  else
+  {
+    extentTerrainCrs = map.terrainTilingScheme.tileToExtent(0, 0, 0);
+  }
+
+  // create terrain entity
+  Terrain* t = new Terrain(map, extentTerrainCrs);
+  //t->setEnabled(false);
+  t->setParent( scene );
+  t->setMaxLevel(2);
+  t->setCamera( camera() );
 
   setRootEntity(scene);
 

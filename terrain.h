@@ -19,12 +19,10 @@ protected:
   Qt3DRender::QCamera *mCamera;
 };
 
+class Map3D;
 struct QuadTreeNode;
 
 #include <Qt3DExtras/QPlaneGeometry>
-
-class MapTextureGenerator;
-class TerrainTextureGenerator;
 
 class QgsRectangle;
 
@@ -33,13 +31,12 @@ class Terrain : public AbstractTerrain
 {
   Q_OBJECT
 public:
-  explicit Terrain(MapTextureGenerator* mapGen, TerrainTextureGenerator* tGen, const QgsRectangle& extent);
+  explicit Terrain(Map3D& map, const QgsRectangle& extent);
 
   ~Terrain();
 
   void setCamera( Qt3DRender::QCamera *camera );
 
-  void setFlat( bool flat ) { isFlat = flat; }
   void setMaxLevel( int level ) { maxLevel = level; }
 
 
@@ -47,11 +44,9 @@ private slots:
   void cameraViewMatrixChanged();
 
 private:
-  bool isFlat;
   int maxLevel;
   QuadTreeNode* root;
-  MapTextureGenerator* mapGen;
-  TerrainTextureGenerator* tGen;
+  Map3D& map;
   QList<QuadTreeNode*> activeNodes;
   Qt3DExtras::QPlaneGeometry* tileGeometry;
 };

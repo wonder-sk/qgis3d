@@ -6,16 +6,16 @@
 #include <Qt3DExtras/QPlaneGeometry>
 #include <Qt3DExtras/QTextureMaterial>
 
-class MapTextureGenerator;
-class TerrainTextureGenerator;
 struct QuadTreeNode;
 class FlatTerrainTileMesh;
+class Map3D;
+class QgsRectangle;
 
 //! base class for all kinds of terrain tiles
 class TerrainTile : public Qt3DCore::QEntity
 {
 public:
-  TerrainTile(QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
+  TerrainTile(QuadTreeNode* node, Map3D& map, Qt3DCore::QNode *parent = nullptr);
 
 protected:
   Qt3DExtras::QTextureMaterial* material;
@@ -26,7 +26,7 @@ protected:
 class FlatTerrainTile : public TerrainTile
 {
 public:
-  FlatTerrainTile(Qt3DExtras::QPlaneGeometry* tileGeometry, QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
+  FlatTerrainTile(Qt3DExtras::QPlaneGeometry* tileGeometry, QuadTreeNode* node, Map3D& map, Qt3DCore::QNode *parent = nullptr);
 
 private:
   FlatTerrainTileMesh* mesh;
@@ -38,10 +38,19 @@ private:
 class DemTerrainTile : public TerrainTile
 {
 public:
-  DemTerrainTile(TerrainTextureGenerator* tGen, QuadTreeNode* node, MapTextureGenerator* mapGen, Qt3DCore::QNode *parent = nullptr);
+  DemTerrainTile(QuadTreeNode* node, Map3D& map, Qt3DCore::QNode *parent = nullptr);
 
 private:
   //Qt3DRender::QGeometryRenderer* mesh;
+};
+
+
+class QuantizedMeshTerrainTile : public TerrainTile
+{
+public:
+  QuantizedMeshTerrainTile(QuadTreeNode* node, Map3D& map, Qt3DCore::QNode *parent = nullptr);
+
+  static void tileExtentXYZ(QuadTreeNode* node, Map3D& map, int& tx, int& ty, int& tz);
 };
 
 #endif // FLATTERRAINTILE_H

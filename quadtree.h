@@ -4,13 +4,12 @@
 #include "qgsrectangle.h"
 
 class TerrainTile;
-class MapTextureGenerator;
-
+class QgsCoordinateTransform;
 
 //! Quad tree data structure to keep track of terrain tiles
 struct QuadTreeNode
 {
-  explicit QuadTreeNode(const QgsRectangle& e, int tileX, int tileY, QuadTreeNode* par);
+  explicit QuadTreeNode(const QgsRectangle& e, int tileX, int tileY, float minDist, QuadTreeNode* par);
 
   QuadTreeNode(const QuadTreeNode& other) = delete;
 
@@ -18,7 +17,7 @@ struct QuadTreeNode
 
   void makeChildren();
 
-  float distance(const QVector3D& pos);
+  float distance(const QVector3D& pos, const QgsPointXY& originOffset, const QgsCoordinateTransform& ctTerrainToMap);
 
   QgsRectangle extent;
   TerrainTile *tile; //!< null = not yet created

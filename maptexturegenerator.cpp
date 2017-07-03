@@ -4,16 +4,17 @@
 #include <qgsmapsettings.h>
 #include <qgsproject.h>
 
-MapTextureGenerator::MapTextureGenerator(QgsProject* project, const TilingScheme& tilingScheme, int resolution)
-  : project(project)
-  , tilingScheme(tilingScheme)
-  , res(resolution)
+#include "map3d.h"
+
+MapTextureGenerator::MapTextureGenerator(const Map3D& map)
+  : map(map)
 {
 }
 
-void MapTextureGenerator::render(int x, int y, int z)
+void MapTextureGenerator::render(const QgsRectangle &extent, const QString &debugText)
 {
-  QgsMapSettings mapSettings = mapSettingsForTile(x, y, z);
+  QgsMapSettings mapSettings(baseMapSettings());
+  mapSettings.setExtent(extent);
 
   QgsMapRendererSequentialJob* job = new QgsMapRendererSequentialJob(mapSettings);
   connect(job, &QgsMapRendererJob::finished, this, &MapTextureGenerator::onRenderingFinished);
@@ -21,12 +22,12 @@ void MapTextureGenerator::render(int x, int y, int z)
 
   JobData jobData;
   jobData.job = job;
-  jobData.x = x;
-  jobData.y = y;
-  jobData.z = z;
+  jobData.extent = extent;
+  jobData.debugText = debugText;
 
   jobs.insert(job, jobData);
 }
+
 
 void MapTextureGenerator::onRenderingFinished()
 {
@@ -40,31 +41,24 @@ void MapTextureGenerator::onRenderingFinished()
   // extra tile information for debugging
   QPainter p(&img);
   p.setPen(Qt::white);
-  QString tileText = QString("%1 | %2 | %3").arg(jobData.x).arg(jobData.y).arg(jobData.z);
   p.drawRect(0,0,img.width()-1, img.height()-1);
-  p.drawText(img.rect(), tileText, QTextOption(Qt::AlignCenter));
+  p.drawText(img.rect(), jobData.debugText, QTextOption(Qt::AlignCenter));
   p.end();
 
   mapJob->deleteLater();
   jobs.remove(mapJob);
 
   // pass QImage further
-  emit tileReady(jobData.x, jobData.y, jobData.z, img);
+  emit tileReady(jobData.extent, img);
 }
 
 QgsMapSettings MapTextureGenerator::baseMapSettings()
 {
   QgsMapSettings mapSettings;
-  mapSettings.setLayers(project->mapLayers().values());  // TODO: correct ordering
-  mapSettings.setOutputSize(QSize(res,res));
-  mapSettings.setDestinationCrs(project->crs());
-  return mapSettings;
-}
-
-QgsMapSettings MapTextureGenerator::mapSettingsForTile(int x, int y, int z)
-{
-  QgsMapSettings mapSettings(baseMapSettings());
-  mapSettings.setExtent(tilingScheme.tileToExtent(x, y, z));
+  mapSettings.setLayers(map.layers);
+  mapSettings.setOutputSize(QSize(map.tileTextureSize,map.tileTextureSize));
+  mapSettings.setDestinationCrs(map.crs);
+  mapSettings.setBackgroundColor(Qt::gray);
   return mapSettings;
 }
 
