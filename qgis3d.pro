@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     tilingscheme.cpp \
     terraintilegeometry.cpp \
     quantizedmeshgeometry.cpp \
-    map3d.cpp
+    map3d.cpp \
+    terrainboundsentity.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -70,4 +71,6 @@ HEADERS += \
     tilingscheme.h \
     terraintilegeometry.h \
     quantizedmeshgeometry.h \
-    map3d.h
+    map3d.h \
+    terrainboundsentity.h \
+    aabb.h

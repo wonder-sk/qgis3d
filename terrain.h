@@ -21,6 +21,7 @@ protected:
 
 class Map3D;
 struct QuadTreeNode;
+class TerrainBoundsEntity;
 
 #include <Qt3DExtras/QPlaneGeometry>
 
@@ -44,11 +45,17 @@ private slots:
   void cameraViewMatrixChanged();
 
 private:
+  void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes, const QVector3D& cameraPos);
+  void ensureTileExists(QuadTreeNode* node);
+
+private:
   int maxLevel;
   QuadTreeNode* root;
   Map3D& map;
   QList<QuadTreeNode*> activeNodes;
   Qt3DExtras::QPlaneGeometry* tileGeometry;
+
+  TerrainBoundsEntity* bboxesEntity;
 };
 
 #endif // FLATTERRAIN_H

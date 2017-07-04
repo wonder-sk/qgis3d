@@ -4,7 +4,7 @@
 
 #include "qgscoordinatetransform.h"
 
-QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, float minDist, QuadTreeNode *par)
+QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, QuadTreeNode *par)
   : extent(e), tile(nullptr), parent(par)
 {
   for (int i = 0; i < 4; ++i)
@@ -12,12 +12,10 @@ QuadTreeNode::QuadTreeNode(const QgsRectangle &e, int tileX, int tileY, float mi
 
   x = tileX;
   y = tileY;
-  minDistance = minDist;
 
   if (parent)
   {
     level = par->level + 1;
-    minDistance = par->minDistance/2;
   }
   else
   {
@@ -45,12 +43,11 @@ void QuadTreeNode::makeChildren()
 
   int baseTileX = x * 2;
   int baseTileY = y * 2;
-  float childMinDist = minDistance/2;
 
-  children[0] = new QuadTreeNode(QgsRectangle(xmin,ymin,xc,yc), baseTileX, baseTileY, childMinDist, this);
-  children[1] = new QuadTreeNode(QgsRectangle(xc,ymin,xmax,yc), baseTileX+1, baseTileY, childMinDist, this);
-  children[2] = new QuadTreeNode(QgsRectangle(xmin,yc,xc,ymax), baseTileX, baseTileY+1, childMinDist, this);
-  children[3] = new QuadTreeNode(QgsRectangle(xc,yc,xmax,ymax), baseTileX+1, baseTileY+1, childMinDist, this);
+  children[0] = new QuadTreeNode(QgsRectangle(xmin,ymin,xc,yc), baseTileX, baseTileY, this);
+  children[1] = new QuadTreeNode(QgsRectangle(xc,ymin,xmax,yc), baseTileX+1, baseTileY, this);
+  children[2] = new QuadTreeNode(QgsRectangle(xmin,yc,xc,ymax), baseTileX, baseTileY+1, this);
+  children[3] = new QuadTreeNode(QgsRectangle(xc,yc,xmax,ymax), baseTileX+1, baseTileY+1, this);
 }
 
 float QuadTreeNode::distance(const QVector3D &pos, const QgsPointXY& originOffset, const QgsCoordinateTransform& ctTerrainToMap)

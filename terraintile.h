@@ -6,16 +6,23 @@
 #include <Qt3DExtras/QPlaneGeometry>
 #include <Qt3DExtras/QTextureMaterial>
 
+#include "aabb.h"
+
 struct QuadTreeNode;
 class FlatTerrainTileMesh;
 class Map3D;
 class QgsRectangle;
+
+
 
 //! base class for all kinds of terrain tiles
 class TerrainTile : public Qt3DCore::QEntity
 {
 public:
   TerrainTile(QuadTreeNode* node, Map3D& map, Qt3DCore::QNode *parent = nullptr);
+
+  AABB bbox;  //!< bounding box
+  float minDistance;  //!< if camera is closer than this distance, we need to switch to children
 
 protected:
   Qt3DExtras::QTextureMaterial* material;
@@ -29,7 +36,6 @@ public:
   FlatTerrainTile(Qt3DExtras::QPlaneGeometry* tileGeometry, QuadTreeNode* node, Map3D& map, Qt3DCore::QNode *parent = nullptr);
 
 private:
-  FlatTerrainTileMesh* mesh;
 };
 
 

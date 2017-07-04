@@ -9,7 +9,7 @@ class QgsCoordinateTransform;
 //! Quad tree data structure to keep track of terrain tiles
 struct QuadTreeNode
 {
-  explicit QuadTreeNode(const QgsRectangle& e, int tileX, int tileY, float minDist, QuadTreeNode* par);
+  explicit QuadTreeNode(const QgsRectangle& e, int tileX, int tileY, QuadTreeNode* par);
 
   QuadTreeNode(const QuadTreeNode& other) = delete;
 
@@ -19,9 +19,8 @@ struct QuadTreeNode
 
   float distance(const QVector3D& pos, const QgsPointXY& originOffset, const QgsCoordinateTransform& ctTerrainToMap);
 
-  QgsRectangle extent;
+  QgsRectangle extent;  //!< extent in terrain's CRS
   TerrainTile *tile; //!< null = not yet created
-  float minDistance;  //!< if camera is closer than this distance, we need to switch to children
 
   int level;   //!< how deep are we in the tree (root = level 0)
   int x,y;     //!< coordinates of the tile in the current level. (0,0) is bottom-left tile.
