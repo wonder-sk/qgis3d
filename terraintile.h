@@ -22,7 +22,8 @@ public:
   TerrainTile(QuadTreeNode* node, Map3D& map, Qt3DCore::QNode *parent = nullptr);
 
   AABB bbox;  //!< bounding box
-  float minDistance;  //!< if camera is closer than this distance, we need to switch to children
+  float epsilon;  //!< (geometric) error of this tile (in world coordinates)
+  //float minDistance;  //!< if camera is closer than this distance, we need to switch to children
 
 protected:
   Qt3DExtras::QTextureMaterial* material;

@@ -16,6 +16,13 @@ public:
   AABB(float xMin, float yMin, float zMin, float xMax, float yMax, float zMax)
     : xMin(xMin), yMin(yMin), zMin(zMin), xMax(xMax), yMax(yMax), zMax(zMax)
   {
+    // normalize coords
+    if (this->xMax < this->xMin)
+      qSwap(this->xMin, this->xMax);
+    if (this->yMax < this->yMin)
+      qSwap(this->yMin, this->yMax);
+    if (this->zMax < this->zMin)
+      qSwap(this->zMin, this->zMax);
   }
 
   float distanceFromPoint(float x, float y, float z) const

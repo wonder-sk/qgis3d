@@ -8,6 +8,7 @@
 class CameraController;
 class Map3D;
 class SidePanel;
+class Terrain;
 
 class Window3D : public Qt3DExtras::Qt3DWindow
 {
@@ -27,6 +28,7 @@ private slots:
 private:
 
   CameraController* cc;
+  Terrain* terrain;
   SidePanel* panel;
   Map3D& map;
 

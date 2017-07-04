@@ -66,7 +66,7 @@ FlatTerrainTile::FlatTerrainTile(Qt3DExtras::QPlaneGeometry *tileGeometry, QuadT
   transform->setTranslation(QVector3D(x0 + half,0, - (y0 + half)));
 
   bbox = AABB(x0, 0, -y0, x0 + side, 0, -(y0 + side));
-  minDistance = side;  // slightly ad-hoc min. distance
+  epsilon = side / map.tileTextureSize;  // no geometric error - use texel size as the error
 }
 
 
@@ -103,7 +103,7 @@ DemTerrainTile::DemTerrainTile(QuadTreeNode *node, Map3D& map, Qt3DCore::QNode *
   transform->setTranslation(QVector3D(x0 + half,0, - (y0 + half)));
 
   bbox = AABB(x0, zMin*map.zExaggeration, -y0, x0 + side, zMax*map.zExaggeration, -(y0 + side));
-  minDistance = side;  // slightly ad-hoc min. distance
+  epsilon = side / map.tileTextureSize;  // use texel size as the error
 }
 
 
@@ -137,11 +137,13 @@ QuantizedMeshTerrainTile::QuantizedMeshTerrainTile(QuadTreeNode *node, Map3D& ma
   transform->setScale3D(QVector3D(1.f, map.zExaggeration, 1.f));
 
   QgsRectangle mapExtent = mapSettings.extent();
-  float x0 = mapExtent.xMinimum(), y0 = mapExtent.yMinimum();
-  float x1 = mapExtent.xMaximum(), y1 = mapExtent.yMaximum();
+  float x0 = mapExtent.xMinimum() - map.originX;
+  float y0 = mapExtent.yMinimum() - map.originY;
+  float x1 = mapExtent.xMaximum() - map.originX;
+  float y1 = mapExtent.yMaximum() - map.originY;
   float z0 = qmt->header.MinimumHeight, z1 = qmt->header.MaximumHeight;
   bbox = AABB(x0, z0*map.zExaggeration, -y0, x1, z1*map.zExaggeration, -y1);
-  minDistance = 5000 / pow(2, node->level);  // even more ad-hoc
+  epsilon = mapExtent.width() / map.tileTextureSize;
 }
 
 void QuantizedMeshTerrainTile::tileExtentXYZ(QuadTreeNode *node, Map3D &map, int &tx, int &ty, int &tz)

@@ -46,11 +46,12 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
   }
 
   // create terrain entity
-  Terrain* t = new Terrain(map, extentTerrainCrs);
+  terrain = new Terrain(map, extentTerrainCrs);
   //t->setEnabled(false);
-  t->setParent( scene );
-  t->setMaxLevel(2);
-  t->setCamera( camera() );
+  terrain->setParent( scene );
+  terrain->setMaxLevel(3);
+  terrain->setCamera( camera() );
+  terrain->setViewport(QRect(QPoint(0,0), size()));
 
   setRootEntity(scene);
 
@@ -63,6 +64,7 @@ void Window3D::resizeEvent(QResizeEvent *ev)
 {
   Qt3DExtras::Qt3DWindow::resizeEvent(ev);
   cc->setViewport(QRect(QPoint(0,0), size()));
+  terrain->setViewport(QRect(QPoint(0,0), size()));
 }
 
 void Window3D::onTimeout()

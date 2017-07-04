@@ -10,6 +10,7 @@
 class AbstractTerrain : public Qt3DCore::QEntity
 {
 public:
+  AbstractTerrain() : mCamera(nullptr) {}
   // TODO: virtual methods
 
   //!
@@ -37,6 +38,7 @@ public:
   ~Terrain();
 
   void setCamera( Qt3DRender::QCamera *camera );
+  void setViewport( const QRect& rect );
 
   void setMaxLevel( int level ) { maxLevel = level; }
 
@@ -45,7 +47,7 @@ private slots:
   void cameraViewMatrixChanged();
 
 private:
-  void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes, const QVector3D& cameraPos);
+  void addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNodes, const QVector3D& cameraPos, float cameraFov);
   void ensureTileExists(QuadTreeNode* node);
 
 private:
@@ -56,6 +58,7 @@ private:
   Qt3DExtras::QPlaneGeometry* tileGeometry;
 
   TerrainBoundsEntity* bboxesEntity;
+  int screenSizePx;
 };
 
 #endif // FLATTERRAIN_H
