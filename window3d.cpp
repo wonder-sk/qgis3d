@@ -7,6 +7,7 @@
 #include "cameracontroller.h"
 #include "maptexturegenerator.h"
 #include "maptextureimage.h"
+#include "terraingenerator.h"
 #include "sidepanel.h"
 
 
@@ -35,18 +36,8 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
   connect(camera(), &Qt3DRender::QCamera::viewMatrixChanged, this, &Window3D::onCameraViewMatrixChanged);
   onCameraViewMatrixChanged();
 
-  QgsRectangle extentTerrainCrs;
-  if (map.terrainType == Map3D::QuantizedMesh)
-  {
-    extentTerrainCrs = QgsRectangle(map.terrainTilingScheme.tileToExtent(map.terrainBaseX, map.terrainBaseY, map.terrainBaseZ));
-  }
-  else
-  {
-    extentTerrainCrs = map.terrainTilingScheme.tileToExtent(0, 0, 0);
-  }
-
   // create terrain entity
-  terrain = new Terrain(map, extentTerrainCrs);
+  terrain = new Terrain(map, map.terrainGenerator->extent());
   //t->setEnabled(false);
   terrain->setParent( scene );
   terrain->setMaxLevel(3);

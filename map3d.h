@@ -1,15 +1,15 @@
 #ifndef MAP3D_H
 #define MAP3D_H
 
-#include "tilingscheme.h"
+#include <memory>
 
-class MapTextureGenerator;
-class TerrainTextureGenerator;
+#include "qgscoordinatetransform.h"
 
 class QgsMapLayer;
 class QgsRasterLayer;
 
-#include "qgscoordinatetransform.h"
+class MapTextureGenerator;
+class TerrainGenerator;
 
 
 //! Definition of the world
@@ -23,20 +23,9 @@ struct Map3D
   int tileTextureSize;   //!< size of map textures of tiles in pixels (width/height)
   MapTextureGenerator* mapGen;
 
-  enum TerrainType { Flat, Dem, QuantizedMesh } terrainType;
-  TilingScheme terrainTilingScheme;   //!< tiling scheme of the terrain
-
   QgsCoordinateTransform ctTerrainToMap;
 
-  // TODO: terrain generator
-
-  // TODO: this is used just for quantized mesh tiles
-  int terrainBaseX, terrainBaseY, terrainBaseZ;   //!< coordinates of the base tile
-
-  // TODO: this is used just for DEM terrain tiles
-  TerrainTextureGenerator* tGen;
-  int demTerrainSize;
-  QgsRasterLayer* demLayer;
+  std::unique_ptr<TerrainGenerator> terrainGenerator;
 };
 
 

@@ -1,6 +1,6 @@
 #include "quadtree.h"
 
-#include "terraintile.h"
+#include "terraingenerator.h"
 
 #include "qgscoordinatetransform.h"
 

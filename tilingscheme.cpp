@@ -16,7 +16,7 @@ TilingScheme::TilingScheme(const QgsRectangle &fullExtent, const QgsCoordinateRe
   baseTileSide = qMax(fullExtent.width(), fullExtent.height());
 }
 
-QgsPointXY TilingScheme::tileToMap(int x, int y, int z)
+QgsPointXY TilingScheme::tileToMap(int x, int y, int z) const
 {
   double tileSide = baseTileSide / pow(2, z);
   double mx = mapOrigin.x() + x * tileSide;
@@ -24,21 +24,21 @@ QgsPointXY TilingScheme::tileToMap(int x, int y, int z)
   return QgsPointXY(mx, my);
 }
 
-void TilingScheme::mapToTile(const QgsPointXY &pt, int z, float &x, float &y)
+void TilingScheme::mapToTile(const QgsPointXY &pt, int z, float &x, float &y) const
 {
   double tileSide = baseTileSide / pow(2, z);
   x = (pt.x() - mapOrigin.x()) / tileSide;
   y = (pt.y() - mapOrigin.y()) / tileSide;
 }
 
-QgsRectangle TilingScheme::tileToExtent(int x, int y, int z)
+QgsRectangle TilingScheme::tileToExtent(int x, int y, int z) const
 {
   QgsPointXY pt0 = tileToMap(x, y, z);
   QgsPointXY pt1 = tileToMap(x+1, y+1, z);
   return QgsRectangle(pt0, pt1);
 }
 
-void TilingScheme::extentToTile(const QgsRectangle &extent, int &x, int &y, int &z)
+void TilingScheme::extentToTile(const QgsRectangle &extent, int &x, int &y, int &z) const
 {
   x = y = z = 0;  // start with root tile
   while (1)

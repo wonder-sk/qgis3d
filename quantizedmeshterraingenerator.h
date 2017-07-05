@@ -1,0 +1,24 @@
+#ifndef QUANTIZEDMESHTERRAINGENERATOR_H
+#define QUANTIZEDMESHTERRAINGENERATOR_H
+
+#include "terraingenerator.h"
+
+
+class QuantizedMeshTerrainGenerator : public TerrainGenerator
+{
+public:
+  QuantizedMeshTerrainGenerator();
+
+  void setBaseTileFromExtent(const QgsRectangle& extentInTerrainCrs);
+
+  void quadTreeTileToBaseTile(int x, int y, int z, int &tx, int &ty, int &tz) const;
+
+  TerrainGenerator::Type type() const override;
+  QgsRectangle extent() const override;
+  TerrainTileEntity* createTile(QuadTreeNode *n, const Map3D& map, Qt3DCore::QNode *parent) const override;
+
+  int terrainBaseX, terrainBaseY, terrainBaseZ;   //!< coordinates of the base tile
+};
+
+
+#endif // QUANTIZEDMESHTERRAINGENERATOR_H

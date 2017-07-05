@@ -1,15 +1,12 @@
 #include "terrain.h"
 
-#include "qgsrectangle.h"
-
-#include <Qt3DExtras/QPlaneMesh>
-#include <Qt3DExtras/QPlaneGeometry>
-
 #include "map3d.h"
 #include "maptextureimage.h"
 #include "quadtree.h"
-#include "terraintile.h"
+#include "terraingenerator.h"
 #include "terrainboundsentity.h"
+
+#include "qgsrectangle.h"
 
 
 float screenSpaceError(float epsilon, float distance, float screenSize, float fov)
@@ -39,6 +36,7 @@ float screenSpaceError(float epsilon, float distance, float screenSize, float fo
 }
 
 
+#if 0
 static QColor tileColors[] = {
   Qt::green,
   Qt::red,
@@ -48,7 +46,7 @@ static QColor tileColors[] = {
   Qt::yellow,
 };
 static int tileColorsCount = sizeof(tileColors) / sizeof(QColor);
-
+#endif
 
 
 Terrain::Terrain(Map3D& map, const QgsRectangle& extent)
@@ -59,14 +57,8 @@ Terrain::Terrain(Map3D& map, const QgsRectangle& extent)
 {
   root = new QuadTreeNode(extent, 0, 0, nullptr);
 
-  // simple quad geometry shared by all tiles
-  // QPlaneGeometry by default is 1x1 with mesh resultion QSize(2,2), centered at 0
-  tileGeometry = new Qt3DExtras::QPlaneGeometry(this);
-
   // entity for drawing bounds of tiles
-
   ensureTileExists(root);
-
   bboxesEntity = new TerrainBoundsEntity(this);
 }
 
@@ -125,13 +117,7 @@ void Terrain::ensureTileExists(QuadTreeNode *n)
 {
   if (!n->tile)
   {
-    if (map.terrainType == Map3D::Flat)
-      n->tile = new FlatTerrainTile(tileGeometry, n, map, this);
-    else if (map.terrainType == Map3D::Dem)
-      n->tile = new DemTerrainTile(n, map, this);
-    else
-      n->tile = new QuantizedMeshTerrainTile(n, map, this);
-
+    n->tile = map.terrainGenerator->createTile(n, map, this);
     n->tile->setEnabled(false); // not shown by default
   }
 }

@@ -11,18 +11,22 @@ SOURCES += main.cpp \
     maptextureimage.cpp \
     quadtree.cpp \
     terrain.cpp \
-    terraintile.cpp \
     tilingscheme.cpp \
-    terraintilegeometry.cpp \
     quantizedmeshgeometry.cpp \
     map3d.cpp \
-    terrainboundsentity.cpp
+    terrainboundsentity.cpp \
+    flatterraingenerator.cpp \
+    demterraingenerator.cpp \
+    quantizedmeshterraingenerator.cpp \
+    terraingenerator.cpp \
+    demterraintilegeometry.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
 
 QGIS_SOURCE_PATH = /home/martin/qgis/git-master
-QGIS_BUILD_PATH = $${QGIS_SOURCE_PATH}/creator
+#QGIS_BUILD_PATH = $${QGIS_SOURCE_PATH}/creator
+QGIS_BUILD_PATH = $${QGIS_SOURCE_PATH}/build59
 
 INCLUDEPATH += \
   $${QGIS_SOURCE_PATH}/src/core \
@@ -67,10 +71,13 @@ HEADERS += \
     maptextureimage.h \
     quadtree.h \
     terrain.h \
-    terraintile.h \
     tilingscheme.h \
-    terraintilegeometry.h \
     quantizedmeshgeometry.h \
     map3d.h \
     terrainboundsentity.h \
-    aabb.h
+    aabb.h \
+    flatterraingenerator.h \
+    demterraingenerator.h \
+    quantizedmeshterraingenerator.h \
+    terraingenerator.h \
+    demterraintilegeometry.h

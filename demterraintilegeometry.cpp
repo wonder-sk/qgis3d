@@ -1,5 +1,5 @@
 
-#include "terraintilegeometry.h"
+#include "demterraintilegeometry.h"
 #include <Qt3DRender/qattribute.h>
 #include <Qt3DRender/qbuffer.h>
 #include <Qt3DRender/qbufferdatagenerator.h>
@@ -160,7 +160,7 @@ public:
 
 
 
-TerrainTileGeometry::TerrainTileGeometry(int resolution, const QByteArray& heightMap, TerrainTileGeometry::QNode *parent)
+DemTerrainTileGeometry::DemTerrainTileGeometry(int resolution, const QByteArray& heightMap, DemTerrainTileGeometry::QNode *parent)
     : QGeometry(parent)
     , m_resolution(resolution)
     , m_heightMap(heightMap)
@@ -174,32 +174,32 @@ TerrainTileGeometry::TerrainTileGeometry(int resolution, const QByteArray& heigh
     init();
 }
 
-TerrainTileGeometry::~TerrainTileGeometry()
+DemTerrainTileGeometry::~DemTerrainTileGeometry()
 {
 }
 
-QAttribute *TerrainTileGeometry::positionAttribute() const
+QAttribute *DemTerrainTileGeometry::positionAttribute() const
 {
     return m_positionAttribute;
 }
 
-QAttribute *TerrainTileGeometry::normalAttribute() const
+QAttribute *DemTerrainTileGeometry::normalAttribute() const
 {
     return m_normalAttribute;
 }
 
-QAttribute *TerrainTileGeometry::texCoordAttribute() const
+QAttribute *DemTerrainTileGeometry::texCoordAttribute() const
 {
     return m_texCoordAttribute;
 }
 
-QAttribute *TerrainTileGeometry::indexAttribute() const
+QAttribute *DemTerrainTileGeometry::indexAttribute() const
 {
     return m_indexAttribute;
 }
 
 
-void TerrainTileGeometry::init()
+void DemTerrainTileGeometry::init()
 {
     m_positionAttribute = new QAttribute(this);
     m_normalAttribute = new QAttribute(this);

@@ -55,7 +55,6 @@ private:
   QuadTreeNode* root;
   Map3D& map;
   QList<QuadTreeNode*> activeNodes;
-  Qt3DExtras::QPlaneGeometry* tileGeometry;
 
   TerrainBoundsEntity* bboxesEntity;
   int screenSizePx;

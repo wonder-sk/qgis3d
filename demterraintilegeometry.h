@@ -16,7 +16,7 @@ class QBuffer;
 } // Qt3DRender
 
 
-class TerrainTileGeometry : public Qt3DRender::QGeometry
+class DemTerrainTileGeometry : public Qt3DRender::QGeometry
 {
     Q_OBJECT
     Q_PROPERTY(Qt3DRender::QAttribute *positionAttribute READ positionAttribute CONSTANT)
@@ -25,8 +25,8 @@ class TerrainTileGeometry : public Qt3DRender::QGeometry
     Q_PROPERTY(Qt3DRender::QAttribute *indexAttribute READ indexAttribute CONSTANT)
 
 public:
-    explicit TerrainTileGeometry(int resolution, const QByteArray& heightMap, QNode *parent = nullptr);
-    ~TerrainTileGeometry();
+    explicit DemTerrainTileGeometry(int resolution, const QByteArray& heightMap, QNode *parent = nullptr);
+    ~DemTerrainTileGeometry();
 
     //void updateVertices();
     //void updateIndices();
