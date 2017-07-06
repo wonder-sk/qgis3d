@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
 
   TerrainGenerator::Type tt;
   //tt = TerrainGenerator::Flat;
-  //tt = TerrainGenerator::Dem;
-  tt = TerrainGenerator::QuantizedMesh;
+  tt = TerrainGenerator::Dem;
+  //tt = TerrainGenerator::QuantizedMesh;
 
   if (tt == TerrainGenerator::Flat)
   {

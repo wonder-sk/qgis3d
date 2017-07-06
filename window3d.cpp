@@ -11,6 +11,7 @@
 #include "sidepanel.h"
 
 
+
 Window3D::Window3D(SidePanel* p, Map3D& map)
   : panel(p)
   , map(map)
@@ -18,6 +19,9 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
   defaultFrameGraph()->setClearColor(QColor(Qt::black));
 
   Qt3DCore::QEntity *scene = new Qt3DCore::QEntity;
+
+  // we want precise picking of terrain (also bounding volume picking does not seem to work - not sure why)
+  renderSettings()->pickingSettings()->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
 
   mFrameAction = new Qt3DLogic::QFrameAction();
   connect(mFrameAction, &Qt3DLogic::QFrameAction::triggered,
@@ -43,6 +47,9 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
   terrain->setMaxLevel(3);
   terrain->setCamera( camera() );
   terrain->setViewport(QRect(QPoint(0,0), size()));
+  // add camera control's terrain picker as a component to be able to capture height where mouse was
+  // pressed in order to correcly pan camera when draggin mouse
+  terrain->addComponent(cc->terrainPicker());
 
   setRootEntity(scene);
 

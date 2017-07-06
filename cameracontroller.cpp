@@ -1,7 +1,13 @@
 #include "cameracontroller.h"
 
+#include <Qt3DRender/QObjectPicker>
+#include <Qt3DRender/QPickEvent>
+
+
 CameraController::CameraController(Qt3DCore::QNode *parent)
   : Qt3DCore::QEntity(parent)
+  , mTerrainPicker(nullptr)
+  , mLastPressedHeight(0)
   , mMouseDevice(new Qt3DInput::QMouseDevice())
   , mKeyboardDevice(new Qt3DInput::QKeyboardDevice())
   , mMouseHandler(new Qt3DInput::QMouseHandler)
@@ -23,6 +29,10 @@ CameraController::CameraController(Qt3DCore::QNode *parent)
   connect(mFrameAction, &Qt3DLogic::QFrameAction::triggered,
           this, &CameraController::onFrameTriggered);
   addComponent(mFrameAction);  // takes ownership
+
+  // object picker for terrain for correct map panning. it will be associated as a component of terrain entity
+  mTerrainPicker = new Qt3DRender::QObjectPicker;
+  connect(mTerrainPicker, &Qt3DRender::QObjectPicker::pressed, this, &CameraController::onPickerMousePressed);
 
   // not using QAxis + QAnalogAxisInput for mouse X,Y because
   // it is only in action when a mouse button is pressed.
@@ -185,8 +195,9 @@ void CameraController::onFrameTriggered(float dt)
       // i.e. find out x,z of the previous mouse point, find out x,z of the current mouse point
       // and use the difference
 
-      QPointF p1 = screen_point_to_point_on_plane(QPointF(mMousePos - QPoint(dx,dy)), mViewport, mCamera, 0);
-      QPointF p2 = screen_point_to_point_on_plane(QPointF(mMousePos), mViewport, mCamera, 0);
+      float z = mLastPressedHeight;
+      QPointF p1 = screen_point_to_point_on_plane(QPointF(mMousePos - QPoint(dx,dy)), mViewport, mCamera, z);
+      QPointF p2 = screen_point_to_point_on_plane(QPointF(mMousePos), mViewport, mCamera, z);
 
       cd.x -= p2.x() - p1.x();
       cd.y -= p2.y() - p1.y();
@@ -207,4 +218,9 @@ void CameraController::onFrameTriggered(float dt)
 void CameraController::onPositionChanged(Qt3DInput::QMouseEvent *mouse)
 {
   mMousePos = QPoint(mouse->x(), mouse->y());
+}
+
+void CameraController::onPickerMousePressed(Qt3DRender::QPickEvent *pick)
+{
+  mLastPressedHeight = pick->worldIntersection().y();
 }

@@ -8,6 +8,8 @@
 
 #include "qgsrectangle.h"
 
+#include <Qt3DRender/QCamera>
+
 
 float screenSpaceError(float epsilon, float distance, float screenSize, float fov)
 {
@@ -50,7 +52,8 @@ static int tileColorsCount = sizeof(tileColors) / sizeof(QColor);
 
 
 Terrain::Terrain(Map3D& map, const QgsRectangle& extent)
-  : maxLevel(0)
+  : mCamera(nullptr)
+  , maxLevel(0)
   , root(nullptr)
   , map(map)
   , screenSizePx(0)
@@ -90,11 +93,10 @@ void Terrain::addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNod
 
   float tau = 1.0;  // max. allowed screen space error
 
-  float tileMinDistance = node->tile->epsilon * screenSizePx / (2 * tau * tan(cameraFov * M_PI / (180*2)));
-
   bool willBeUsed = sse <= tau || node->level == maxLevel;
 
-  qDebug() << "node " << node->x << " " << node->y << " " << node->level << "  | extent " << node->extent.toString(1) << " --> dist " << dist  << " min dist " << tileMinDistance << (willBeUsed ? " -- YES " : "") << "   sse " << sse;
+  //float tileMinDistance = node->tile->epsilon * screenSizePx / (2 * tau * tan(cameraFov * M_PI / (180*2)));
+  //qDebug() << "node " << node->x << " " << node->y << " " << node->level << "  | extent " << node->extent.toString(1) << " --> dist " << dist  << " min dist " << tileMinDistance << (willBeUsed ? " -- YES " : "") << "   sse " << sse;
 
   if (willBeUsed)
   {
