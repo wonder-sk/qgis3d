@@ -94,12 +94,12 @@ void Terrain::addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNod
 
   float sse = screenSpaceError(node->tile->epsilon, dist, screenSizePx, cameraFov);
 
-  float tau = 1.0;  // max. allowed screen space error
+  float tau = 2.0;  // max. allowed screen space error
 
   bool willBeUsed = sse <= tau || node->level == maxLevel;
 
   //float tileMinDistance = node->tile->epsilon * screenSizePx / (2 * tau * tan(cameraFov * M_PI / (180*2)));
-  //qDebug() << "node " << node->x << " " << node->y << " " << node->level << "  | extent " << node->extent.toString(1) << " --> dist " << dist  << " min dist " << tileMinDistance << (willBeUsed ? " -- YES " : "") << "   sse " << sse;
+  //qDebug() << "node " << node->x << " " << node->y << " " << node->level << "  | extent " << node->extent.toString(1) << /*" --> dist " << dist  << " min dist " << tileMinDistance << (willBeUsed ? " -- YES " : "") <<*/ "   sse " << sse;
 
   if (willBeUsed)
   {

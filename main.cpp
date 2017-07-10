@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
   map.zExaggeration = 3;
   map.originZ = 0;
 
-  map.tileTextureSize = 1024;
+  map.tileTextureSize = 512;
 
   TerrainGenerator::Type tt;
   //tt = TerrainGenerator::Flat;
