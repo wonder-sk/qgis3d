@@ -3,7 +3,12 @@
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DCore/QTransform>
+
+#if QT_VERSION >= 0x050900
 #include <Qt3DExtras/QTextureMaterial>
+#else
+#include <Qt3DExtras/QDiffuseMapMaterial>
+#endif
 
 #include "aabb.h"
 #include "tilingscheme.h"
@@ -30,7 +35,11 @@ public:
   float epsilon;  //!< (geometric) error of this tile (in world coordinates)
 
 protected:
+#if QT_VERSION >= 0x050900
   Qt3DExtras::QTextureMaterial* material;
+#else
+  Qt3DExtras::QDiffuseMapMaterial* material;
+#endif
   Qt3DCore::QTransform* transform;
 };
 

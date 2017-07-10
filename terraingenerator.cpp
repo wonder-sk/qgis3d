@@ -30,13 +30,20 @@ TerrainTileEntity::TerrainTileEntity(QuadTreeNode* node, const Map3D& map, Qt3DC
   QgsRectangle extentMapCrs = map.ctTerrainToMap.transformBoundingBox(extentTerrainCrs);
   QString tileDebugText = QString("%1 | %2 | %3").arg(tx).arg(ty).arg(tz);
 
-  material = new Qt3DExtras::QTextureMaterial;
   Qt3DRender::QTexture2D* texture = new Qt3DRender::QTexture2D(this);
   MapTextureImage* image = new MapTextureImage(map.mapGen, extentMapCrs, tileDebugText);
   texture->addTextureImage(image);
   texture->setMinificationFilter(Qt3DRender::QTexture2D::Linear);
   texture->setMagnificationFilter(Qt3DRender::QTexture2D::Linear);
+#if QT_VERSION >= 0x050900
+  material = new Qt3DExtras::QTextureMaterial;
   material->setTexture(texture);
+#else
+  material = new Qt3DExtras::QDiffuseMapMaterial;
+  material->setDiffuse(texture);
+  material->setShininess(1);
+  material->setAmbient(Qt::white);
+#endif
   addComponent(material);  // takes ownership if the component has no parent
 
   // create transform for derived classes

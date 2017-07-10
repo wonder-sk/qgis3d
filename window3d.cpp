@@ -20,8 +20,10 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
 
   Qt3DCore::QEntity *scene = new Qt3DCore::QEntity;
 
+#if QT_VERSION >= 0x050900
   // we want precise picking of terrain (also bounding volume picking does not seem to work - not sure why)
   renderSettings()->pickingSettings()->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
+#endif
 
   mFrameAction = new Qt3DLogic::QFrameAction();
   connect(mFrameAction, &Qt3DLogic::QFrameAction::triggered,

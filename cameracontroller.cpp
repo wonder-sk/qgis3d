@@ -50,9 +50,12 @@ CameraController::CameraController(Qt3DCore::QNode *parent)
   mLeftMouseButtonAction->addInput(mLeftMouseButtonInput);
 
   // Mouse Wheel (Y)
+  // TODO: zoom with mouse wheel in Qt < 5.8
+#if QT_VERSION >= 0x050800
   mMouseWheelInput->setAxis(Qt3DInput::QMouseDevice::WheelY);
   mMouseWheelInput->setSourceDevice(mMouseDevice);
   mWheelAxis->addInput(mMouseWheelInput);
+#endif
 
   // Keyboard shift
   mShiftInput->setButtons(QVector<int>() << Qt::Key_Shift);
