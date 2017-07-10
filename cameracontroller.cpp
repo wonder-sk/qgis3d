@@ -215,7 +215,10 @@ void CameraController::onFrameTriggered(float dt)
     cd.dist = 10;
 
   if (cd != oldCamData)
+  {
     cd.setCamera(mCamera);
+    emit cameraChanged();
+  }
 }
 
 void CameraController::onPositionChanged(Qt3DInput::QMouseEvent *mouse)

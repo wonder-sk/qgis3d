@@ -48,6 +48,7 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
   terrain->setParent( scene );
   terrain->setMaxLevel(3);
   terrain->setCamera( camera() );
+  connect(cc, &CameraController::cameraChanged, terrain, &Terrain::cameraViewMatrixChanged);
   terrain->setViewport(QRect(QPoint(0,0), size()));
   // add camera control's terrain picker as a component to be able to capture height where mouse was
   // pressed in order to correcly pan camera when draggin mouse

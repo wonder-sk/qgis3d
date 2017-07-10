@@ -73,8 +73,11 @@ Terrain::~Terrain()
 void Terrain::setCamera(Qt3DRender::QCamera *camera)
 {
   mCamera = camera;
-  connect(mCamera, &Qt3DRender::QCamera::viewMatrixChanged, this, &Terrain::cameraViewMatrixChanged);
   cameraViewMatrixChanged();  // initial update
+
+  // we do not listen directly to camera's matrix changed signals because we would update
+  // terrain too often (a camera update is made of four partial updates).
+  // The window owning terrain sends signals when camera controller changes camera position.
 }
 
 void Terrain::setViewport(const QRect &rect)

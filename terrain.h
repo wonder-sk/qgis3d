@@ -32,7 +32,7 @@ public:
   void setMaxLevel( int level ) { maxLevel = level; }
 
 
-private slots:
+public slots:
   void cameraViewMatrixChanged();
 
 private:
