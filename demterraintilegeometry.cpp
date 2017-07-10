@@ -12,7 +12,7 @@ using namespace Qt3DRender;
 QByteArray createPlaneVertexData(int res, const QByteArray& heights)
 {
     Q_ASSERT(res >= 2);
-    Q_ASSERT(heights.count() == res*res*sizeof(float));
+    Q_ASSERT(heights.count() == res*res*(int)sizeof(float));
 
     const float* zBits = (const float*) heights.constData();
 
@@ -70,7 +70,7 @@ QByteArray createPlaneIndexData(int res)
     QSize resolution(res, res);
     // Create the index data. 2 triangles per rectangular face
     const int faces = 2 * (resolution.width() - 1) * (resolution.height() - 1);
-    const int indices = 3 * faces;
+    const quint32 indices = 3 * faces;
     Q_ASSERT(indices < std::numeric_limits<quint32>::max());
     QByteArray indexBytes;
     indexBytes.resize(indices * sizeof(quint32));
@@ -176,6 +176,12 @@ DemTerrainTileGeometry::DemTerrainTileGeometry(int resolution, const QByteArray&
 
 DemTerrainTileGeometry::~DemTerrainTileGeometry()
 {
+}
+
+void DemTerrainTileGeometry::setHeightMap(const QByteArray &heightMap)
+{
+  m_heightMap = heightMap;
+  m_vertexBuffer->setDataGenerator(QSharedPointer<PlaneVertexBufferFunctor>::create(m_resolution, m_heightMap));
 }
 
 QAttribute *DemTerrainTileGeometry::positionAttribute() const

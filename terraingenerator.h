@@ -31,6 +31,7 @@ class TerrainTileEntity : public Qt3DCore::QEntity
 public:
   TerrainTileEntity(QuadTreeNode* node, const Map3D& map, Qt3DCore::QNode *parent = nullptr);
 
+  const Map3D& m_map;
   AABB bbox;  //!< bounding box
   float epsilon;  //!< (geometric) error of this tile (in world coordinates)
 

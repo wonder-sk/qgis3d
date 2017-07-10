@@ -10,15 +10,23 @@ class MapTextureGenerator;
 //! texture image with a rendered map
 class MapTextureImage : public Qt3DRender::QAbstractTextureImage
 {
+  Q_OBJECT
 public:
   MapTextureImage(MapTextureGenerator* mapGen, const QgsRectangle& extent, const QString& debugText = QString(), Qt3DCore::QNode *parent = nullptr);
+  ~MapTextureImage();
 
   virtual Qt3DRender::QTextureImageDataGeneratorPtr dataGenerator() const override;
 
+private slots:
+  void onTileReady(int jobId, const QImage& img);
+
+private:
   MapTextureGenerator* mapGen;
   QgsRectangle extent;
   QString debugText;
   QImage img;
+  int jobId;
+  bool jobDone;
 };
 
 #endif // MAPTEXTUREIMAGE_H

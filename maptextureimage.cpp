@@ -48,21 +48,31 @@ MapTextureImage::MapTextureImage(MapTextureGenerator *mapGen, const QgsRectangle
   , mapGen(mapGen)
   , extent(extent)
   , debugText(debugText)
+  , jobDone(false)
 {
-  connect(mapGen, &MapTextureGenerator::tileReady, [this, mapGen](const QgsRectangle& extent, const QImage& img)
-  {
-    if (extent == this->extent)
-    {
-      this->img = img;
-      this->notifyDataGeneratorChanged();
-    }
-  });
+  connect(mapGen, &MapTextureGenerator::tileReady, this, &MapTextureImage::onTileReady);
 
   // request image
-  mapGen->render(extent, debugText);
+  jobId = mapGen->render(extent, debugText);
+}
+
+MapTextureImage::~MapTextureImage()
+{
+  if (!jobDone)
+    mapGen->cancelJob(jobId);
 }
 
 Qt3DRender::QTextureImageDataGeneratorPtr MapTextureImage::dataGenerator() const
 {
   return Qt3DRender::QTextureImageDataGeneratorPtr(new MapTextureImageDataGenerator(extent, debugText, img));
+}
+
+void MapTextureImage::onTileReady(int jobId, const QImage &img)
+{
+  if (jobId == this->jobId)
+  {
+    this->img = img;
+    this->jobDone = true;
+    notifyDataGeneratorChanged();
+  }
 }

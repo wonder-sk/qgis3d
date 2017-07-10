@@ -31,6 +31,8 @@ public:
     //void updateVertices();
     //void updateIndices();
 
+    void setHeightMap(const QByteArray& heightMap);
+
     Qt3DRender::QAttribute *positionAttribute() const;
     Qt3DRender::QAttribute *normalAttribute() const;
     Qt3DRender::QAttribute *texCoordAttribute() const;

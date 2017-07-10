@@ -136,11 +136,23 @@ void Terrain::cameraViewMatrixChanged()
   qDebug() << "terrain update";
 
   // TODO: delete cached tiles when they have not been used for a while
+#if 0
+  QSet<QuadTreeNode*> oldActiveNodes = QSet<QuadTreeNode*>::fromList(activeNodes);
+  // ... update tiles here ...
+  QSet<QuadTreeNode*> newActiveNodes = QSet<QuadTreeNode*>::fromList(activeNodes);
+  Q_FOREACH (QuadTreeNode* n, oldActiveNodes)
+  {
+    if (!newActiveNodes.contains(n))
+    {
+      n->tile->deleteLater();
+      n->tile = nullptr;
+    }
+  }
+#endif
 
   // remove all active nodes from the scene
   Q_FOREACH (QuadTreeNode* n, activeNodes)
   {
-    //n->tile->setParent((Qt3DCore::QNode*)nullptr);  // crashes if we add/remove tiles like this :-(
     n->tile->setEnabled(false);
   }
 
@@ -153,7 +165,6 @@ void Terrain::cameraViewMatrixChanged()
   // add active nodes to the scene
   Q_FOREACH (QuadTreeNode* n, activeNodes)
   {
-    //n->tile->setParent(this);  // crashes if we add/remove tiles like this :-(
     n->tile->setEnabled(true);
     bboxes << n->tile->bbox;
   }

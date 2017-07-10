@@ -11,6 +11,7 @@
 
 TerrainTileEntity::TerrainTileEntity(QuadTreeNode* node, const Map3D& map, Qt3DCore::QNode *parent)
   : Qt3DCore::QEntity(parent)
+  , m_map(map)
 {
   int tx, ty, tz;
   if (map.terrainGenerator->type() == TerrainGenerator::QuantizedMesh)
