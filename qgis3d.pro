@@ -19,7 +19,15 @@ SOURCES += main.cpp \
     demterraingenerator.cpp \
     quantizedmeshterraingenerator.cpp \
     terraingenerator.cpp \
-    demterraintilegeometry.cpp
+    demterraintilegeometry.cpp \
+    poly2tri/common/shapes.cc \
+    poly2tri/sweep/advancing_front.cc \
+    poly2tri/sweep/cdt.cc \
+    poly2tri/sweep/sweep_context.cc \
+    poly2tri/sweep/sweep.cc \
+    tessellator.cpp \
+    polygongeometry.cpp \
+    polygonentity.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -80,4 +88,14 @@ HEADERS += \
     demterraingenerator.h \
     quantizedmeshterraingenerator.h \
     terraingenerator.h \
-    demterraintilegeometry.h
+    demterraintilegeometry.h \
+    poly2tri/poly2tri.h \
+    poly2tri/common/shapes.h \
+    poly2tri/common/utils.h \
+    poly2tri/sweep/advancing_front.h \
+    poly2tri/sweep/cdt.h \
+    poly2tri/sweep/sweep_context.h \
+    poly2tri/sweep/sweep.h \
+    tessellator.h \
+    polygongeometry.h \
+    polygonentity.h

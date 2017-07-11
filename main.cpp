@@ -17,6 +17,8 @@
 #include <qgsmapsettings.h>
 #include <qgsrasterlayer.h>
 #include <qgsproject.h>
+#include <qgsvectorlayer.h>
+
 
 
 static QgsRectangle _fullExtent(const QList<QgsMapLayer*>& layers, const QgsCoordinateReferenceSystem& crs)
@@ -41,6 +43,9 @@ int main(int argc, char *argv[])
   QgsRasterLayer* rlSat = new QgsRasterLayer("/home/martin/tmp/qgis3d/ap.tif", "ap", "gdal");
   Q_ASSERT( rlSat->isValid() );
 
+  QgsVectorLayer* vlPolygons = new QgsVectorLayer("/home/martin/tmp/qgis3d/osm.db|layerid=3", "buildings", "ogr");
+  Q_ASSERT( vlPolygons->isValid() );
+
   Map3D map;
   map.layers << rlSat;
   map.crs = rlSat->crs();
@@ -50,8 +55,8 @@ int main(int argc, char *argv[])
   map.tileTextureSize = 512;
 
   TerrainGenerator::Type tt;
-  //tt = TerrainGenerator::Flat;
-  tt = TerrainGenerator::Dem;
+  tt = TerrainGenerator::Flat;
+  //tt = TerrainGenerator::Dem;
   //tt = TerrainGenerator::QuantizedMesh;
 
   if (tt == TerrainGenerator::Flat)
@@ -95,6 +100,16 @@ int main(int argc, char *argv[])
   map.originY = centerMapCrs.y();
 
   map.mapGen = new MapTextureGenerator(map);
+
+  // polygons
+
+  PolygonRenderer pr;
+  pr.layer = vlPolygons;
+  pr.ambientColor = Qt::gray;
+  pr.diffuseColor = Qt::lightGray;
+  pr.height = 0;
+  pr.extrusionHeight = 20;
+  map.polygonRenderers << pr;
 
   SidePanel* sidePanel = new SidePanel;
   sidePanel->setMinimumWidth(150);

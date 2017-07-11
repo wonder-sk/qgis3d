@@ -10,7 +10,7 @@
 #include "terraingenerator.h"
 #include "sidepanel.h"
 
-
+#include "polygonentity.h"
 
 Window3D::Window3D(SidePanel* p, Map3D& map)
   : panel(p)
@@ -53,6 +53,22 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
   // add camera control's terrain picker as a component to be able to capture height where mouse was
   // pressed in order to correcly pan camera when draggin mouse
   terrain->addComponent(cc->terrainPicker());
+
+  Q_FOREACH (const PolygonRenderer& pr, map.polygonRenderers)
+  {
+    PolygonEntity* p = new PolygonEntity(map, pr);
+    p->setParent(scene);
+  }
+
+  Qt3DCore::QEntity* lightEntity = new Qt3DCore::QEntity;
+  Qt3DCore::QTransform* lightTransform = new Qt3DCore::QTransform;
+  lightTransform->setTranslation(QVector3D(0, 1000, 0));
+  Qt3DRender::QPointLight* light = new Qt3DRender::QPointLight;
+  light->setColor(Qt::white);
+  //light->setIntensity(0.5);
+  lightEntity->addComponent(light);
+  lightEntity->addComponent(lightTransform);
+  lightEntity->setParent(scene);
 
   setRootEntity(scene);
 

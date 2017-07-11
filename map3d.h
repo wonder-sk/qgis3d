@@ -2,15 +2,25 @@
 #define MAP3D_H
 
 #include <memory>
+#include <QColor>
 
 #include "qgscoordinatetransform.h"
 
 class QgsMapLayer;
 class QgsRasterLayer;
+class QgsVectorLayer;
 
 class MapTextureGenerator;
 class TerrainGenerator;
 
+struct PolygonRenderer
+{
+  QgsVectorLayer* layer;  //!< layer used to extract polygons from
+  float height;           //!< base height of polygons
+  float extrusionHeight;  //!< how much to extrude (0 means no walls)
+  QColor ambientColor;
+  QColor diffuseColor;
+};
 
 //! Definition of the world
 struct Map3D
@@ -26,6 +36,8 @@ struct Map3D
   QgsCoordinateTransform ctTerrainToMap;
 
   std::unique_ptr<TerrainGenerator> terrainGenerator;
+
+  QList<PolygonRenderer> polygonRenderers;   //!< stuff to render as polygons
 };
 
 
