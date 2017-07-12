@@ -74,5 +74,6 @@ void MapTextureImage::onTileReady(int jobId, const QImage &img)
     this->img = img;
     this->jobDone = true;
     notifyDataGeneratorChanged();
+    emit textureReady();
   }
 }

@@ -12,6 +12,7 @@
 TerrainTileEntity::TerrainTileEntity(QuadTreeNode* node, const Map3D& map, Qt3DCore::QNode *parent)
   : Qt3DCore::QEntity(parent)
   , m_map(map)
+  , m_textureReady(false)
 {
   int tx, ty, tz;
   if (map.terrainGenerator->type() == TerrainGenerator::QuantizedMesh)
@@ -33,6 +34,7 @@ TerrainTileEntity::TerrainTileEntity(QuadTreeNode* node, const Map3D& map, Qt3DC
 
   Qt3DRender::QTexture2D* texture = new Qt3DRender::QTexture2D(this);
   MapTextureImage* image = new MapTextureImage(map.mapGen, extentMapCrs, tileDebugText);
+  connect(image, &MapTextureImage::textureReady, this, &TerrainTileEntity::onTextureReady);
   texture->addTextureImage(image);
   texture->setMinificationFilter(Qt3DRender::QTexture2D::Linear);
   texture->setMagnificationFilter(Qt3DRender::QTexture2D::Linear);
@@ -50,6 +52,12 @@ TerrainTileEntity::TerrainTileEntity(QuadTreeNode* node, const Map3D& map, Qt3DC
   // create transform for derived classes
   transform = new Qt3DCore::QTransform();
   addComponent(transform);
+}
+
+void TerrainTileEntity::onTextureReady()
+{
+  m_textureReady = true;
+  emit textureReady();
 }
 
 // -------------------

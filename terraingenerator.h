@@ -28,12 +28,20 @@ class QgsRectangle;
  */
 class TerrainTileEntity : public Qt3DCore::QEntity
 {
+  Q_OBJECT
 public:
   TerrainTileEntity(QuadTreeNode* node, const Map3D& map, Qt3DCore::QNode *parent = nullptr);
 
   const Map3D& m_map;
   AABB bbox;  //!< bounding box
   float epsilon;  //!< (geometric) error of this tile (in world coordinates)
+  bool m_textureReady;  //!< whether tile's texture is available -> ready to be displayed
+
+private slots:
+  void onTextureReady();
+
+signals:
+  void textureReady();
 
 protected:
 #if QT_VERSION >= 0x050900

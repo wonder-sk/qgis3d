@@ -112,6 +112,22 @@ void Terrain::addActiveNodes(QuadTreeNode* node, QList<QuadTreeNode*>& activeNod
     if (!node->children[0])
       node->makeChildren();
 
+    // test whether all children are ready to replace this parent tile.
+    // if not, we still need to display the parent tile, otherwise children could only
+    // display some placeholder texture
+    for (int i = 0; i < 4; ++i)
+    {
+      QuadTreeNode* childNode = node->children[i];
+      ensureTileExists(childNode);
+      if (!childNode->tile->m_textureReady)
+      {
+        activeNodes << node;
+        //qDebug() << "skipping children: not ready!";
+        return;
+      }
+    }
+
+    // child tiles are ready - we can use them
     for (int i = 0; i < 4; ++i)
       addActiveNodes(node->children[i], activeNodes, cameraPos, cameraFov);
   }
@@ -124,6 +140,8 @@ void Terrain::ensureTileExists(QuadTreeNode *n)
   {
     n->tile = map.terrainGenerator->createTile(n, map, this);
     n->tile->setEnabled(false); // not shown by default
+    // force update of terrain
+    connect(n->tile, &TerrainTileEntity::textureReady, this, &Terrain::cameraViewMatrixChanged);
   }
 }
 

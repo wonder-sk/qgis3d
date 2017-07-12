@@ -20,6 +20,9 @@ public:
 private slots:
   void onTileReady(int jobId, const QImage& img);
 
+signals:
+  void textureReady();
+
 private:
   MapTextureGenerator* mapGen;
   QgsRectangle extent;
