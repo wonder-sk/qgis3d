@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
   QgsRasterLayer* rlSat = new QgsRasterLayer("/home/martin/tmp/qgis3d/ap.tif", "ap", "gdal");
   Q_ASSERT( rlSat->isValid() );
 
-  QgsVectorLayer* vlPolygons = new QgsVectorLayer("/home/martin/tmp/qgis3d/osm.db|layerid=3", "buildings", "ogr");
+  QgsVectorLayer* vlPolygons = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/buildings.shp", "buildings", "ogr");
   Q_ASSERT( vlPolygons->isValid() );
 
   Map3D map;

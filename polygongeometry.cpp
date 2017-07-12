@@ -69,9 +69,7 @@ void PolygonGeometry::setPolygons(const QList<QgsPolygonV2*> &polygons, const Qg
   Tessellator tesselator(origin.x(), origin.y(), m_withNormals);
   Q_FOREACH (QgsPolygonV2* polygon, polygons)
   {
-    qDebug() << "tessellating " << ++i;
-    if (i!=16)  // TODO: infinite loop on that feature
-      tesselator.addPolygon(*polygon, height, extrusionHeight);
+    tesselator.addPolygon(*polygon, height, extrusionHeight);
   }
 
   QByteArray data((const char*)tesselator.data.constData(), tesselator.data.count() * sizeof(float));
