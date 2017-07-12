@@ -53,6 +53,23 @@ Tessellator::Tessellator(double originX, double originY, bool addNormals)
     stride += 3*sizeof(float);
 }
 
+
+static bool _isRingCounterClockWise(const QgsCurve& ring)
+{
+  double a = 0;
+  int count = ring.numPoints();
+  QgsVertexId::VertexType vt;
+  QgsPoint pt, ptPrev;
+  ring.pointAt(0, ptPrev, vt);
+  for (int i = 1; i < count + 1; ++i)
+  {
+    ring.pointAt(i % count, pt, vt);
+    a += ptPrev.x() * pt.y() - ptPrev.y() * pt.x();
+    ptPrev = pt;
+  }
+  return a > 0; // clockwise if a is negative
+}
+
 void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float extrusionHeight)
 {
   const QgsCurve* exterior = polygon.exteriorRing();
@@ -62,6 +79,7 @@ void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float ex
 
   QgsVertexId::VertexType vt;
   QgsPoint pt;
+
   for (int i = 0; i < exterior->numPoints() - 1; ++i)
   {
     exterior->pointAt(i, pt, vt);
@@ -94,11 +112,15 @@ void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float ex
   // add walls if extrusion is enabled
   if (extrusionHeight != 0)
   {
+    // we need to find out orientation of the ring so that the triangles we generate
+    // face the right direction
+    bool is_counter_clockwise = _isRingCounterClockWise(*exterior);
+
     QgsPoint ptPrev;
-    exterior->pointAt(0, ptPrev, vt);
+    exterior->pointAt(!is_counter_clockwise ? 0 : exterior->numPoints() - 1, ptPrev, vt);
     for (int i = 1; i < exterior->numPoints(); ++i)
     {
-      exterior->pointAt(i, pt, vt);
+      exterior->pointAt(!is_counter_clockwise ? i : exterior->numPoints() - i - 1, pt, vt);
       float x0 = ptPrev.x() - originX, y0 = ptPrev.y() - originY;
       float x1 = pt.x() - originX, y1 = pt.y() - originY;
       // make a quad
