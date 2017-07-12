@@ -60,7 +60,7 @@ PolygonGeometry::~PolygonGeometry()
   qDeleteAll(mPolygons);
 }
 
-void PolygonGeometry::setPolygons(const QList<QgsPolygonV2*> &polygons, const QgsPointXY& origin)
+void PolygonGeometry::setPolygons(const QList<QgsPolygonV2*> &polygons, const QgsPointXY& origin, float height, float extrusionHeight)
 {
   qDeleteAll(mPolygons);
   mPolygons = polygons;
@@ -71,10 +71,10 @@ void PolygonGeometry::setPolygons(const QList<QgsPolygonV2*> &polygons, const Qg
   {
     qDebug() << "tessellating " << ++i;
     if (i!=16)  // TODO: infinite loop on that feature
-      tesselator.addPolygon(*polygon, 0, 20);
+      tesselator.addPolygon(*polygon, height, extrusionHeight);
   }
 
-  QByteArray data((const char*)tesselator.data.constData(), tesselator.data.count());
+  QByteArray data((const char*)tesselator.data.constData(), tesselator.data.count() * sizeof(float));
   int nVerts = data.count() / tesselator.stride;
 
   m_vertexBuffer->setData(data);

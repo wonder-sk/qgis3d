@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
   pr.ambientColor = Qt::gray;
   pr.diffuseColor = Qt::lightGray;
   pr.height = 0;
-  pr.extrusionHeight = 20;
+  pr.extrusionHeight = 10;
   map.polygonRenderers << pr;
 
   SidePanel* sidePanel = new SidePanel;

@@ -54,7 +54,7 @@ PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, 
   }
 
   geometry = new PolygonGeometry;
-  geometry->setPolygons(polygons, origin);
+  geometry->setPolygons(polygons, origin, settings.height, settings.extrusionHeight);
 
   Qt3DRender::QGeometryRenderer* renderer = new Qt3DRender::QGeometryRenderer;
   renderer->setGeometry(geometry);

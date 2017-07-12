@@ -17,7 +17,7 @@ public:
   ~PolygonGeometry();
 
   // takes ownership of passed polygon geometries
-  void setPolygons(const QList<QgsPolygonV2*>& polygons, const QgsPointXY& origin);
+  void setPolygons(const QList<QgsPolygonV2*>& polygons, const QgsPointXY& origin, float height, float extrusionHeight);
 
 private:
   QList<QgsPolygonV2*> mPolygons;
