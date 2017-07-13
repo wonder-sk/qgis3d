@@ -20,6 +20,7 @@
 #include "qgspoint.h"
 
 
+
 PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCore::QNode* parent)
   : Qt3DCore::QEntity(parent)
 {
@@ -110,13 +111,34 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
   technique->graphicsApiFilter()->setMinorVersion(2);
 
   QColor clr = settings.diffuseColor;
-  Qt3DRender::QParameter* param = new Qt3DRender::QParameter;
-  param->setName("kdx");
-  param->setValue(QVector3D(clr.red()/255.f,clr.green()/255.f,clr.blue()/255.f));
+  Qt3DRender::QParameter* paramColor = new Qt3DRender::QParameter;
+  paramColor->setName("kdx");
+  paramColor->setValue(QVector3D(clr.red()/255.f,clr.green()/255.f,clr.blue()/255.f));
+
+  QMatrix4x4 transformMatrix = settings.transform;
+  QMatrix3x3 normalMatrix = transformMatrix.normalMatrix();  // transponed inverse of 3x3 sub-matrix
+
+  // QMatrix3x3 is not supported for passing to shaders, so we pass QMatrix4x4
+  float *n = normalMatrix.data();
+  QMatrix4x4 normalMatrix4(
+       n[0], n[3], n[6], 0,
+       n[1], n[4], n[7], 0,
+       n[2], n[5], n[8], 0,
+       0, 0, 0, 0);
+
+  Qt3DRender::QParameter* paramInst = new Qt3DRender::QParameter;
+  paramInst->setName("inst");
+  paramInst->setValue(transformMatrix);
+
+  Qt3DRender::QParameter* paramInstNormal = new Qt3DRender::QParameter;
+  paramInstNormal->setName("instNormal");
+  paramInstNormal->setValue(normalMatrix4);
 
   Qt3DRender::QEffect* effect = new Qt3DRender::QEffect;
   effect->addTechnique(technique);
-  effect->addParameter(param);
+  effect->addParameter(paramColor);
+  effect->addParameter(paramInst);
+  effect->addParameter(paramInstNormal);
 
   Qt3DRender::QMaterial* material = new Qt3DRender::QMaterial;
   material->setEffect(effect);

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <QColor>
+#include <QMatrix4x4>
 
 #include "qgscoordinatetransform.h"
 
@@ -27,6 +28,7 @@ struct PointRenderer
   QgsVectorLayer* layer;  //!< layer used to extract points from
   float height;
   QColor diffuseColor;
+  QMatrix4x4 transform;  //!< transform of individual instanced models
 };
 
 //! Definition of the world

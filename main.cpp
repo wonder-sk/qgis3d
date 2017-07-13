@@ -120,6 +120,9 @@ int main(int argc, char *argv[])
   ptr.layer = vlPoints;
   ptr.diffuseColor = QColor(Qt::cyan).lighter();
   ptr.height = 0;
+  Qt3DCore::QTransform tr;
+  tr.setScale3D(QVector3D(4,1,4));
+  ptr.transform = tr.matrix();
   map.pointRenderers << ptr;
 
   // skybox

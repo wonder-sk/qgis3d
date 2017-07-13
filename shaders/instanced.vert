@@ -13,14 +13,16 @@ uniform mat3 modelViewNormal;
 uniform mat4 mvp;
 
 uniform vec3 kdx;
+uniform mat4 inst;  // transform of individual object instance
+uniform mat4 instNormal;  // should be mat3 but Qt3D only supports mat4...
 
 void main()
 {
-    vec3 offsetPos = vertexPosition + pos;
+    vec4 offsetPos = inst * vec4(vertexPosition, 1.0) + vec4(pos, 1.0);
 
-    worldNormal = normalize(modelViewNormal * vertexNormal);
-    worldPosition = vec3(modelView * vec4(offsetPos, 1.0));
+    worldNormal = normalize(modelViewNormal * mat3(instNormal) * vertexNormal);
+    worldPosition = vec3(modelView * offsetPos);
     kd = kdx; //vec3(1.0, 1.0, 1.0);
 
-    gl_Position = mvp * vec4(offsetPos, 1.0);
+    gl_Position = mvp * offsetPos;
 }
