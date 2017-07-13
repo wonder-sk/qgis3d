@@ -12,6 +12,8 @@
 
 #include "polygonentity.h"
 
+#include <Qt3DExtras/QSkyboxEntity>
+
 Window3D::Window3D(SidePanel* p, Map3D& map)
   : panel(p)
   , map(map)
@@ -69,6 +71,20 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
   lightEntity->addComponent(light);
   lightEntity->addComponent(lightTransform);
   lightEntity->setParent(scene);
+
+
+  if (map.skybox)
+  {
+    Qt3DExtras::QSkyboxEntity* skybox = new Qt3DExtras::QSkyboxEntity;
+    skybox->setBaseName(map.skyboxFileBase);
+    skybox->setExtension(map.skyboxFileExtension);
+    skybox->setParent(scene);
+
+    // docs say frustum culling must be disabled for skybox.
+    // it _somehow_ works even when frustum culling is enabled with some camera positions,
+    // but then when zoomed in more it would disappear - so let's keep frustum culling disabled
+    defaultFrameGraph()->setFrustumCullingEnabled(false);
+  }
 
   setRootEntity(scene);
 

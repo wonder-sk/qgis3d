@@ -111,6 +111,12 @@ int main(int argc, char *argv[])
   pr.extrusionHeight = 10;
   map.polygonRenderers << pr;
 
+  // skybox
+
+  map.skybox = true;
+  map.skyboxFileBase = "file:///home/martin/tmp/qgis3d/skybox/miramar";
+  map.skyboxFileExtension = ".jpg";
+
   SidePanel* sidePanel = new SidePanel;
   sidePanel->setMinimumWidth(150);
 

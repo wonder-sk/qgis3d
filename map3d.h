@@ -38,6 +38,10 @@ struct Map3D
   std::unique_ptr<TerrainGenerator> terrainGenerator;
 
   QList<PolygonRenderer> polygonRenderers;   //!< stuff to render as polygons
+
+  bool skybox;  //!< whether to render skybox
+  QString skyboxFileBase;
+  QString skyboxFileExtension;
 };
 
 
