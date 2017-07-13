@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     poly2tri/sweep/sweep.cc \
     tessellator.cpp \
     polygongeometry.cpp \
-    polygonentity.cpp
+    polygonentity.cpp \
+    pointentity.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -98,4 +99,5 @@ HEADERS += \
     poly2tri/sweep/sweep.h \
     tessellator.h \
     polygongeometry.h \
-    polygonentity.h
+    polygonentity.h \
+    pointentity.h

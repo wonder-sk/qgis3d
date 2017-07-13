@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>ap.tif</file>
-        <file>dtm.tif</file>
+        <file>shaders/instanced.frag</file>
+        <file>shaders/instanced.vert</file>
     </qresource>
 </RCC>

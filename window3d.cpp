@@ -11,6 +11,7 @@
 #include "sidepanel.h"
 
 #include "polygonentity.h"
+#include "pointentity.h"
 
 #include <Qt3DExtras/QSkyboxEntity>
 
@@ -72,6 +73,11 @@ Window3D::Window3D(SidePanel* p, Map3D& map)
   lightEntity->addComponent(lightTransform);
   lightEntity->setParent(scene);
 
+  Q_FOREACH (const PointRenderer& pr, map.pointRenderers)
+  {
+    PointEntity* pe = new PointEntity(map, pr);
+    pe->setParent(scene);
+  }
 
   if (map.skybox)
   {

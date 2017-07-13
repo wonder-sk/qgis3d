@@ -22,6 +22,13 @@ struct PolygonRenderer
   QColor diffuseColor;
 };
 
+struct PointRenderer
+{
+  QgsVectorLayer* layer;  //!< layer used to extract points from
+  float height;
+  QColor diffuseColor;
+};
+
 //! Definition of the world
 struct Map3D
 {
@@ -38,6 +45,7 @@ struct Map3D
   std::unique_ptr<TerrainGenerator> terrainGenerator;
 
   QList<PolygonRenderer> polygonRenderers;   //!< stuff to render as polygons
+  QList<PointRenderer> pointRenderers;   //!< stuff to render as points
 
   bool skybox;  //!< whether to render skybox
   QString skyboxFileBase;

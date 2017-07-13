@@ -46,6 +46,9 @@ int main(int argc, char *argv[])
   QgsVectorLayer* vlPolygons = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/buildings.shp", "buildings", "ogr");
   Q_ASSERT( vlPolygons->isValid() );
 
+  QgsVectorLayer* vlPoints = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/trees.shp", "trees", "ogr");
+  Q_ASSERT( vlPoints->isValid() );
+
   Map3D map;
   map.layers << rlSat;
   map.crs = rlSat->crs();
@@ -110,6 +113,14 @@ int main(int argc, char *argv[])
   pr.height = 0;
   pr.extrusionHeight = 10;
   map.polygonRenderers << pr;
+
+  // points
+
+  PointRenderer ptr;
+  ptr.layer = vlPoints;
+  ptr.diffuseColor = QColor(Qt::cyan).lighter();
+  ptr.height = 0;
+  map.pointRenderers << ptr;
 
   // skybox
 
