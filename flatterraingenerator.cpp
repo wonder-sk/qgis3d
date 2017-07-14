@@ -2,23 +2,24 @@
 
 #include <Qt3DRender/QGeometryRenderer>
 #include <Qt3DExtras/QPlaneGeometry>
-//#include <Qt3DExtras/QPlaneMesh>
 
 #include "map3d.h"
 #include "quadtree.h"
+#include "terrain.h"
 
 //! just a simple quad with a map texture
 class FlatTerrainTile : public TerrainTileEntity
 {
 public:
-  FlatTerrainTile(Qt3DExtras::QPlaneGeometry* tileGeometry, QuadTreeNode* node, const Map3D& map, Qt3DCore::QNode *parent = nullptr);
+  FlatTerrainTile(Qt3DExtras::QPlaneGeometry* tileGeometry, Terrain* terrain, QuadTreeNode* node, Qt3DCore::QNode *parent = nullptr);
 
 private:
 };
 
-FlatTerrainTile::FlatTerrainTile(Qt3DExtras::QPlaneGeometry *tileGeometry, QuadTreeNode *node, const Map3D& map, Qt3DCore::QNode *parent)
-  : TerrainTileEntity(node, map, parent)
+FlatTerrainTile::FlatTerrainTile(Qt3DExtras::QPlaneGeometry *tileGeometry, Terrain* terrain, QuadTreeNode *node, Qt3DCore::QNode *parent)
+  : TerrainTileEntity(terrain, node, parent)
 {
+  const Map3D& map = terrain->map3D();
   Qt3DRender::QGeometryRenderer* mesh = new Qt3DRender::QGeometryRenderer;
   mesh->setGeometry(tileGeometry);  // does not take ownership - geometry is already owned by FlatTerrain entity
   addComponent(mesh);  // takes ownership if the component has no parent
@@ -59,9 +60,9 @@ QgsRectangle FlatTerrainGenerator::extent() const
   return terrainTilingScheme.tileToExtent(0, 0, 0);
 }
 
-TerrainTileEntity *FlatTerrainGenerator::createTile(QuadTreeNode *n, const Map3D &map, Qt3DCore::QNode *parent) const
+TerrainTileEntity *FlatTerrainGenerator::createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const
 {
-  return new FlatTerrainTile(tileGeometry, n, map, parent);
+  return new FlatTerrainTile(tileGeometry, terrain, n, parent);
 }
 
 void FlatTerrainGenerator::setExtent(const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs)

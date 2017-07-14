@@ -2,6 +2,7 @@
 
 #include "map3d.h"
 #include "maptextureimage.h"
+#include "maptexturegenerator.h"
 #include "quadtree.h"
 #include "terraingenerator.h"
 #include "terrainboundsentity.h"
@@ -61,6 +62,8 @@ Terrain::Terrain(const Map3D& map)
   QgsRectangle extent = map.terrainGenerator->extent();
 
   root = new QuadTreeNode(extent, 0, 0, nullptr);
+
+  mMapTextureGenerator = new MapTextureGenerator(map);
 
   // entity for drawing bounds of tiles
   ensureTileExists(root);
@@ -140,7 +143,7 @@ void Terrain::ensureTileExists(QuadTreeNode *n)
 {
   if (!n->tile)
   {
-    n->tile = map.terrainGenerator->createTile(n, map, this);
+    n->tile = map.terrainGenerator->createTile(this, n, this);
     n->tile->setEnabled(false); // not shown by default
     // force update of terrain
     connect(n->tile, &TerrainTileEntity::textureReady, this, &Terrain::cameraViewMatrixChanged);

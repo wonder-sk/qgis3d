@@ -4,6 +4,7 @@
 #include "quadtree.h"
 #include "demterraintilegeometry.h"
 #include "maptexturegenerator.h"
+#include "terrain.h"
 
 #include <Qt3DRender/QGeometryRenderer>
 
@@ -34,9 +35,10 @@ static void _heightMapMinMax(const QByteArray& heightMap, float& zMin, float& zM
   }
 }
 
-DemTerrainTile::DemTerrainTile(QuadTreeNode *node, const Map3D& map, Qt3DCore::QNode *parent)
-  : TerrainTileEntity(node, map, parent)
+DemTerrainTile::DemTerrainTile(Terrain* terrain, QuadTreeNode *node, Qt3DCore::QNode *parent)
+  : TerrainTileEntity(terrain, node, parent)
 {
+  const Map3D& map = terrain->map3D();
   DemTerrainGenerator* generator = static_cast<DemTerrainGenerator*>(map.terrainGenerator.get());
 
   // generate a temporary heightmap
@@ -77,8 +79,9 @@ void DemTerrainTile::onHeightMapReady(int jobId, const QByteArray &heightMap)
     // also update our bbox!
     float zMin, zMax;
     _heightMapMinMax(heightMap, zMin, zMax);
-    bbox.yMin = zMin*m_map.zExaggeration;
-    bbox.yMax = zMax*m_map.zExaggeration;
+    const Map3D& map = mTerrain->map3D();
+    bbox.yMin = zMin*map.zExaggeration;
+    bbox.yMax = zMax*map.zExaggeration;
   }
 }
 
@@ -104,9 +107,9 @@ QgsRectangle DemTerrainGenerator::extent() const
   return terrainTilingScheme.tileToExtent(0, 0, 0);
 }
 
-TerrainTileEntity *DemTerrainGenerator::createTile(QuadTreeNode *n, const Map3D &map, Qt3DCore::QNode *parent) const
+TerrainTileEntity *DemTerrainGenerator::createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const
 {
-  return new DemTerrainTile(n, map, parent);
+  return new DemTerrainTile(terrain, n, parent);
 }
 
 

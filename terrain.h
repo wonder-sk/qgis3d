@@ -9,6 +9,7 @@ namespace Qt3DRender
 }
 
 class Map3D;
+class MapTextureGenerator;
 struct QuadTreeNode;
 class TerrainBoundsEntity;
 
@@ -31,6 +32,8 @@ public:
 
   void setMaxLevel( int level ) { maxLevel = level; }
 
+  const Map3D& map3D() const { return map; }
+  MapTextureGenerator* mapTextureGenerator() { return mMapTextureGenerator; }
 
 public slots:
   void cameraViewMatrixChanged();
@@ -50,6 +53,8 @@ private:
 
   TerrainBoundsEntity* bboxesEntity;
   int screenSizePx;
+
+  MapTextureGenerator* mMapTextureGenerator;
 };
 
 #endif // TERRAIN_H

@@ -43,7 +43,6 @@ struct Map3D
 
   QList<QgsMapLayer*> layers;   //!< layers to be rendered
   int tileTextureSize;   //!< size of map textures of tiles in pixels (width/height)
-  MapTextureGenerator* mapGen;
 
   QgsCoordinateTransform ctTerrainToMap;
 

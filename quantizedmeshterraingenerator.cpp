@@ -3,6 +3,7 @@
 #include "map3d.h"
 #include "quadtree.h"
 #include "quantizedmeshgeometry.h"
+#include "terrain.h"
 
 #include "qgsmapsettings.h"
 
@@ -11,13 +12,14 @@
 class QuantizedMeshTerrainTile : public TerrainTileEntity
 {
 public:
-  QuantizedMeshTerrainTile(QuadTreeNode* node, const Map3D& map, Qt3DCore::QNode *parent = nullptr);
+  QuantizedMeshTerrainTile(Terrain* terrain, QuadTreeNode* node, Qt3DCore::QNode *parent = nullptr);
 
 };
 
-QuantizedMeshTerrainTile::QuantizedMeshTerrainTile(QuadTreeNode *node, const Map3D& map, Qt3DCore::QNode *parent)
-  : TerrainTileEntity(node, map, parent)
+QuantizedMeshTerrainTile::QuantizedMeshTerrainTile(Terrain* terrain, QuadTreeNode *node, Qt3DCore::QNode *parent)
+  : TerrainTileEntity(terrain, node, parent)
 {
+  const Map3D& map = terrain->map3D();
   QuantizedMeshTerrainGenerator* generator = static_cast<QuantizedMeshTerrainGenerator*>(map.terrainGenerator.get());
 
   int tx, ty, tz;
@@ -86,7 +88,7 @@ QgsRectangle QuantizedMeshTerrainGenerator::extent() const
   return terrainTilingScheme.tileToExtent(terrainBaseX, terrainBaseY, terrainBaseZ);
 }
 
-TerrainTileEntity *QuantizedMeshTerrainGenerator::createTile(QuadTreeNode *n, const Map3D &map, Qt3DCore::QNode *parent) const
+TerrainTileEntity *QuantizedMeshTerrainGenerator::createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const
 {
-  return new QuantizedMeshTerrainTile(n, map, parent);
+  return new QuantizedMeshTerrainTile(terrain, n, parent);
 }

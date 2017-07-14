@@ -103,8 +103,6 @@ int main(int argc, char *argv[])
   map.originX = centerMapCrs.x();
   map.originY = centerMapCrs.y();
 
-  map.mapGen = new MapTextureGenerator(map);
-
   // polygons
 
   PolygonRenderer pr;

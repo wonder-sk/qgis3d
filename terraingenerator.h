@@ -17,7 +17,7 @@ struct QuadTreeNode;
 class FlatTerrainTileMesh;
 class Map3D;
 class QgsRectangle;
-
+class Terrain;
 
 /**
  * Base class for all kinds of terrain tiles.
@@ -30,9 +30,9 @@ class TerrainTileEntity : public Qt3DCore::QEntity
 {
   Q_OBJECT
 public:
-  TerrainTileEntity(QuadTreeNode* node, const Map3D& map, Qt3DCore::QNode *parent = nullptr);
+  TerrainTileEntity(Terrain* terrain, QuadTreeNode* node, Qt3DCore::QNode *parent = nullptr);
 
-  const Map3D& m_map;
+  Terrain* mTerrain;
   AABB bbox;  //!< bounding box
   float epsilon;  //!< (geometric) error of this tile (in world coordinates)
   bool m_textureReady;  //!< whether tile's texture is available -> ready to be displayed
@@ -79,7 +79,7 @@ public:
   virtual QgsRectangle extent() const = 0;
 
   //! Factory method to create tile entity for given [x,y,z] tile coordinates
-  virtual TerrainTileEntity* createTile(QuadTreeNode *n, const Map3D& map, Qt3DCore::QNode *parent) const = 0;
+  virtual TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const = 0;
 
   QgsCoordinateReferenceSystem crs() const { return terrainTilingScheme.crs; }
 

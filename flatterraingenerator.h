@@ -15,7 +15,7 @@ public:
 
   Type type() const override;
   QgsRectangle extent() const override;
-  TerrainTileEntity* createTile(QuadTreeNode *n, const Map3D& map, Qt3DCore::QNode *parent) const override;
+  TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const override;
 
   void setExtent(const QgsRectangle& extent, const QgsCoordinateReferenceSystem& crs);
 

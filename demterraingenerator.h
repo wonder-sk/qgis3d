@@ -20,7 +20,7 @@ public:
 
   Type type() const override;
   QgsRectangle extent() const override;
-  virtual TerrainTileEntity* createTile(QuadTreeNode *n, const Map3D& map, Qt3DCore::QNode *parent) const override;
+  virtual TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const override;
 
   std::unique_ptr<DemHeightMapGenerator> tGen;
   int demTerrainSize;
@@ -35,7 +35,7 @@ class DemTerrainTile : public TerrainTileEntity
 {
   Q_OBJECT
 public:
-  DemTerrainTile(QuadTreeNode* node, const Map3D& map, Qt3DCore::QNode *parent = nullptr);
+  DemTerrainTile(Terrain* terrain, QuadTreeNode* node, Qt3DCore::QNode *parent = nullptr);
 
 private slots:
   void onHeightMapReady(int jobId, const QByteArray& heightMap);
