@@ -10,6 +10,14 @@
 #include <Qt3DRender/QTechnique>
 
 #include <Qt3DExtras/QCylinderGeometry>
+#include <Qt3DExtras/QConeGeometry>
+#include <Qt3DExtras/QCuboidGeometry>
+#include <Qt3DExtras/QPlaneGeometry>
+#include <Qt3DExtras/QSphereGeometry>
+#include <Qt3DExtras/QTorusGeometry>
+#if QT_VERSION >= 0x050900
+#include <Qt3DExtras/QExtrudedTextGeometry>
+#endif
 
 #include <QUrl>
 #include <QVector3D>
@@ -39,7 +47,7 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
     {
       QgsPoint* pt = static_cast<QgsPoint*>(g);
       // TODO: use Z coordinates if the point is 3D
-      positions.append(QVector3D(pt->x() - map.originX, settings.height, -(pt->y() - map.originY)));
+      positions.append(QVector3D(pt->x() - map.originX, settings.height/2, -(pt->y() - map.originY))*2);  // TODO: why do we need to multiply point positions???
       qDebug() << positions.last();
     }
     else
@@ -72,11 +80,77 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
   instanceDataAttribute->setDivisor(1);
   instanceDataAttribute->setBuffer(instanceBuffer);
 
-  Qt3DExtras::QCylinderGeometry* geometry = new Qt3DExtras::QCylinderGeometry;
-  geometry->setRings(2);  // how many vertices vertically
-  geometry->setSlices(8); // how many vertices on circumference
-  geometry->setRadius(2);
-  geometry->setLength(20);
+  Qt3DRender::QGeometry* geometry = nullptr;
+  QString shape = settings.shapeProperties["shape"].toString();
+  if (shape == "sphere")
+  {
+    float radius = settings.shapeProperties["radius"].toFloat();
+    Qt3DExtras::QSphereGeometry* g = new Qt3DExtras::QSphereGeometry;
+    g->setRadius(radius ? radius : 10);
+    geometry = g;
+  }
+  else if (shape == "cone")
+  {
+    float length = settings.shapeProperties["length"].toFloat();
+    float bottomRadius = settings.shapeProperties["bottomRadius"].toFloat();
+    float topRadius = settings.shapeProperties["topRadius"].toFloat();
+    Qt3DExtras::QConeGeometry* g = new Qt3DExtras::QConeGeometry;
+    g->setLength(length ? length : 10);
+    g->setBottomRadius(bottomRadius);
+    g->setTopRadius(topRadius);
+    //g->setHasBottomEndcap(hasBottomEndcap);
+    //g->setHasTopEndcap(hasTopEndcap);
+    geometry = g;
+  }
+  else if (shape == "cube")
+  {
+    float size = settings.shapeProperties["size"].toFloat();
+    Qt3DExtras::QCuboidGeometry* g = new Qt3DExtras::QCuboidGeometry;
+    g->setXExtent(size ? size : 10);
+    g->setYExtent(size ? size : 10);
+    g->setZExtent(size ? size : 10);
+    geometry = g;
+  }
+  else if (shape == "torus")
+  {
+    float radius = settings.shapeProperties["radius"].toFloat();
+    float minorRadius = settings.shapeProperties["minorRadius"].toFloat();
+    Qt3DExtras::QTorusGeometry* g = new Qt3DExtras::QTorusGeometry;
+    g->setRadius(radius ? radius : 10);
+    g->setMinorRadius(minorRadius ? minorRadius : 5);
+    geometry = g;
+  }
+  else if (shape == "plane")
+  {
+    float size = settings.shapeProperties["size"].toFloat();
+    Qt3DExtras::QPlaneGeometry* g = new Qt3DExtras::QPlaneGeometry;
+    g->setWidth(size ? size : 10);
+    g->setHeight(size ? size : 10);
+    geometry = g;
+  }
+#if QT_VERSION >= 0x050900
+  else if (shape == "extrudedText")
+  {
+    float depth = settings.shapeProperties["depth"].toFloat();
+    QString text = settings.shapeProperties["text"].toString();
+    Qt3DExtras::QExtrudedTextGeometry* g = new Qt3DExtras::QExtrudedTextGeometry;
+    g->setDepth(depth ? depth : 1);
+    g->setText(text);
+    geometry = g;
+  }
+#endif
+  else  // shape == "cylinder" or anything else
+  {
+    float radius = settings.shapeProperties["radius"].toFloat();
+    float length = settings.shapeProperties["length"].toFloat();
+    Qt3DExtras::QCylinderGeometry* g = new Qt3DExtras::QCylinderGeometry;
+    //g->setRings(2);  // how many vertices vertically
+    //g->setSlices(8); // how many vertices on circumference
+    g->setRadius(radius ? radius : 10);
+    g->setLength(length ? length: 10);
+    geometry = g;
+  }
+
   geometry->addAttribute(instanceDataAttribute);
 
   Qt3DRender::QGeometryRenderer* renderer = new Qt3DRender::QGeometryRenderer;

@@ -28,6 +28,7 @@ struct PointRenderer
   QgsVectorLayer* layer;  //!< layer used to extract points from
   float height;
   QColor diffuseColor;
+  QVariantMap shapeProperties;  //!< what kind of shape to use and what
   QMatrix4x4 transform;  //!< transform of individual instanced models
 };
 
