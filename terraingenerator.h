@@ -13,7 +13,7 @@
 #include "aabb.h"
 #include "tilingscheme.h"
 
-struct QuadTreeNode;
+class QuadTreeNode;
 class FlatTerrainTileMesh;
 class Map3D;
 class QgsRectangle;

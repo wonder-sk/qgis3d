@@ -57,7 +57,7 @@ class Map3D;
 class QuantizedMeshGeometry : public Qt3DRender::QGeometry
 {
 public:
-  QuantizedMeshGeometry(QuantizedMeshTile* t, const Map3D& map, const QgsMapToPixel& mapToPixel, QNode *parent = nullptr);
+  QuantizedMeshGeometry(QuantizedMeshTile* t, const Map3D& map, const QgsMapToPixel& mapToPixel, const QgsCoordinateTransform& terrainToMap, QNode *parent = nullptr);
 
   static QuantizedMeshTile* readTile(int tx, int ty, int tz, const QgsRectangle& extent);
   static void downloadTileIfMissing(int tx, int ty, int tz);

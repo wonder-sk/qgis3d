@@ -3,8 +3,8 @@
 
 #include <Qt3DCore/QEntity>
 
-struct Map3D;
-struct PointRenderer;
+class Map3D;
+class PointRenderer;
 
 class PointEntity : public Qt3DCore::QEntity
 {

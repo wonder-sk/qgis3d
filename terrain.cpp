@@ -63,6 +63,8 @@ Terrain::Terrain(const Map3D& map)
 
   root = new QuadTreeNode(extent, 0, 0, nullptr);
 
+  mTerrainToMapTransform = new QgsCoordinateTransform(map.terrainGenerator->crs(), map.crs);
+
   mMapTextureGenerator = new MapTextureGenerator(map);
 
   // entity for drawing bounds of tiles
@@ -73,6 +75,8 @@ Terrain::Terrain(const Map3D& map)
 Terrain::~Terrain()
 {
   delete root;
+  delete mMapTextureGenerator;
+  delete mTerrainToMapTransform;
 }
 
 void Terrain::setCamera(Qt3DRender::QCamera *camera)

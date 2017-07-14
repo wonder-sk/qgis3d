@@ -10,9 +10,10 @@ namespace Qt3DRender
 
 class Map3D;
 class MapTextureGenerator;
-struct QuadTreeNode;
+class QuadTreeNode;
 class TerrainBoundsEntity;
 
+class QgsCoordinateTransform;
 class QgsRectangle;
 
 /**
@@ -34,6 +35,7 @@ public:
 
   const Map3D& map3D() const { return map; }
   MapTextureGenerator* mapTextureGenerator() { return mMapTextureGenerator; }
+  const QgsCoordinateTransform& terrainToMapTransform() const { return *mTerrainToMapTransform; }
 
 public slots:
   void cameraViewMatrixChanged();
@@ -55,6 +57,7 @@ private:
   int screenSizePx;
 
   MapTextureGenerator* mMapTextureGenerator;
+  QgsCoordinateTransform* mTerrainToMapTransform;
 };
 
 #endif // TERRAIN_H

@@ -14,8 +14,9 @@ class QgsVectorLayer;
 class MapTextureGenerator;
 class TerrainGenerator;
 
-struct PolygonRenderer
+class PolygonRenderer
 {
+public:
   QgsVectorLayer* layer;  //!< layer used to extract polygons from
   float height;           //!< base height of polygons
   float extrusionHeight;  //!< how much to extrude (0 means no walls)
@@ -23,8 +24,9 @@ struct PolygonRenderer
   QColor diffuseColor;
 };
 
-struct PointRenderer
+class PointRenderer
 {
+public:
   QgsVectorLayer* layer;  //!< layer used to extract points from
   float height;
   QColor diffuseColor;
@@ -33,8 +35,11 @@ struct PointRenderer
 };
 
 //! Definition of the world
-struct Map3D
+class Map3D
 {
+public:
+  Map3D();
+
   double originX, originY, originZ;   //!< coordinates in map CRS at which our 3D world has origin (0,0,0)
   QgsCoordinateReferenceSystem crs;   //!< destination coordinate system of the world  (TODO: not needed? can be
   double zExaggeration;
@@ -43,8 +48,6 @@ struct Map3D
 
   QList<QgsMapLayer*> layers;   //!< layers to be rendered
   int tileTextureSize;   //!< size of map textures of tiles in pixels (width/height)
-
-  QgsCoordinateTransform ctTerrainToMap;
 
   std::unique_ptr<TerrainGenerator> terrainGenerator;
 

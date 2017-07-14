@@ -8,11 +8,9 @@ class QgsRasterLayer;
 
 #include <QObject>
 
-#include "tilingscheme.h"
-
 #include "qgsrectangle.h"
 
-struct Map3D;
+class Map3D;
 
 /**
  * Responsible for:

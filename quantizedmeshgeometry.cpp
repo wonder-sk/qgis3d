@@ -253,7 +253,7 @@ void QuantizedMeshGeometry::downloadTileIfMissing(int tx, int ty, int tz)
 #include "qgsmaptopixel.h"
 #include "map3d.h"
 
-QuantizedMeshGeometry::QuantizedMeshGeometry(QuantizedMeshTile* t, const Map3D& map, const QgsMapToPixel& mapToPixel, QNode *parent)
+QuantizedMeshGeometry::QuantizedMeshGeometry(QuantizedMeshTile* t, const Map3D& map, const QgsMapToPixel& mapToPixel, const QgsCoordinateTransform& terrainToMap, QNode *parent)
   : QGeometry(parent)
 {
   int vertexCount = t->uvh.count() / 3;
@@ -281,7 +281,7 @@ QuantizedMeshGeometry::QuantizedMeshGeometry(QuantizedMeshTile* t, const Map3D& 
     float yWgs = yMinWgs + heightWgs * vNorm;
     float hWgs = t->header.MinimumHeight + hNorm * (t->header.MaximumHeight - t->header.MinimumHeight);
 
-    QgsPointXY ptProjected = map.ctTerrainToMap.transform(xWgs, yWgs);
+    QgsPointXY ptProjected = terrainToMap.transform(xWgs, yWgs);
     QgsPointXY ptFinal(ptProjected.x() - ptMinProjected.x(), ptProjected.y() - ptMinProjected.y());
 
     // our plane is (x,-z) with y growing towards camera

@@ -3,13 +3,13 @@
 
 #include <Qt3DCore/QEntity>
 
+class Map3D;
 class PolygonGeometry;
+class PolygonRenderer;
 
 class QgsPointXY;
 class QgsVectorLayer;
 
-struct Map3D;
-struct PolygonRenderer;
 
 //! Entity that handles rendering of polygons
 class PolygonEntity : public Qt3DCore::QEntity

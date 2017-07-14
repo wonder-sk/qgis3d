@@ -53,10 +53,6 @@ int main(int argc, char *argv[])
   map.layers << rlSat;
   map.crs = rlSat->crs();
   map.zExaggeration = 3;
-  map.originZ = 0;
-  map.backgroundColor = Qt::black;
-
-  map.tileTextureSize = 512;
 
   TerrainGenerator::Type tt;
   tt = TerrainGenerator::Flat;
@@ -88,7 +84,6 @@ int main(int argc, char *argv[])
     static_cast<FlatTerrainGenerator*>(map.terrainGenerator.get())->setExtent(_fullExtent(map.layers, map.crs), map.crs);
   }
 
-  map.ctTerrainToMap = QgsCoordinateTransform(map.terrainGenerator->crs(), map.crs);
   QgsRectangle fullExtentInTerrainCrs = _fullExtent(map.layers, map.terrainGenerator->crs());
 
   if (map.terrainGenerator->type() == TerrainGenerator::QuantizedMesh)

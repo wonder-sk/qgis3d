@@ -32,13 +32,13 @@ QuantizedMeshTerrainTile::QuantizedMeshTerrainTile(Terrain* terrain, QuadTreeNod
   mapSettings.setLayers(map.layers);
   mapSettings.setOutputSize(QSize(map.tileTextureSize,map.tileTextureSize));
   mapSettings.setDestinationCrs(map.crs);
-  mapSettings.setExtent(map.ctTerrainToMap.transformBoundingBox(tileRect));
+  mapSettings.setExtent(terrain->terrainToMapTransform().transformBoundingBox(tileRect));
 
   QuantizedMeshGeometry::downloadTileIfMissing(tx, ty, tz);
   QuantizedMeshTile* qmt = QuantizedMeshGeometry::readTile(tx, ty, tz, tileRect);
   Q_ASSERT(qmt);
   Qt3DRender::QGeometryRenderer* mesh = new Qt3DRender::QGeometryRenderer;
-  mesh->setGeometry(new QuantizedMeshGeometry(qmt, map, mapSettings.mapToPixel(), mesh));
+  mesh->setGeometry(new QuantizedMeshGeometry(qmt, map, mapSettings.mapToPixel(), terrain->terrainToMapTransform(), mesh));
   addComponent(mesh);
 
   transform->setScale3D(QVector3D(1.f, map.zExaggeration, 1.f));

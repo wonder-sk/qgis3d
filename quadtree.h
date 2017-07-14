@@ -7,8 +7,9 @@ class TerrainTileEntity;
 class QgsCoordinateTransform;
 
 //! Quad tree data structure to keep track of terrain tiles
-struct QuadTreeNode
+class QuadTreeNode
 {
+public:
   explicit QuadTreeNode(const QgsRectangle& e, int tileX, int tileY, QuadTreeNode* par);
 
   QuadTreeNode(const QuadTreeNode& other) = delete;
