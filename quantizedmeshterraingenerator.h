@@ -16,6 +16,8 @@ public:
   TerrainGenerator::Type type() const override;
   QgsRectangle extent() const override;
   TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const override;
+  virtual void writeXml(QDomElement& elem) const override;
+  virtual void readXml(const QDomElement& elem) override;
 
   int terrainBaseX, terrainBaseY, terrainBaseZ;   //!< coordinates of the base tile
 };

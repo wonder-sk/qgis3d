@@ -2,6 +2,8 @@
 
 #include <Qt3DRender/QTexture>
 
+#include "qgscoordinatetransform.h"
+
 #include "map3d.h"
 #include "maptexturegenerator.h"
 #include "maptextureimage.h"
@@ -63,3 +65,17 @@ void TerrainTileEntity::onTextureReady()
 }
 
 // -------------------
+
+QString TerrainGenerator::typeToString(TerrainGenerator::Type type)
+{
+  switch (type)
+  {
+    case TerrainGenerator::Flat:
+      return "flat";
+    case TerrainGenerator::Dem:
+      return "dem";
+    case TerrainGenerator::QuantizedMesh:
+      return "quantized-mesh";
+  }
+  return QString();
+}

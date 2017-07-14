@@ -44,6 +44,7 @@ INCLUDEPATH += \
   $${QGIS_SOURCE_PATH}/src/core/geometry \
   $${QGIS_SOURCE_PATH}/src/core/metadata \
   $${QGIS_SOURCE_PATH}/src/core/raster \
+  $${QGIS_SOURCE_PATH}/src/core/symbology-ng \
   $${QGIS_BUILD_PATH} \
   $${QGIS_BUILD_PATH}/src/core
 

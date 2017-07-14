@@ -52,6 +52,9 @@ protected:
   Qt3DCore::QTransform* transform;
 };
 
+class QDomElement;
+class QDomDocument;
+class QgsProject;
 
 /**
  * Base class for generators of terrain. All terrain generators are tile based
@@ -80,6 +83,17 @@ public:
 
   //! Factory method to create tile entity for given [x,y,z] tile coordinates
   virtual TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const = 0;
+
+  //! Write terrain generator's configuration to XML
+  virtual void writeXml(QDomElement& elem) const = 0;
+
+  //! Read terrain generator's configuration from XML
+  virtual void readXml(const QDomElement& elem) = 0;
+
+  //! After read of XML, resolve references to any layers that have been read as layer IDs
+  virtual void resolveReferences(const QgsProject& project) { Q_UNUSED(project); }
+
+  static QString typeToString(Type type);
 
   QgsCoordinateReferenceSystem crs() const { return terrainTilingScheme.crs; }
 

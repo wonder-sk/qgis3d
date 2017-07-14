@@ -29,7 +29,7 @@ QuantizedMeshTerrainTile::QuantizedMeshTerrainTile(Terrain* terrain, QuadTreeNod
 
   // we need map settings here for access to mapToPixel
   QgsMapSettings mapSettings;
-  mapSettings.setLayers(map.layers);
+  mapSettings.setLayers(map.layers());
   mapSettings.setOutputSize(QSize(map.tileTextureSize,map.tileTextureSize));
   mapSettings.setDestinationCrs(map.crs);
   mapSettings.setExtent(terrain->terrainToMapTransform().transformBoundingBox(tileRect));
@@ -91,4 +91,19 @@ QgsRectangle QuantizedMeshTerrainGenerator::extent() const
 TerrainTileEntity *QuantizedMeshTerrainGenerator::createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const
 {
   return new QuantizedMeshTerrainTile(terrain, n, parent);
+}
+
+void QuantizedMeshTerrainGenerator::writeXml(QDomElement &elem) const
+{
+  elem.setAttribute("base-x", terrainBaseX);
+  elem.setAttribute("base-y", terrainBaseY);
+  elem.setAttribute("base-z", terrainBaseZ);
+}
+
+void QuantizedMeshTerrainGenerator::readXml(const QDomElement &elem)
+{
+  terrainBaseX = elem.attribute("base-x").toInt();
+  terrainBaseY = elem.attribute("base-y").toInt();
+  terrainBaseZ = elem.attribute("base-z").toInt();
+  // TODO: update tiling scheme
 }

@@ -9,6 +9,7 @@ class DemHeightMapGenerator;
 
 class QgsRasterLayer;
 
+#include "qgsmaplayerref.h"
 
 /**
  * Implementation of terrain generator that uses a raster layer with DEM to build terrain.
@@ -16,15 +17,32 @@ class QgsRasterLayer;
 class DemTerrainGenerator : public TerrainGenerator
 {
 public:
-  DemTerrainGenerator(QgsRasterLayer* dem, int terrainSize);
+  DemTerrainGenerator();
+
+  void setLayer(QgsRasterLayer* layer);
+  QgsRasterLayer* layer() const;
+
+  void setResolution(int resolution) { mResolution = resolution; updateGenerator(); }
+  int resolution() const { return mResolution; }
+
+  DemHeightMapGenerator* heightMapGenerator() { return mHeightMapGenerator.get(); }
 
   Type type() const override;
   QgsRectangle extent() const override;
   virtual TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const override;
+  virtual void writeXml(QDomElement& elem) const override;
+  virtual void readXml(const QDomElement& elem) override;
+  virtual void resolveReferences(const QgsProject& project) override;
 
-  std::unique_ptr<DemHeightMapGenerator> tGen;
-  int demTerrainSize;
-  QgsRasterLayer* demLayer;
+private:
+  void updateGenerator();
+
+  std::unique_ptr<DemHeightMapGenerator> mHeightMapGenerator;
+
+  //! source layer for heights
+  QgsMapLayerRef mLayer;
+  //! how many vertices to place on one side of the tile
+  int mResolution;
 };
 
 

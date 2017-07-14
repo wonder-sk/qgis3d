@@ -39,7 +39,7 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
   QList<QVector3D> positions;
   QgsFeature f;
   QgsFeatureRequest request;
-  QgsFeatureIterator fi = settings.layer->getFeatures(request);
+  QgsFeatureIterator fi = settings.layer()->getFeatures(request);
   while (fi.nextFeature(f))
   {
     QgsAbstractGeometry* g = f.geometry().geometry();

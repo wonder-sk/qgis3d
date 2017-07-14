@@ -14,7 +14,7 @@
 PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, Qt3DCore::QNode* parent)
   : Qt3DCore::QEntity(parent)
 {
-  QgsVectorLayer* layer = settings.layer;
+  QgsVectorLayer* layer = settings.layer();
   QgsPointXY origin(map.originX, map.originY);
 
   Qt3DExtras::QPhongMaterial* material = new Qt3DExtras::QPhongMaterial;

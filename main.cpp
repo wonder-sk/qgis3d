@@ -15,6 +15,7 @@
 
 #include <qgsapplication.h>
 #include <qgsmapsettings.h>
+#include <qgsreadwritecontext.h>
 #include <qgsrasterlayer.h>
 #include <qgsproject.h>
 #include <qgsvectorlayer.h>
@@ -49,8 +50,14 @@ int main(int argc, char *argv[])
   QgsVectorLayer* vlPoints = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/trees.shp", "trees", "ogr");
   Q_ASSERT( vlPoints->isValid() );
 
+  QList<QgsMapLayer*> layers;
+  layers << rlDtm << rlSat << vlPolygons << vlPoints;
+
+  QgsProject project;
+  project.addMapLayers(layers);
+
   Map3D map;
-  map.layers << rlSat;
+  map.setLayers(QList<QgsMapLayer*>() << rlSat);
   map.crs = rlSat->crs();
   map.zExaggeration = 3;
 
@@ -67,7 +74,8 @@ int main(int argc, char *argv[])
   }
   else if (tt == TerrainGenerator::Dem)
   {
-    DemTerrainGenerator* demTerrain = new DemTerrainGenerator(rlDtm, 16);
+    DemTerrainGenerator* demTerrain = new DemTerrainGenerator;
+    demTerrain->setLayer(rlDtm);
     map.terrainGenerator.reset(demTerrain);
   }
   else if (tt == TerrainGenerator::QuantizedMesh)
@@ -81,10 +89,12 @@ int main(int argc, char *argv[])
   if (map.terrainGenerator->type() == TerrainGenerator::Flat)
   {
     // we are free to define terrain extent to whatever works best
-    static_cast<FlatTerrainGenerator*>(map.terrainGenerator.get())->setExtent(_fullExtent(map.layers, map.crs), map.crs);
+    FlatTerrainGenerator* flatGen = static_cast<FlatTerrainGenerator*>(map.terrainGenerator.get());
+    flatGen->setCrs(map.crs);
+    flatGen->setExtent(_fullExtent(map.layers(), map.crs));
   }
 
-  QgsRectangle fullExtentInTerrainCrs = _fullExtent(map.layers, map.terrainGenerator->crs());
+  QgsRectangle fullExtentInTerrainCrs = _fullExtent(map.layers(), map.terrainGenerator->crs());
 
   if (map.terrainGenerator->type() == TerrainGenerator::QuantizedMesh)
   {
@@ -101,7 +111,7 @@ int main(int argc, char *argv[])
   // polygons
 
   PolygonRenderer pr;
-  pr.layer = vlPolygons;
+  pr.setLayer(vlPolygons);
   pr.ambientColor = Qt::gray;
   pr.diffuseColor = Qt::lightGray;
   pr.height = 0;
@@ -111,7 +121,7 @@ int main(int argc, char *argv[])
   // points
 
   PointRenderer ptr;
-  ptr.layer = vlPoints;
+  ptr.setLayer(vlPoints);
   ptr.diffuseColor = QColor(222,184,135);
   ptr.height = 5;
   ptr.shapeProperties["shape"] = "cylinder";
@@ -123,7 +133,7 @@ int main(int argc, char *argv[])
   map.pointRenderers << ptr;
 
   PointRenderer ptr2;
-  ptr2.layer = vlPoints;
+  ptr2.setLayer(vlPoints);
   ptr2.diffuseColor = QColor(60,179,113);
   ptr2.height = 15;
   ptr2.shapeProperties["shape"] = "sphere";
@@ -151,10 +161,34 @@ int main(int argc, char *argv[])
   map.skyboxFileBase = "file:///home/martin/tmp/qgis3d/skybox/miramar";
   map.skyboxFileExtension = ".jpg";
 
+  //
+  // map read/write test
+  //
+
+  QObject::connect(&project, &QgsProject::writeProject, [&map](QDomDocument& doc) {
+    QDomElement elem = map.writeXml(doc, QgsReadWriteContext());
+    doc.documentElement().appendChild(elem);
+  });
+  project.write("/tmp/3d.qgs");
+
+  QgsProject project2;
+  Map3D map2;
+  QObject::connect(&project2, &QgsProject::readProject, [&map2](const QDomDocument& doc) {
+    QDomElement elem = doc.documentElement().firstChildElement("qgis3d");
+    map2.readXml(elem, QgsReadWriteContext());
+  });
+  project2.read("/tmp/3d.qgs");
+  map2.resolveReferences(project2);
+  map2.terrainGenerator->terrainTilingScheme = map.terrainGenerator->terrainTilingScheme;
+
+  //
+  // GUI initialization
+  //
+
   SidePanel* sidePanel = new SidePanel;
   sidePanel->setMinimumWidth(150);
 
-  Window3D* view = new Window3D(sidePanel, map);
+  Window3D* view = new Window3D(sidePanel, map2);
   QWidget *container = QWidget::createWindowContainer(view);
 
   QSize screenSize = view->screen()->size();

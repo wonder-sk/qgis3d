@@ -65,8 +65,52 @@ TerrainTileEntity *FlatTerrainGenerator::createTile(Terrain* terrain, QuadTreeNo
   return new FlatTerrainTile(tileGeometry, terrain, n, parent);
 }
 
-void FlatTerrainGenerator::setExtent(const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs)
+void FlatTerrainGenerator::writeXml(QDomElement &elem) const
 {
-  // the real extent will be a square where the given extent fully fits
-  terrainTilingScheme = TilingScheme(extent, crs);
+  QgsRectangle r = mExtent;
+  QDomElement elemExtent = elem.ownerDocument().createElement("extent");
+  elemExtent.setAttribute("xmin", QString::number(r.xMinimum()));
+  elemExtent.setAttribute("xmax", QString::number(r.xMaximum()));
+  elemExtent.setAttribute("ymin", QString::number(r.yMinimum()));
+  elemExtent.setAttribute("ymax", QString::number(r.yMaximum()));
+
+  // crs is not read/written - it should be the same as destination crs of the map
+}
+
+void FlatTerrainGenerator::readXml(const QDomElement &elem)
+{
+  QDomElement elemExtent = elem.firstChildElement("extent");
+  double xmin = elemExtent.attribute("xmin").toDouble();
+  double xmax = elemExtent.attribute("xmax").toDouble();
+  double ymin = elemExtent.attribute("ymin").toDouble();
+  double ymax = elemExtent.attribute("ymax").toDouble();
+
+  setExtent(QgsRectangle(xmin, ymin, xmax, ymax));
+
+  // crs is not read/written - it should be the same as destination crs of the map
+}
+
+void FlatTerrainGenerator::setCrs(const QgsCoordinateReferenceSystem &crs)
+{
+  mCrs = crs;
+  updateTilingScheme();
+}
+
+void FlatTerrainGenerator::setExtent(const QgsRectangle &extent)
+{
+  mExtent = extent;
+  updateTilingScheme();
+}
+
+void FlatTerrainGenerator::updateTilingScheme()
+{
+  if (mExtent.isNull() || !mCrs.isValid())
+  {
+    terrainTilingScheme = TilingScheme();
+  }
+  else
+  {
+    // the real extent will be a square where the given extent fully fits
+    terrainTilingScheme = TilingScheme(mExtent, mCrs);
+  }
 }

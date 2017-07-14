@@ -7,6 +7,7 @@
 #include "terraingenerator.h"
 #include "terrainboundsentity.h"
 
+#include "qgscoordinatetransform.h"
 #include "qgsrectangle.h"
 
 #include <Qt3DRender/QCamera>

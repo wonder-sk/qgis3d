@@ -43,17 +43,17 @@ DemTerrainTile::DemTerrainTile(Terrain* terrain, QuadTreeNode *node, Qt3DCore::Q
 
   // generate a temporary heightmap
   // TODO: use upsampled heightmap from parent
-  QByteArray heightMap = _temporaryHeightMap(generator->demTerrainSize);
+  QByteArray heightMap = _temporaryHeightMap(generator->resolution());
 
   // async request for heightmap
-  jobId = generator->tGen->render(node->x, node->y, node->level);
-  connect(generator->tGen.get(), &DemHeightMapGenerator::heightMapReady, this, &DemTerrainTile::onHeightMapReady);
+  jobId = generator->heightMapGenerator()->render(node->x, node->y, node->level);
+  connect(generator->heightMapGenerator(), &DemHeightMapGenerator::heightMapReady, this, &DemTerrainTile::onHeightMapReady);
 
   float zMin, zMax;
   _heightMapMinMax(heightMap, zMin, zMax);
 
   Qt3DRender::QGeometryRenderer* mesh = new Qt3DRender::QGeometryRenderer;
-  geometry = new DemTerrainTileGeometry(generator->tGen->resolution(), heightMap, mesh);
+  geometry = new DemTerrainTileGeometry(generator->heightMapGenerator()->resolution(), heightMap, mesh);
   mesh->setGeometry(geometry);
   addComponent(mesh);  // takes ownership if the component has no parent
 
@@ -89,12 +89,20 @@ void DemTerrainTile::onHeightMapReady(int jobId, const QByteArray &heightMap)
 // ---------------
 
 
-DemTerrainGenerator::DemTerrainGenerator(QgsRasterLayer *dem, int terrainSize)
+DemTerrainGenerator::DemTerrainGenerator()
+  : mResolution(16)
 {
-  demLayer = dem;
-  demTerrainSize = terrainSize;
-  terrainTilingScheme = TilingScheme(dem->extent(), dem->crs());
-  tGen.reset(new DemHeightMapGenerator(demLayer, terrainTilingScheme, demTerrainSize));
+}
+
+void DemTerrainGenerator::setLayer(QgsRasterLayer *layer)
+{
+  mLayer = QgsMapLayerRef(layer);
+  updateGenerator();
+}
+
+QgsRasterLayer *DemTerrainGenerator::layer() const
+{
+  return qobject_cast<QgsRasterLayer*>(mLayer.layer.data());
 }
 
 TerrainGenerator::Type DemTerrainGenerator::type() const
@@ -110,6 +118,39 @@ QgsRectangle DemTerrainGenerator::extent() const
 TerrainTileEntity *DemTerrainGenerator::createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const
 {
   return new DemTerrainTile(terrain, n, parent);
+}
+
+void DemTerrainGenerator::writeXml(QDomElement& elem) const
+{
+  elem.setAttribute("layer", mLayer.layerId);
+  elem.setAttribute("resolution", mResolution);
+}
+
+void DemTerrainGenerator::readXml(const QDomElement &elem)
+{
+  mLayer = QgsMapLayerRef(elem.attribute("layer"));
+  mResolution = elem.attribute("resolution").toInt();
+}
+
+void DemTerrainGenerator::resolveReferences(const QgsProject &project)
+{
+  mLayer = QgsMapLayerRef(project.mapLayer(mLayer.layerId));
+  updateGenerator();
+}
+
+void DemTerrainGenerator::updateGenerator()
+{
+  QgsRasterLayer* dem = layer();
+  if (dem)
+  {
+    terrainTilingScheme = TilingScheme(dem->extent(), dem->crs());
+    mHeightMapGenerator.reset(new DemHeightMapGenerator(dem, terrainTilingScheme, mResolution));
+  }
+  else
+  {
+    terrainTilingScheme = TilingScheme();
+    mHeightMapGenerator.reset();
+  }
 }
 
 
