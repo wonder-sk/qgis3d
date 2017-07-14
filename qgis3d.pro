@@ -28,7 +28,8 @@ SOURCES += main.cpp \
     tessellator.cpp \
     polygongeometry.cpp \
     polygonentity.cpp \
-    pointentity.cpp
+    pointentity.cpp \
+    scene.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -100,4 +101,5 @@ HEADERS += \
     tessellator.h \
     polygongeometry.h \
     polygonentity.h \
-    pointentity.h
+    pointentity.h \
+    scene.h

@@ -1,21 +1,24 @@
 #ifndef WINDOW3D_H
 #define WINDOW3D_H
 
-#include <Qt3DExtras>
+#include <Qt3DExtras/Qt3DWindow>
+
+namespace Qt3DLogic
+{
+  class QFrameAction;
+}
 
 #include <QTimer>
 
-class CameraController;
 class Map3D;
+class Scene;
 class SidePanel;
-class Terrain;
 
+//! window with 3D content
 class Window3D : public Qt3DExtras::Qt3DWindow
 {
 public:
   Window3D(SidePanel* p, Map3D& map);
-
-  Qt3DCore::QEntity *createScene();
 
 protected:
   void resizeEvent(QResizeEvent *ev) override;
@@ -23,14 +26,12 @@ protected:
 private slots:
   void onTimeout();
   void onFrameTriggered(float dt);
-  void onCameraViewMatrixChanged();
 
 private:
 
-  CameraController* cc;
-  Terrain* terrain;
   SidePanel* panel;
   Map3D& map;
+  Scene* scene;
 
   QTimer timer;
   int frames = 0;

@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
   map.crs = rlSat->crs();
   map.zExaggeration = 3;
   map.originZ = 0;
+  map.backgroundColor = Qt::black;
 
   map.tileTextureSize = 512;
 

@@ -22,7 +22,7 @@ class Terrain : public Qt3DCore::QEntity
 {
   Q_OBJECT
 public:
-  explicit Terrain(Map3D& map, const QgsRectangle& extent);
+  explicit Terrain(const Map3D& map);
 
   ~Terrain();
 
@@ -45,7 +45,7 @@ private:
 
   int maxLevel;
   QuadTreeNode* root;
-  Map3D& map;
+  const Map3D& map;
   QList<QuadTreeNode*> activeNodes;
 
   TerrainBoundsEntity* bboxesEntity;

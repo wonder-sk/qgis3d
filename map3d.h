@@ -39,6 +39,8 @@ struct Map3D
   QgsCoordinateReferenceSystem crs;   //!< destination coordinate system of the world  (TODO: not needed? can be
   double zExaggeration;
 
+  QColor backgroundColor;   //!< background color of the scene
+
   QList<QgsMapLayer*> layers;   //!< layers to be rendered
   int tileTextureSize;   //!< size of map textures of tiles in pixels (width/height)
   MapTextureGenerator* mapGen;

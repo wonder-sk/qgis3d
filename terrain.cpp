@@ -51,13 +51,15 @@ static int tileColorsCount = sizeof(tileColors) / sizeof(QColor);
 #endif
 
 
-Terrain::Terrain(Map3D& map, const QgsRectangle& extent)
+Terrain::Terrain(const Map3D& map)
   : mCamera(nullptr)
   , maxLevel(0)
   , root(nullptr)
   , map(map)
   , screenSizePx(0)
 {
+  QgsRectangle extent = map.terrainGenerator->extent();
+
   root = new QuadTreeNode(extent, 0, 0, nullptr);
 
   // entity for drawing bounds of tiles
