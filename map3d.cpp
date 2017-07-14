@@ -10,5 +10,7 @@ Map3D::Map3D()
   , backgroundColor(Qt::black)
   , tileTextureSize(512)
   , skybox(false)
+  , showBoundingBoxes(false)
+  , drawTerrainTileInfo(false)
 {
 }

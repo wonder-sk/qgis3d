@@ -57,6 +57,9 @@ public:
   bool skybox;  //!< whether to render skybox
   QString skyboxFileBase;
   QString skyboxFileExtension;
+
+  bool showBoundingBoxes;  //!< whether to show bounding boxes of entities - useful for debugging
+  bool drawTerrainTileInfo;  //!< whether to draw extra information about terrain tiles to the textures - useful for debugging
 };
 
 

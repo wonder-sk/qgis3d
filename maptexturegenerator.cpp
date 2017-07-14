@@ -59,12 +59,15 @@ void MapTextureGenerator::onRenderingFinished()
 
   QImage img = mapJob->renderedImage();
 
-  // extra tile information for debugging
-  QPainter p(&img);
-  p.setPen(Qt::white);
-  p.drawRect(0,0,img.width()-1, img.height()-1);
-  p.drawText(img.rect(), jobData.debugText, QTextOption(Qt::AlignCenter));
-  p.end();
+  if (!jobData.debugText.isEmpty())
+  {
+    // extra tile information for debugging
+    QPainter p(&img);
+    p.setPen(Qt::white);
+    p.drawRect(0,0,img.width()-1, img.height()-1);
+    p.drawText(img.rect(), jobData.debugText, QTextOption(Qt::AlignCenter));
+    p.end();
+  }
 
   mapJob->deleteLater();
   jobs.remove(mapJob);

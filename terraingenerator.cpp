@@ -32,7 +32,7 @@ TerrainTileEntity::TerrainTileEntity(Terrain* terrain, QuadTreeNode* node, Qt3DC
 
   QgsRectangle extentTerrainCrs = map.terrainGenerator->terrainTilingScheme.tileToExtent(tx, ty, tz);
   QgsRectangle extentMapCrs = terrain->terrainToMapTransform().transformBoundingBox(extentTerrainCrs);
-  QString tileDebugText = QString("%1 | %2 | %3").arg(tx).arg(ty).arg(tz);
+  QString tileDebugText = map.drawTerrainTileInfo ? QString("%1 | %2 | %3").arg(tx).arg(ty).arg(tz) : QString();
 
   Qt3DRender::QTexture2D* texture = new Qt3DRender::QTexture2D(this);
   MapTextureImage* image = new MapTextureImage(terrain->mapTextureGenerator(), extentMapCrs, tileDebugText);

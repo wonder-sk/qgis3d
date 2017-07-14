@@ -57,6 +57,7 @@ Terrain::Terrain(const Map3D& map)
   , maxLevel(0)
   , root(nullptr)
   , map(map)
+  , bboxesEntity(nullptr)
   , screenSizePx(0)
 {
   QgsRectangle extent = map.terrainGenerator->extent();
@@ -69,7 +70,9 @@ Terrain::Terrain(const Map3D& map)
 
   // entity for drawing bounds of tiles
   ensureTileExists(root);
-  bboxesEntity = new TerrainBoundsEntity(this);
+
+  if (map.showBoundingBoxes)
+    bboxesEntity = new TerrainBoundsEntity(this);
 }
 
 Terrain::~Terrain()
@@ -196,7 +199,8 @@ void Terrain::cameraViewMatrixChanged()
     bboxes << n->tile->bbox;
   }
 
-  bboxesEntity->setBoxes(bboxes);
+  if (bboxesEntity)
+    bboxesEntity->setBoxes(bboxes);
 
   qDebug() << "active nodes " << activeNodes.count();
 }
