@@ -27,10 +27,11 @@ PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, 
   QList<QgsPolygonV2*> polygons;
   QgsFeature f;
   QgsFeatureRequest request;
+  request.setDestinationCrs(map.crs);
   QgsFeatureIterator fi = layer->getFeatures(request);
   while (fi.nextFeature(f))
   {
-    if (f.attribute("building").isNull())
+    if (f.geometry().isNull())
       continue;
 
     QgsAbstractGeometry* g = f.geometry().geometry();

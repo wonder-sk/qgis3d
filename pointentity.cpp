@@ -39,9 +39,13 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
   QList<QVector3D> positions;
   QgsFeature f;
   QgsFeatureRequest request;
+  request.setDestinationCrs(map.crs);
   QgsFeatureIterator fi = settings.layer()->getFeatures(request);
   while (fi.nextFeature(f))
   {
+    if (f.geometry().isNull())
+      continue;
+
     QgsAbstractGeometry* g = f.geometry().geometry();
     if (QgsWkbTypes::flatType(g->wkbType()) == QgsWkbTypes::Point)
     {

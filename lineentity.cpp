@@ -33,9 +33,13 @@ LineEntity::LineEntity(const Map3D &map, const LineRenderer &settings, Qt3DCore:
   QList<QgsPolygonV2*> polygons;
   QgsFeature f;
   QgsFeatureRequest request;
+  request.setDestinationCrs(map.crs);
   QgsFeatureIterator fi = layer->getFeatures(request);
   while (fi.nextFeature(f))
   {
+    if (f.geometry().isNull())
+      continue;
+
     QgsAbstractGeometry* g = f.geometry().geometry();
 
     QgsGeos engine(g);
