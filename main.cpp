@@ -50,8 +50,11 @@ int main(int argc, char *argv[])
   QgsVectorLayer* vlPoints = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/trees.shp", "trees", "ogr");
   Q_ASSERT( vlPoints->isValid() );
 
+  QgsVectorLayer* vlLines = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/roads.shp", "roads", "ogr");
+  Q_ASSERT( vlLines->isValid() );
+
   QList<QgsMapLayer*> layers;
-  layers << rlDtm << rlSat << vlPolygons << vlPoints;
+  layers << rlDtm << rlSat << vlPolygons << vlPoints << vlLines;
 
   QgsProject project;
   project.addMapLayers(layers);
@@ -160,6 +163,16 @@ int main(int argc, char *argv[])
   ptr3.transform = tr.matrix();
   map.pointRenderers << ptr3;
 #endif
+
+  // lines
+
+  LineRenderer lr;
+  lr.setLayer(vlLines);
+  lr.material.setAmbient(Qt::yellow);
+  lr.material.setShininess(0);
+  lr.height = 0.5;
+  lr.distance = 2.5;
+  map.lineRenderers << lr;
 
   // skybox
 

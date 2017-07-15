@@ -88,6 +88,28 @@ private:
   QgsMapLayerRef layerRef; //!< layer used to extract points from
 };
 
+class LineRenderer
+{
+public:
+  LineRenderer();
+
+  void setLayer(QgsVectorLayer* layer);
+  QgsVectorLayer *layer() const;
+
+  void writeXml(QDomElement& elem) const;
+  void readXml(const QDomElement& elem);
+  void resolveReferences(const QgsProject& project);
+
+  float height;           //!< base height of polygons
+  float extrusionHeight;  //!< how much to extrude (0 means no walls)
+  PhongMaterialSettings material;  //!< defines appearance of objects
+
+  float distance;  //!< distance of buffer of lines
+
+private:
+  QgsMapLayerRef layerRef; //!< layer used to extract points from
+};
+
 class QgsReadWriteContext;
 class QgsProject;
 
@@ -127,6 +149,7 @@ public:
 
   QList<PolygonRenderer> polygonRenderers;   //!< stuff to render as polygons
   QList<PointRenderer> pointRenderers;   //!< stuff to render as points
+  QList<LineRenderer> lineRenderers;  //!< stuff to render as lines
 
   bool skybox;  //!< whether to render skybox
   QString skyboxFileBase;

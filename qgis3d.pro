@@ -29,7 +29,8 @@ SOURCES += main.cpp \
     polygongeometry.cpp \
     polygonentity.cpp \
     pointentity.cpp \
-    scene.cpp
+    scene.cpp \
+    lineentity.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -103,4 +104,5 @@ HEADERS += \
     polygongeometry.h \
     polygonentity.h \
     pointentity.h \
-    scene.h
+    scene.h \
+    lineentity.h

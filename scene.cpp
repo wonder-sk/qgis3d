@@ -8,10 +8,12 @@
 #include <Qt3DLogic/QFrameAction>
 
 #include "cameracontroller.h"
+#include "lineentity.h"
 #include "map3d.h"
 #include "pointentity.h"
 #include "polygonentity.h"
 #include "terrain.h"
+
 
 Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, Qt3DRender::QRenderSettings *renderSettings, Qt3DRender::QCamera *camera, const QRect& viewportRect, Qt3DCore::QNode* parent)
   : Qt3DCore::QEntity(parent)
@@ -64,6 +66,12 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
   {
     PointEntity* pe = new PointEntity(map, pr);
     pe->setParent(this);
+  }
+
+  Q_FOREACH (const LineRenderer& lr, map.lineRenderers)
+  {
+    LineEntity* le = new LineEntity(map, lr);
+    le->setParent(this);
   }
 
   if (map.skybox)

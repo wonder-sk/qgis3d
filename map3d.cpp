@@ -108,6 +108,12 @@ void Map3D::readXml(const QDomElement &elem, const QgsReadWriteContext &context)
       r.readXml(elemRenderer);
       pointRenderers.append(r);
     }
+    else if (type == "line")
+    {
+      LineRenderer r;
+      r.readXml(elemRenderer);
+      lineRenderers.append(r);
+    }
     elemRenderer = elemRenderer.nextSiblingElement("renderer");
   }
 
@@ -168,6 +174,13 @@ QDomElement Map3D::writeXml(QDomDocument &doc, const QgsReadWriteContext &contex
     r.writeXml(elemRenderer);
     elemRenderers.appendChild(elemRenderer);
   }
+  Q_FOREACH (const LineRenderer& r, lineRenderers)
+  {
+    QDomElement elemRenderer = doc.createElement("renderer");
+    elemRenderer.setAttribute("type", "line");
+    r.writeXml(elemRenderer);
+    elemRenderers.appendChild(elemRenderer);
+  }
   elem.appendChild(elemRenderers);
 
   QDomElement elemSkybox = doc.createElement("skybox");
@@ -204,6 +217,12 @@ void Map3D::resolveReferences(const QgsProject& project)
   for (int i = 0; i < pointRenderers.count(); ++i)
   {
     PointRenderer& r = pointRenderers[i];
+    r.resolveReferences(project);
+  }
+
+  for (int i = 0; i < lineRenderers.count(); ++i)
+  {
+    LineRenderer& r = lineRenderers[i];
     r.resolveReferences(project);
   }
 }
@@ -339,6 +358,61 @@ void PointRenderer::resolveReferences(const QgsProject &project)
 {
   layerRef.setLayer(project.mapLayer(layerRef.layerId));
 }
+
+// ---------------
+
+LineRenderer::LineRenderer()
+  : height(0)
+  , extrusionHeight(0)
+  , distance(1)
+{
+
+}
+
+void LineRenderer::setLayer(QgsVectorLayer *layer)
+{
+  layerRef = QgsMapLayerRef(layer);
+}
+
+QgsVectorLayer *LineRenderer::layer() const
+{
+  return qobject_cast<QgsVectorLayer*>(layerRef.layer);
+}
+
+void LineRenderer::writeXml(QDomElement &elem) const
+{
+  QDomDocument doc = elem.ownerDocument();
+
+  QDomElement elemDataProperties = doc.createElement("data");
+  elemDataProperties.setAttribute("layer", layerRef.layerId);
+  elemDataProperties.setAttribute("height", height);
+  elemDataProperties.setAttribute("extrusion-height", extrusionHeight);
+  elemDataProperties.setAttribute("distance", distance);
+  elem.appendChild(elemDataProperties);
+
+  QDomElement elemMaterial = doc.createElement("material");
+  material.writeXml(elemMaterial);
+  elem.appendChild(elemMaterial);
+}
+
+void LineRenderer::readXml(const QDomElement &elem)
+{
+  QDomElement elemDataProperties = elem.firstChildElement("data");
+  layerRef = QgsMapLayerRef(elemDataProperties.attribute("layer"));
+  height = elemDataProperties.attribute("height").toFloat();
+  extrusionHeight = elemDataProperties.attribute("extrusion-height").toFloat();
+  distance = elemDataProperties.attribute("distance").toFloat();
+
+  QDomElement elemMaterial = elem.firstChildElement("material");
+  material.readXml(elemMaterial);
+}
+
+void LineRenderer::resolveReferences(const QgsProject &project)
+{
+  layerRef.setLayer(project.mapLayer(layerRef.layerId));
+}
+
+// ---------------
 
 void PhongMaterialSettings::readXml(const QDomElement &elem)
 {
