@@ -112,8 +112,9 @@ int main(int argc, char *argv[])
 
   PolygonRenderer pr;
   pr.setLayer(vlPolygons);
-  pr.ambientColor = Qt::gray;
-  pr.diffuseColor = Qt::lightGray;
+  pr.material.setAmbient(Qt::gray);
+  pr.material.setDiffuse(Qt::lightGray);
+  pr.material.setShininess(0);
   pr.height = 0;
   pr.extrusionHeight = 10;
   map.polygonRenderers << pr;
@@ -122,7 +123,9 @@ int main(int argc, char *argv[])
 
   PointRenderer ptr;
   ptr.setLayer(vlPoints);
-  ptr.diffuseColor = QColor(222,184,135);
+  ptr.material.setDiffuse(QColor(222,184,135));
+  ptr.material.setAmbient(ptr.material.diffuse().darker());
+  ptr.material.setShininess(0);
   ptr.height = 5;
   ptr.shapeProperties["shape"] = "cylinder";
   ptr.shapeProperties["radius"] = 2;
@@ -134,7 +137,9 @@ int main(int argc, char *argv[])
 
   PointRenderer ptr2;
   ptr2.setLayer(vlPoints);
-  ptr2.diffuseColor = QColor(60,179,113);
+  ptr2.material.setDiffuse(QColor(60,179,113));
+  ptr2.material.setAmbient(ptr2.material.diffuse().darker());
+  ptr2.material.setShininess(0);
   ptr2.height = 15;
   ptr2.shapeProperties["shape"] = "sphere";
   ptr2.shapeProperties["radius"] = 7;
@@ -143,8 +148,9 @@ int main(int argc, char *argv[])
 #if 0
   // Q on top of trees - only in Qt 5.9
   PointRenderer ptr3;
-  ptr3.layer = vlPoints;
-  ptr3.diffuseColor = QColor(88, 150, 50);
+  ptr3.setLayer(vlPoints);
+  ptr3.material.setDiffuse(QColor(88, 150, 50));
+  ptr3.material.setAmbient(ptr3.material.diffuse().darker());
   ptr3.height = 25;
   ptr3.shapeProperties["shape"] = "extrudedText";
   ptr3.shapeProperties["text"] = "Q";

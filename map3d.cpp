@@ -236,8 +236,6 @@ QList<QgsMapLayer *> Map3D::layers() const
 PolygonRenderer::PolygonRenderer()
   : height(0)
   , extrusionHeight(0)
-  , ambientColor(Qt::gray)
-  , diffuseColor(Qt::lightGray)
 {
 }
 
@@ -253,13 +251,17 @@ QgsVectorLayer *PolygonRenderer::layer() const
 
 void PolygonRenderer::writeXml(QDomElement &elem) const
 {
-  QDomElement elemDataProperties = elem.ownerDocument().createElement("data");
+  QDomDocument doc = elem.ownerDocument();
+
+  QDomElement elemDataProperties = doc.createElement("data");
   elemDataProperties.setAttribute("layer", layerRef.layerId);
   elemDataProperties.setAttribute("height", height);
   elemDataProperties.setAttribute("extrusion-height", extrusionHeight);
-  elemDataProperties.setAttribute("diffuse-color", QgsSymbolLayerUtils::encodeColor(diffuseColor));  // TODO: more general phong material settings
-  elemDataProperties.setAttribute("ambient-color", QgsSymbolLayerUtils::encodeColor(ambientColor));
   elem.appendChild(elemDataProperties);
+
+  QDomElement elemMaterial = doc.createElement("material");
+  material.writeXml(elemMaterial);
+  elem.appendChild(elemMaterial);
 }
 
 void PolygonRenderer::readXml(const QDomElement &elem)
@@ -268,8 +270,9 @@ void PolygonRenderer::readXml(const QDomElement &elem)
   layerRef = QgsMapLayerRef(elemDataProperties.attribute("layer"));
   height = elemDataProperties.attribute("height").toFloat();
   extrusionHeight = elemDataProperties.attribute("extrusion-height").toFloat();
-  diffuseColor = QgsSymbolLayerUtils::decodeColor(elemDataProperties.attribute("diffuse-color"));
-  ambientColor = QgsSymbolLayerUtils::decodeColor(elemDataProperties.attribute("ambient-color"));
+
+  QDomElement elemMaterial = elem.firstChildElement("material");
+  material.readXml(elemMaterial);
 }
 
 void PolygonRenderer::resolveReferences(const QgsProject &project)
@@ -281,7 +284,6 @@ void PolygonRenderer::resolveReferences(const QgsProject &project)
 
 PointRenderer::PointRenderer()
   : height(0)
-  , diffuseColor(Qt::yellow)
 {
 }
 
@@ -302,8 +304,11 @@ void PointRenderer::writeXml(QDomElement &elem) const
   QDomElement elemDataProperties = doc.createElement("data");
   elemDataProperties.setAttribute("layer", layerRef.layerId);
   elemDataProperties.setAttribute("height", height);
-  elemDataProperties.setAttribute("diffuse-color",  QgsSymbolLayerUtils::encodeColor(diffuseColor));  // TODO: more general phong material settings
   elem.appendChild(elemDataProperties);
+
+  QDomElement elemMaterial = doc.createElement("material");
+  material.writeXml(elemMaterial);
+  elem.appendChild(elemMaterial);
 
   QDomElement elemShapeProperties = doc.createElement("shape-properties");
   elemShapeProperties.appendChild(QgsXmlUtils::writeVariant(shapeProperties, doc));
@@ -319,7 +324,9 @@ void PointRenderer::readXml(const QDomElement &elem)
   QDomElement elemDataProperties = elem.firstChildElement("data");
   layerRef = QgsMapLayerRef(elemDataProperties.attribute("layer"));
   height = elemDataProperties.attribute("height").toFloat();
-  diffuseColor = QgsSymbolLayerUtils::decodeColor(elemDataProperties.attribute("diffuse-color"));
+
+  QDomElement elemMaterial = elem.firstChildElement("material");
+  material.readXml(elemMaterial);
 
   QDomElement elemShapeProperties = elem.firstChildElement("shape-properties");
   shapeProperties = QgsXmlUtils::readVariant(elemShapeProperties.firstChildElement()).toMap();
@@ -331,4 +338,20 @@ void PointRenderer::readXml(const QDomElement &elem)
 void PointRenderer::resolveReferences(const QgsProject &project)
 {
   layerRef.setLayer(project.mapLayer(layerRef.layerId));
+}
+
+void PhongMaterialSettings::readXml(const QDomElement &elem)
+{
+  mAmbient = QgsSymbolLayerUtils::decodeColor(elem.attribute("ambient"));
+  mDiffuse = QgsSymbolLayerUtils::decodeColor(elem.attribute("diffuse"));
+  mSpecular = QgsSymbolLayerUtils::decodeColor(elem.attribute("specular"));
+  mShininess = elem.attribute("shininess").toFloat();
+}
+
+void PhongMaterialSettings::writeXml(QDomElement &elem) const
+{
+  elem.setAttribute("ambient", QgsSymbolLayerUtils::encodeColor(mAmbient));
+  elem.setAttribute("diffuse", QgsSymbolLayerUtils::encodeColor(mDiffuse));
+  elem.setAttribute("specular", QgsSymbolLayerUtils::encodeColor(mSpecular));
+  elem.setAttribute("shininess", mShininess);
 }

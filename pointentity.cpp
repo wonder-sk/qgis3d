@@ -184,10 +184,15 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
   technique->graphicsApiFilter()->setMajorVersion(3);
   technique->graphicsApiFilter()->setMinorVersion(2);
 
-  QColor clr = settings.diffuseColor;
-  Qt3DRender::QParameter* paramColor = new Qt3DRender::QParameter;
-  paramColor->setName("kdx");
-  paramColor->setValue(QVector3D(clr.red()/255.f,clr.green()/255.f,clr.blue()/255.f));
+  Qt3DRender::QParameter* ambientParameter = new Qt3DRender::QParameter(QStringLiteral("ka"), QColor::fromRgbF(0.05f, 0.05f, 0.05f, 1.0f));
+  Qt3DRender::QParameter* diffuseParameter = new Qt3DRender::QParameter(QStringLiteral("kd"), QColor::fromRgbF(0.7f, 0.7f, 0.7f, 1.0f));
+  Qt3DRender::QParameter* specularParameter = new Qt3DRender::QParameter(QStringLiteral("ks"), QColor::fromRgbF(0.01f, 0.01f, 0.01f, 1.0f));
+  Qt3DRender::QParameter* shininessParameter = new Qt3DRender::QParameter(QStringLiteral("shininess"), 150.0f);
+
+  diffuseParameter->setValue(settings.material.diffuse());
+  ambientParameter->setValue(settings.material.ambient());
+  specularParameter->setValue(settings.material.specular());
+  shininessParameter->setValue(settings.material.shininess());
 
   QMatrix4x4 transformMatrix = settings.transform;
   QMatrix3x3 normalMatrix = transformMatrix.normalMatrix();  // transponed inverse of 3x3 sub-matrix
@@ -210,9 +215,13 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
 
   Qt3DRender::QEffect* effect = new Qt3DRender::QEffect;
   effect->addTechnique(technique);
-  effect->addParameter(paramColor);
   effect->addParameter(paramInst);
   effect->addParameter(paramInstNormal);
+
+  effect->addParameter(ambientParameter);
+  effect->addParameter(diffuseParameter);
+  effect->addParameter(specularParameter);
+  effect->addParameter(shininessParameter);
 
   Qt3DRender::QMaterial* material = new Qt3DRender::QMaterial;
   material->setEffect(effect);

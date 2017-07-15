@@ -18,10 +18,10 @@ PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, 
   QgsPointXY origin(map.originX, map.originY);
 
   Qt3DExtras::QPhongMaterial* material = new Qt3DExtras::QPhongMaterial;
-  material->setAmbient(settings.ambientColor);
-  material->setDiffuse(settings.diffuseColor);
-  //material->setSpecular(Qt::blue);
-  material->setShininess(0);
+  material->setAmbient(settings.material.ambient());
+  material->setDiffuse(settings.material.diffuse());
+  material->setSpecular(settings.material.specular());
+  material->setShininess(settings.material.shininess());
   addComponent(material);
 
   QList<QgsPolygonV2*> polygons;

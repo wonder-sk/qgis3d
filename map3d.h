@@ -15,6 +15,38 @@ class QgsVectorLayer;
 class MapTextureGenerator;
 class TerrainGenerator;
 
+//! Basic shading material used for rendering
+class PhongMaterialSettings
+{
+public:
+  PhongMaterialSettings()
+    : mAmbient(QColor::fromRgbF(0.05f, 0.05f, 0.05f, 1.0f))
+    , mDiffuse(QColor::fromRgbF(0.7f, 0.7f, 0.7f, 1.0f))
+    , mSpecular(QColor::fromRgbF(0.01f, 0.01f, 0.01f, 1.0f))
+    , mShininess(150.0f)
+  {
+  }
+
+  QColor ambient() const { return mAmbient; }
+  QColor diffuse() const { return mDiffuse; }
+  QColor specular() const { return mSpecular; }
+  float shininess() const { return mShininess; }
+
+  void setAmbient(const QColor &ambient) { mAmbient = ambient; }
+  void setDiffuse(const QColor &diffuse) { mDiffuse = diffuse; }
+  void setSpecular(const QColor &specular) { mSpecular = specular; }
+  void setShininess(float shininess) { mShininess = shininess; }
+
+  void readXml( const QDomElement& elem );
+  void writeXml( QDomElement& elem ) const;
+
+private:
+  QColor mAmbient;
+  QColor mDiffuse;
+  QColor mSpecular;
+  float mShininess;
+};
+
 class PolygonRenderer
 {
 public:
@@ -29,8 +61,7 @@ public:
 
   float height;           //!< base height of polygons
   float extrusionHeight;  //!< how much to extrude (0 means no walls)
-  QColor ambientColor;
-  QColor diffuseColor;
+  PhongMaterialSettings material;  //!< defines appearance of objects
 
 private:
   QgsMapLayerRef layerRef; //!< layer used to extract polygons from
@@ -49,7 +80,7 @@ public:
   void resolveReferences(const QgsProject& project);
 
   float height;
-  QColor diffuseColor;
+  PhongMaterialSettings material;  //!< defines appearance of objects
   QVariantMap shapeProperties;  //!< what kind of shape to use and what
   QMatrix4x4 transform;  //!< transform of individual instanced models
 

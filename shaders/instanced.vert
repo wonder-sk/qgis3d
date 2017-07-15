@@ -6,13 +6,11 @@ in vec3 pos;
 
 out vec3 worldPosition;
 out vec3 worldNormal;
-out vec3 kd;
 
 uniform mat4 modelView;
 uniform mat3 modelViewNormal;
-uniform mat4 mvp;
+uniform mat4 modelViewProjection;
 
-uniform vec3 kdx;
 uniform mat4 inst;  // transform of individual object instance
 uniform mat4 instNormal;  // should be mat3 but Qt3D only supports mat4...
 
@@ -22,7 +20,6 @@ void main()
 
     worldNormal = normalize(modelViewNormal * mat3(instNormal) * vertexNormal);
     worldPosition = vec3(modelView * offsetPos);
-    kd = kdx; //vec3(1.0, 1.0, 1.0);
 
-    gl_Position = mvp * offsetPos;
+    gl_Position = modelViewProjection * offsetPos;
 }
