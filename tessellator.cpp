@@ -70,6 +70,29 @@ static bool _isRingCounterClockWise(const QgsCurve& ring)
   return a > 0; // clockwise if a is negative
 }
 
+static void _makeWalls(const QgsCurve& ring, bool ccw, float height, float extrusionHeight, QVector<float>& data, bool addNormals, double originX, double originY)
+{
+  // we need to find out orientation of the ring so that the triangles we generate
+  // face the right direction
+  // (for exterior we want clockwise order, for holes we want counter-clockwise order)
+  bool is_counter_clockwise = _isRingCounterClockWise(ring);
+
+  QgsVertexId::VertexType vt;
+  QgsPoint pt;
+
+  QgsPoint ptPrev;
+  ring.pointAt(is_counter_clockwise == ccw ? 0 : ring.numPoints() - 1, ptPrev, vt);
+  for (int i = 1; i < ring.numPoints(); ++i)
+  {
+    ring.pointAt(is_counter_clockwise == ccw ? i : ring.numPoints() - i - 1, pt, vt);
+    float x0 = ptPrev.x() - originX, y0 = ptPrev.y() - originY;
+    float x1 = pt.x() - originX, y1 = pt.y() - originY;
+    // make a quad
+    make_quad(x0, y0, x1, y1, height, height+extrusionHeight, data, addNormals);
+    ptPrev = pt;
+  }
+}
+
 void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float extrusionHeight)
 {
   const QgsCurve* exterior = polygon.exteriorRing();
@@ -86,10 +109,24 @@ void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float ex
     polyline.push_back(new p2t::Point(pt.x() - originX, pt.y() - originY));
   }
 
-  // TODO: holes
+  p2t::CDT* cdt = new p2t::CDT(polyline);
+
+  // polygon holes
+  for (int i = 0; i < polygon.numInteriorRings(); ++i)
+  {
+    std::vector<p2t::Point*> holePolyline;
+    holePolyline.reserve(exterior->numPoints());
+    const QgsCurve* hole = polygon.interiorRing(i);
+    for (int j = 0; j < hole->numPoints() - 1; ++j)
+    {
+      hole->pointAt(j, pt, vt);
+      holePolyline.push_back(new p2t::Point(pt.x() - originX, pt.y() - originY));
+    }
+    cdt->AddHole(holePolyline);
+  }
+
   // TODO: robustness (no duplicate / nearly duplicate points, ...)
 
-  p2t::CDT* cdt = new p2t::CDT(polyline);
   cdt->Triangulate();
 
   std::vector<p2t::Triangle*> triangles = cdt->GetTriangles();
@@ -112,20 +149,9 @@ void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float ex
   // add walls if extrusion is enabled
   if (extrusionHeight != 0)
   {
-    // we need to find out orientation of the ring so that the triangles we generate
-    // face the right direction
-    bool is_counter_clockwise = _isRingCounterClockWise(*exterior);
+    _makeWalls(*exterior, false, height, extrusionHeight, data, addNormals, originX, originY);
 
-    QgsPoint ptPrev;
-    exterior->pointAt(!is_counter_clockwise ? 0 : exterior->numPoints() - 1, ptPrev, vt);
-    for (int i = 1; i < exterior->numPoints(); ++i)
-    {
-      exterior->pointAt(!is_counter_clockwise ? i : exterior->numPoints() - i - 1, pt, vt);
-      float x0 = ptPrev.x() - originX, y0 = ptPrev.y() - originY;
-      float x1 = pt.x() - originX, y1 = pt.y() - originY;
-      // make a quad
-      make_quad(x0, y0, x1, y1, height, height+extrusionHeight, data, addNormals);
-      ptPrev = pt;
-    }
+    for (int i = 0; i < polygon.numInteriorRings(); ++i)
+      _makeWalls(*polygon.interiorRing(i), true, height, extrusionHeight, data, addNormals, originX, originY);
   }
 }
