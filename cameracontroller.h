@@ -3,7 +3,6 @@
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DInput>
-#include <Qt3DLogic>
 #include <Qt3DRender>
 
 
@@ -24,18 +23,17 @@ public:
 
   void setCameraData(float x, float y, float dist, float pitch = 0, float yaw = 0);
 
+  void frameTriggered(float dt);
+
 signals:
     void cameraChanged();
     void viewportChanged();
 
 private slots:
-  void onFrameTriggered(float dt);
   void onPositionChanged(Qt3DInput::QMouseEvent *mouse);
   void onPickerMousePressed(Qt3DRender::QPickEvent *pick);
 
 private:
-  //! Provides a way to have a synchronous function executed each frame
-  Qt3DLogic::QFrameAction* mFrameAction;
   //! Camera that is being controlled
   Qt3DRender::QCamera* mCamera;
   //! used for computation of translation when dragging mouse

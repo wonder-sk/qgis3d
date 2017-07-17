@@ -7,16 +7,24 @@
 #include <Qt3DExtras/QSkyboxEntity>
 #include <Qt3DLogic/QFrameAction>
 
+#include "aabb.h"
 #include "cameracontroller.h"
 #include "lineentity.h"
 #include "map3d.h"
 #include "pointentity.h"
 #include "polygonentity.h"
 #include "terrain.h"
+#include "testchunkloader.h"
+
+#include <Qt3DRender/QMesh>
+#include <Qt3DRender/QSceneLoader>
+#include <Qt3DExtras/QPhongMaterial>
+
 
 
 Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, Qt3DRender::QRenderSettings *renderSettings, Qt3DRender::QCamera *camera, const QRect& viewportRect, Qt3DCore::QNode* parent)
   : Qt3DCore::QEntity(parent)
+  , testChunkEntity(nullptr)
 {
   defaultFrameGraph->setClearColor(map.backgroundColor);
 
@@ -27,6 +35,11 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
 
   // Camera
   camera->lens()->setPerspectiveProjection(45.0f, 16.0f/9.0f, 10.f, 10000.0f);
+
+  mFrameAction = new Qt3DLogic::QFrameAction();
+  connect(mFrameAction, &Qt3DLogic::QFrameAction::triggered,
+          this, &Scene::onFrameTriggered);
+  addComponent(mFrameAction);  // takes ownership
 
   // Camera controlling
   mCameraController = new CameraController(this); // attaches to the scene
@@ -55,8 +68,11 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
   Qt3DCore::QEntity* lightEntity = new Qt3DCore::QEntity;
   Qt3DCore::QTransform* lightTransform = new Qt3DCore::QTransform;
   lightTransform->setTranslation(QVector3D(0, 1000, 0));
+  // defaults: white, intensity 0.5
+  // attenuation: constant 1.0, linear 0.0, quadratic 0.0
   Qt3DRender::QPointLight* light = new Qt3DRender::QPointLight;
-  light->setColor(Qt::white);
+  light->setConstantAttenuation(0);
+  //light->setColor(Qt::white);
   //light->setIntensity(0.5);
   lightEntity->addComponent(light);
   lightEntity->addComponent(lightTransform);
@@ -74,6 +90,39 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
     le->setParent(this);
   }
 
+  testChunkEntity = new ChunkedEntity(AABB(-500, 0, -500, 500, 100, 500), 2.f, 3.f, 7, new TestChunkLoaderFactory);
+  testChunkEntity->setEnabled(false);
+  testChunkEntity->setParent(this);
+
+  connect(mCameraController, &CameraController::cameraChanged, this, &Scene::onCameraChanged);
+  connect(mCameraController, &CameraController::viewportChanged, this, &Scene::onCameraChanged);
+
+#if 0
+  // experiments with loading of existing 3D models.
+
+  // scene loader only gets loaded only when added to a scene...
+  // it loads everything: geometries, materials, transforms, lights, cameras (if any)
+  Qt3DCore::QEntity* loaderEntity = new Qt3DCore::QEntity;
+  Qt3DRender::QSceneLoader* loader = new Qt3DRender::QSceneLoader;
+  loader->setSource(QUrl("file:///home/martin/Downloads/LowPolyModels/tree.dae"));
+  loaderEntity->addComponent(loader);
+  loaderEntity->setParent(this);
+
+  // mesh loads just geometry as one geometry...
+  // so if there are different materials (e.g. colors) used in the model, this information is lost
+  Qt3DCore::QEntity* meshEntity = new Qt3DCore::QEntity;
+  Qt3DRender::QMesh* mesh = new Qt3DRender::QMesh;
+  mesh->setSource(QUrl("file:///home/martin/Downloads/LowPolyModels/tree.obj"));
+  meshEntity->addComponent(mesh);
+  Qt3DExtras::QPhongMaterial* material = new Qt3DExtras::QPhongMaterial;
+  material->setAmbient(Qt::red);
+  meshEntity->addComponent(material);
+  Qt3DCore::QTransform* meshTransform = new Qt3DCore::QTransform;
+  meshTransform->setScale(1);
+  meshEntity->addComponent(meshTransform);
+  meshEntity->setParent(this);
+#endif
+
   if (map.skybox)
   {
     Qt3DExtras::QSkyboxEntity* skybox = new Qt3DExtras::QSkyboxEntity;
@@ -85,5 +134,34 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
     // it _somehow_ works even when frustum culling is enabled with some camera positions,
     // but then when zoomed in more it would disappear - so let's keep frustum culling disabled
     defaultFrameGraph->setFrustumCullingEnabled(false);
+    }
+}
+
+SceneState _sceneState(CameraController* cameraController)
+{
+  Qt3DRender::QCamera* camera = cameraController->camera();
+  SceneState state;
+  state.cameraFov = camera->fieldOfView();
+  state.cameraPos = camera->position();
+  QRect rect = cameraController->viewport();
+  state.screenSizePx = qMax(rect.width(), rect.height());  // TODO: is this correct?
+  state.viewProjectionMatrix = camera->projectionMatrix() * camera->viewMatrix();
+  return state;
+}
+
+void Scene::onCameraChanged()
+{
+  if (testChunkEntity && testChunkEntity->isEnabled())
+    testChunkEntity->update(_sceneState(mCameraController));
+}
+
+void Scene::onFrameTriggered(float dt)
+{
+  mCameraController->frameTriggered(dt);
+
+  if (testChunkEntity && testChunkEntity->isEnabled() && testChunkEntity->needsUpdate)
+  {
+    qDebug() << "need for update";
+    testChunkEntity->update(_sceneState(mCameraController));
   }
 }

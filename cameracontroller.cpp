@@ -25,10 +25,6 @@ CameraController::CameraController(Qt3DCore::QNode *parent)
   , mKeyboardTxNegInput(new Qt3DInput::QButtonAxisInput())
   , mKeyboardTyNegInput(new Qt3DInput::QButtonAxisInput())
 {
-  mFrameAction = new Qt3DLogic::QFrameAction();
-  connect(mFrameAction, &Qt3DLogic::QFrameAction::triggered,
-          this, &CameraController::onFrameTriggered);
-  addComponent(mFrameAction);  // takes ownership
 
   // object picker for terrain for correct map panning. it will be associated as a component of terrain entity
   mTerrainPicker = new Qt3DRender::QObjectPicker;
@@ -158,7 +154,7 @@ QPointF screen_point_to_point_on_plane(const QPointF& pt, const QRect& viewport,
 }
 
 
-void CameraController::onFrameTriggered(float dt)
+void CameraController::frameTriggered(float dt)
 {
   if (mCamera == nullptr)
     return;

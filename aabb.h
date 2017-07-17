@@ -2,6 +2,7 @@
 #define AABB_H
 
 #include <math.h>
+#include <QList>
 #include <QVector3D>
 
 //! axis-aligned bounding box - in world coords
@@ -23,6 +24,30 @@ public:
       qSwap(this->yMin, this->yMax);
     if (this->zMax < this->zMin)
       qSwap(this->zMin, this->zMax);
+  }
+
+  float xExtent() const { return xMax-xMin; }
+  float yExtent() const { return yMax-yMin; }
+  float zExtent() const { return zMax-zMin; }
+
+  float xCenter() const { return (xMax+xMin)/2; }
+  float yCenter() const { return (yMax+yMin)/2; }
+  float zCenter() const { return (zMax+zMin)/2; }
+
+  QVector3D center() const { return QVector3D(xCenter(), yCenter(), zCenter()); }
+
+  bool intersects(const AABB& other) const
+  {
+    return xMin < other.xMax && other.xMin < xMax &&
+           yMin < other.yMax && other.yMin < yMax &&
+           zMin < other.zMax && other.zMin < zMax;
+  }
+
+  bool intersects(float x, float y, float z) const
+  {
+    return xMin <= x && xMax >= x &&
+           yMin <= y && yMax >= y &&
+           zMin <= z && zMax >= z;
   }
 
   float distanceFromPoint(float x, float y, float z) const

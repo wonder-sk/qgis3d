@@ -30,7 +30,11 @@ SOURCES += main.cpp \
     polygonentity.cpp \
     pointentity.cpp \
     scene.cpp \
-    lineentity.cpp
+    lineentity.cpp \
+    chunkedentity.cpp \
+    chunknode.cpp \
+    chunklist.cpp \
+    testchunkloader.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -105,4 +109,8 @@ HEADERS += \
     polygonentity.h \
     pointentity.h \
     scene.h \
-    lineentity.h
+    lineentity.h \
+    chunkedentity.h \
+    chunknode.h \
+    chunklist.h \
+    testchunkloader.h

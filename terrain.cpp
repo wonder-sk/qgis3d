@@ -40,19 +40,6 @@ float screenSpaceError(float epsilon, float distance, float screenSize, float fo
 }
 
 
-#if 0
-static QColor tileColors[] = {
-  Qt::green,
-  Qt::red,
-  Qt::blue,
-  Qt::cyan,
-  Qt::magenta,
-  Qt::yellow,
-};
-static int tileColorsCount = sizeof(tileColors) / sizeof(QColor);
-#endif
-
-
 Terrain::Terrain(const Map3D& map)
   : mCamera(nullptr)
   , maxLevel(0)
@@ -164,7 +151,7 @@ void Terrain::cameraViewMatrixChanged()
   if (!mCamera || !screenSizePx)
     return;  // not yet fully initialized
 
-  qDebug() << "terrain update";
+  //qDebug() << "terrain update";
 
   // TODO: delete cached tiles when they have not been used for a while
 #if 0
@@ -203,5 +190,5 @@ void Terrain::cameraViewMatrixChanged()
   if (bboxesEntity)
     bboxesEntity->setBoxes(bboxes);
 
-  qDebug() << "active nodes " << activeNodes.count();
+  //qDebug() << "active nodes " << activeNodes.count();
 }
