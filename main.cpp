@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
   map.setLayers(QList<QgsMapLayer*>() << rlSat);
   map.crs = rlSat->crs();
   map.zExaggeration = 3;
+  map.showBoundingBoxes = true;
+  map.drawTerrainTileInfo = true;
 
   TerrainGenerator::Type tt;
   tt = TerrainGenerator::Flat;

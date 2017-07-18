@@ -5,15 +5,19 @@
 
 #include "qgsrectangle.h"
 
+#include "chunkloader.h"
+
 namespace Qt3DExtras
 {
   class QPlaneGeometry;
 }
 
-class FlatTerrainGenerator : public TerrainGenerator
+class FlatTerrainGenerator : public TerrainGenerator, public ChunkLoaderFactory
 {
 public:
   FlatTerrainGenerator();
+
+  virtual ChunkLoader *createChunkLoader(ChunkNode* node) const override;
 
   Type type() const override;
   QgsRectangle extent() const override;

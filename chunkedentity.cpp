@@ -3,6 +3,7 @@
 #include "chunknode.h"
 #include "chunklist.h"
 #include "chunkloader.h"
+#include "terrainboundsentity.h"
 
 static float screenSpaceError(float epsilon, float distance, float screenSize, float fov)
 {
@@ -82,8 +83,9 @@ ChunkedEntity::ChunkedEntity(const AABB &rootBbox, float rootError, float tau, i
   , maxLevel(maxLevel)
   , chunkLoaderFactory(loaderFactory)
   , maxLoadedChunks(512)
+  , bboxesEntity(nullptr)
 {
-  rootNode = new ChunkNode(rootBbox, rootError);
+  rootNode = new ChunkNode(0, 0, 0, rootBbox, rootError);
   chunkLoaderQueue = new ChunkList;
   replacementQueue = new ChunkList;
 }
@@ -104,7 +106,9 @@ ChunkedEntity::~ChunkedEntity()
 
   delete replacementQueue;
   delete rootNode;
-  delete chunkLoaderFactory;
+
+  // TODO: shall we own the factory or not?
+  //delete chunkLoaderFactory;
 }
 
 
@@ -146,6 +150,14 @@ void ChunkedEntity::update(const SceneState &state)
     ++unloaded;
   }
 
+  if (bboxesEntity)
+  {
+    QList<AABB> bboxes;
+    Q_FOREACH (ChunkNode* n, activeNodes)
+      bboxes << n->bbox;
+    bboxesEntity->setBoxes(bboxes);
+  }
+
   needsUpdate = false;  // just updated
 
   qDebug() << "update: active " << activeNodes.count() << " enabled " << enabled << " disabled " << disabled << " | culled " << frustumCulled << " | loading " << chunkLoaderQueue->count() << " loaded " << replacementQueue->count() << " | unloaded " << unloaded;
@@ -170,6 +182,22 @@ void ChunkedEntity::update(const SceneState &state)
 
     // now we need an update!
     needsUpdate = true;
+  }
+}
+
+void ChunkedEntity::setShowBoundingBoxes(bool enabled)
+{
+  if ((enabled && bboxesEntity) || (!enabled && !bboxesEntity))
+    return;
+
+  if (enabled)
+  {
+    bboxesEntity = new TerrainBoundsEntity(this);
+  }
+  else
+  {
+    bboxesEntity->deleteLater();
+    bboxesEntity = nullptr;
   }
 }
 

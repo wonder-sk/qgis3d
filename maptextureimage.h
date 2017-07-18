@@ -12,7 +12,10 @@ class MapTextureImage : public Qt3DRender::QAbstractTextureImage
 {
   Q_OBJECT
 public:
+  //! constructor that will generate image asynchronously
   MapTextureImage(MapTextureGenerator* mapGen, const QgsRectangle& extent, const QString& debugText = QString(), Qt3DCore::QNode *parent = nullptr);
+  //! constructor that uses already prepared image
+  MapTextureImage(const QImage& image, const QgsRectangle& extent, const QString& debugText, Qt3DCore::QNode *parent = nullptr);
   ~MapTextureImage();
 
   virtual Qt3DRender::QTextureImageDataGeneratorPtr dataGenerator() const override;

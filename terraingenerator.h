@@ -75,6 +75,8 @@ public:
 
   virtual ~TerrainGenerator() {}
 
+  void setTerrain(Terrain* t) { mTerrain = t; }
+
   //! What texture generator implementation is this
   virtual Type type() const = 0;
 
@@ -98,6 +100,8 @@ public:
   QgsCoordinateReferenceSystem crs() const { return terrainTilingScheme.crs; }
 
   TilingScheme terrainTilingScheme;   //!< tiling scheme of the terrain
+
+  Terrain* mTerrain = nullptr;
 };
 
 

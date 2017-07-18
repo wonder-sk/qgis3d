@@ -30,6 +30,9 @@ public:
   //! Cancels a rendering job
   void cancelJob(int jobId);
 
+  //! Render a map and return rendered image
+  QImage renderSynchronously(const QgsRectangle& extent, const QString& debugText = QString());
+
 signals:
   void tileReady(int jobId, const QImage& image);
 

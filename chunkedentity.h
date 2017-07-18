@@ -7,7 +7,7 @@ class AABB;
 class ChunkNode;
 class ChunkList;
 class ChunkLoaderFactory;
-
+class TerrainBoundsEntity;
 
 #include <QVector3D>
 #include <QMatrix4x4>
@@ -36,6 +36,8 @@ public:
   void update(const SceneState& state);
 
   bool needsUpdate; //!< a chunk has been loaded recently - let's display it!
+
+  void setShowBoundingBoxes(bool enabled);
 
 private:
   void update(ChunkNode* node, const SceneState& state);
@@ -66,6 +68,8 @@ private:
 
   //! max. length for replacement queue
   int maxLoadedChunks;
+
+  TerrainBoundsEntity* bboxesEntity;
 };
 
 

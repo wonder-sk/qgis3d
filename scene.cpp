@@ -21,6 +21,7 @@
 #include <Qt3DRender/QSceneLoader>
 #include <Qt3DExtras/QPhongMaterial>
 
+#include "flatterraingenerator.h"
 
 
 Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, Qt3DRender::QRenderSettings *renderSettings, Qt3DRender::QCamera *camera, const QRect& viewportRect, Qt3DCore::QNode* parent)
@@ -50,7 +51,7 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
 
   // create terrain entity
   mTerrain = new Terrain(map);
-  //t->setEnabled(false);
+  mTerrain->setEnabled(false);
   mTerrain->setParent(this);
   mTerrain->setMaxLevel(3);
   mTerrain->setCamera(camera);
@@ -91,8 +92,16 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
     le->setParent(this);
   }
 
-  testChunkEntity = new ChunkedEntity(AABB(-500, 0, -500, 500, 100, 500), 2.f, 3.f, 7, new TestChunkLoaderFactory);
-  testChunkEntity->setEnabled(false);
+  //testChunkEntity = new ChunkedEntity(AABB(-500, 0, -500, 500, 100, 500), 2.f, 3.f, 7, new TestChunkLoaderFactory);
+
+  map.terrainGenerator->setTerrain(mTerrain);
+  FlatTerrainGenerator* loaderFactory = static_cast<FlatTerrainGenerator*>(map.terrainGenerator.get());
+  QgsRectangle te = loaderFactory->extent();
+  AABB terrainRootBbox(te.xMinimum() - map.originX, 0, -te.yMaximum() + map.originY,
+                       te.xMaximum() - map.originX, 0, -te.yMinimum() + map.originY);
+  testChunkEntity = new ChunkedEntity(terrainRootBbox, 2.f, 3.f, 3, loaderFactory);
+  testChunkEntity->setShowBoundingBoxes(map.showBoundingBoxes);
+  //testChunkEntity->setEnabled(false);
   testChunkEntity->setParent(this);
 
   connect(mCameraController, &CameraController::cameraChanged, this, &Scene::onCameraChanged);

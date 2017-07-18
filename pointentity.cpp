@@ -52,7 +52,7 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
       QgsPoint* pt = static_cast<QgsPoint*>(g);
       // TODO: use Z coordinates if the point is 3D
       positions.append(QVector3D(pt->x() - map.originX, settings.height, -(pt->y() - map.originY)));
-      qDebug() << positions.last();
+      //qDebug() << positions.last();
     }
     else
       qDebug() << "not a point";

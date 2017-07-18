@@ -7,7 +7,7 @@ class AABB;
 class AABBMesh;
 
 //! Draws bounds of axis aligned bounding boxes
-class TerrainBoundsEntity : Qt3DCore::QEntity
+class TerrainBoundsEntity : public Qt3DCore::QEntity
 {
 public:
   TerrainBoundsEntity(Qt3DCore::QNode* parent = nullptr);

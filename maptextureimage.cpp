@@ -56,6 +56,17 @@ MapTextureImage::MapTextureImage(MapTextureGenerator *mapGen, const QgsRectangle
   jobId = mapGen->render(extent, debugText);
 }
 
+
+MapTextureImage::MapTextureImage(const QImage& image, const QgsRectangle& extent, const QString& debugText, Qt3DCore::QNode *parent)
+  : Qt3DRender::QAbstractTextureImage(parent)
+  , extent(extent)
+  , debugText(debugText)
+  , img(image)
+  , jobDone(true)
+{
+}
+
+
 MapTextureImage::~MapTextureImage()
 {
   if (!jobDone)

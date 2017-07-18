@@ -49,6 +49,30 @@ void MapTextureGenerator::cancelJob(int jobId)
   Q_ASSERT(false && "requested job ID does not exist!");
 }
 
+QImage MapTextureGenerator::renderSynchronously(const QgsRectangle &extent, const QString &debugText)
+{
+  QgsMapSettings mapSettings(baseMapSettings());
+  mapSettings.setExtent(extent);
+
+  QgsMapRendererSequentialJob job(mapSettings);
+  job.start();
+  job.waitForFinished();
+
+  QImage img = job.renderedImage();
+
+  if (!debugText.isEmpty())
+  {
+    // extra tile information for debugging
+    QPainter p(&img);
+    p.setPen(Qt::white);
+    p.drawRect(0,0,img.width()-1, img.height()-1);
+    p.drawText(img.rect(), debugText, QTextOption(Qt::AlignCenter));
+    p.end();
+  }
+
+  return img;
+}
+
 
 void MapTextureGenerator::onRenderingFinished()
 {

@@ -18,7 +18,7 @@ class ChunkNode
 {
 public:
   //! constructs a skeleton chunk
-  ChunkNode(const AABB& bbox, float error);
+  ChunkNode(int x, int y, int z, const AABB& bbox, float error);
 
   ~ChunkNode();
 
@@ -40,6 +40,8 @@ public:
 
   AABB bbox;      //!< bounding box in world coordinates
   float error;    //!< error of the node in world coordinates
+
+  int x,y,z;    //!< chunk coordinates (for use with a tiling scheme)
 
   ChunkNode* parent;        //!< TODO: should be shared pointer
   ChunkNode* children[4];   //!< TODO: should be weak pointers. May be null if not created yet or removed already
