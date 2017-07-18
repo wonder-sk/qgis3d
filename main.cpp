@@ -129,10 +129,10 @@ int main(int argc, char *argv[])
   ptr.material.setDiffuse(QColor(222,184,135));
   ptr.material.setAmbient(ptr.material.diffuse().darker());
   ptr.material.setShininess(0);
-  ptr.height = 5;
+  ptr.height = 2.5;
   ptr.shapeProperties["shape"] = "cylinder";
-  ptr.shapeProperties["radius"] = 2;
-  ptr.shapeProperties["length"] = 10;
+  ptr.shapeProperties["radius"] = 1;
+  ptr.shapeProperties["length"] = 5;
   //Qt3DCore::QTransform tr;
   //tr.setScale3D(QVector3D(4,1,4));
   //ptr.transform = tr.matrix();
@@ -143,9 +143,9 @@ int main(int argc, char *argv[])
   ptr2.material.setDiffuse(QColor(60,179,113));
   ptr2.material.setAmbient(ptr2.material.diffuse().darker());
   ptr2.material.setShininess(0);
-  ptr2.height = 15;
+  ptr2.height = 7.5;
   ptr2.shapeProperties["shape"] = "sphere";
-  ptr2.shapeProperties["radius"] = 7;
+  ptr2.shapeProperties["radius"] = 3.5;
   map.pointRenderers << ptr2;
 
 #if 0

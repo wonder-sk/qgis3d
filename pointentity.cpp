@@ -51,7 +51,7 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
     {
       QgsPoint* pt = static_cast<QgsPoint*>(g);
       // TODO: use Z coordinates if the point is 3D
-      positions.append(QVector3D(pt->x() - map.originX, settings.height/2, -(pt->y() - map.originY))*2);  // TODO: why do we need to multiply point positions???
+      positions.append(QVector3D(pt->x() - map.originX, settings.height, -(pt->y() - map.originY)));
       qDebug() << positions.last();
     }
     else
