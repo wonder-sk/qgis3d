@@ -2,6 +2,7 @@
 
 #include "chunkedentity.h"  // for ChunkLoader destructor
 #include "chunklist.h"
+#include "chunkloader.h"
 #include <Qt3DCore/QEntity>
 
 

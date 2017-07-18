@@ -2,6 +2,7 @@
 
 #include "chunknode.h"
 #include "chunklist.h"
+#include "chunkloader.h"
 
 static float screenSpaceError(float epsilon, float distance, float screenSize, float fov)
 {
@@ -249,7 +250,3 @@ void ChunkedEntity::requestResidency(ChunkNode *node)
   else
     Q_ASSERT(false && "impossible!");
 }
-
-ChunkLoader::~ChunkLoader() {}
-
-ChunkLoaderFactory::~ChunkLoaderFactory() {}

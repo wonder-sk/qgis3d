@@ -15,6 +15,7 @@
 #include "polygonentity.h"
 #include "terrain.h"
 #include "testchunkloader.h"
+#include "chunkedentity.h"
 
 #include <Qt3DRender/QMesh>
 #include <Qt3DRender/QSceneLoader>

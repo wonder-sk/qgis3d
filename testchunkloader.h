@@ -1,7 +1,7 @@
 #ifndef TESTCHUNKLOADER_H
 #define TESTCHUNKLOADER_H
 
-#include "chunkedentity.h"
+#include "chunkloader.h"
 
 
 class TestChunkLoader : public ChunkLoader

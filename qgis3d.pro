@@ -34,7 +34,8 @@ SOURCES += main.cpp \
     chunkedentity.cpp \
     chunknode.cpp \
     chunklist.cpp \
-    testchunkloader.cpp
+    testchunkloader.cpp \
+    chunkloader.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -113,4 +114,5 @@ HEADERS += \
     chunkedentity.h \
     chunknode.h \
     chunklist.h \
-    testchunkloader.h
+    testchunkloader.h \
+    chunkloader.h
