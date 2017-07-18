@@ -102,7 +102,21 @@ ChunkedEntity::~ChunkedEntity()
   loaderThread->wait();
   delete loaderThread;
 
-  // TODO: delete any entries in the loader queue
+  // clean up any pending load requests
+  while (!chunkLoaderQueue->isEmpty())
+  {
+    ChunkListEntry* entry = chunkLoaderQueue->takeFirst();
+    ChunkNode* node = entry->chunk;
+
+    delete entry;
+    delete node->loader;
+
+    // unload node that is in "loading" state
+    node->state = ChunkNode::Skeleton;
+    node->loaderQueueEntry = nullptr;
+    node->loader = nullptr;
+  }
+
   delete chunkLoaderQueue;
 
   while (!replacementQueue->isEmpty())
@@ -191,7 +205,8 @@ void ChunkedEntity::setShowBoundingBoxes(bool enabled)
 
 void ChunkedEntity::update(ChunkNode *node, const SceneState &state)
 {
-  if (!isInFrustum(node->bbox, state.viewProjectionMatrix))
+  // TODO: re-enable frustum culling
+  if (0 && !isInFrustum(node->bbox, state.viewProjectionMatrix))
   {
     ++frustumCulled;
     return;
@@ -311,7 +326,7 @@ LoaderThread::LoaderThread(ChunkList *list, QMutex &mutex, QWaitCondition& waitC
 
 void LoaderThread::run()
 {
-  while (!stopping)
+  while (1)
   {
     ChunkListEntry* entry = nullptr;
     mutex.lock();
@@ -336,5 +351,12 @@ void LoaderThread::run()
     qDebug() << "[THR] done!";
 
     emit nodeLoaded(entry->chunk);
+
+    if (stopping)
+    {
+      // this chunk we just processed will not be processed anymore because we are shutting down everything
+      // so at least put it back into the loader queue so that we can clean up the chunk
+      loadList->insertFirst(entry);
+    }
   }
 }

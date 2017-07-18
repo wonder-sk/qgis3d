@@ -17,9 +17,10 @@ public:
   void loadTexture();
   void createTextureComponent(Qt3DCore::QEntity* entity);
 
-private:
+protected:
   Terrain* mTerrain;
 
+private:
   QgsRectangle mExtentMapCrs;
   QString mTileDebugText;
   QImage mTextureImage;

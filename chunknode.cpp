@@ -25,11 +25,11 @@ ChunkNode::ChunkNode(int x, int y, int z, const AABB &bbox, float error)
 
 ChunkNode::~ChunkNode()
 {
+  Q_ASSERT(state == Skeleton);
   Q_ASSERT(!loaderQueueEntry);
   Q_ASSERT(!replacementQueueEntry);
   Q_ASSERT(!loader);   // should be deleted when removed from loader queue
   Q_ASSERT(!entity);   // should be deleted when removed from replacement queue
-  Q_ASSERT(state == Skeleton);
   for (int i = 0; i < 4; ++i)
     delete children[i];
 }
@@ -140,4 +140,11 @@ void ChunkNode::unloadChunk()
   delete replacementQueueEntry;
   replacementQueueEntry = nullptr;
   state = ChunkNode::Skeleton;
+}
+
+void ChunkNode::setExactBbox(const AABB &box)
+{
+  bbox = box;
+
+  // TODO: propagate better estimate to children?
 }

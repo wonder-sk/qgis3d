@@ -57,7 +57,7 @@ Terrain::Terrain(const Map3D& map)
   mMapTextureGenerator = new MapTextureGenerator(map);
 
   // entity for drawing bounds of tiles
-  ensureTileExists(root);
+  //ensureTileExists(root);
 
   if (map.showBoundingBoxes)
     bboxesEntity = new TerrainBoundsEntity(this);
@@ -148,6 +148,8 @@ void Terrain::ensureTileExists(QuadTreeNode *n)
 
 void Terrain::cameraViewMatrixChanged()
 {
+  return;  // disabled
+
   if (!mCamera || !screenSizePx)
     return;  // not yet fully initialized
 

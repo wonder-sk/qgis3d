@@ -9,6 +9,8 @@
 
 #include <Qt3DRender/QTexture>
 
+#include "quantizedmeshterraingenerator.h"
+
 
 TerrainChunkLoader::TerrainChunkLoader(Terrain* terrain, ChunkNode* node)
   : ChunkLoader(node)
@@ -16,15 +18,13 @@ TerrainChunkLoader::TerrainChunkLoader(Terrain* terrain, ChunkNode* node)
 {
   const Map3D& map = mTerrain->map3D();
   int tx, ty, tz;
-#if 0
   if (map.terrainGenerator->type() == TerrainGenerator::QuantizedMesh)
   {
     // TODO: sort out - should not be here
     QuantizedMeshTerrainGenerator* generator = static_cast<QuantizedMeshTerrainGenerator*>(map.terrainGenerator.get());
-    generator->quadTreeTileToBaseTile(node->x, node->y, node->level, tx, ty, tz);
+    generator->quadTreeTileToBaseTile(node->x, node->y, node->z, tx, ty, tz);
   }
   else
-#endif
   {
     tx = node->x;
     ty = node->y;

@@ -21,7 +21,9 @@
 #include <Qt3DRender/QSceneLoader>
 #include <Qt3DExtras/QPhongMaterial>
 
+#include "demterraingenerator.h"
 #include "flatterraingenerator.h"
+#include "quantizedmeshterraingenerator.h"
 
 
 Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, Qt3DRender::QRenderSettings *renderSettings, Qt3DRender::QCamera *camera, const QRect& viewportRect, Qt3DCore::QNode* parent)
@@ -96,9 +98,12 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
 
   map.terrainGenerator->setTerrain(mTerrain);
   FlatTerrainGenerator* loaderFactory = static_cast<FlatTerrainGenerator*>(map.terrainGenerator.get());
+  //DemTerrainGenerator* loaderFactory = static_cast<DemTerrainGenerator*>(map.terrainGenerator.get());
+  //QuantizedMeshTerrainGenerator* loaderFactory = static_cast<QuantizedMeshTerrainGenerator*>(map.terrainGenerator.get());
   QgsRectangle te = loaderFactory->extent();
+  // TODO: how to estimate min/max height?
   AABB terrainRootBbox(te.xMinimum() - map.originX, 0, -te.yMaximum() + map.originY,
-                       te.xMaximum() - map.originX, 0, -te.yMinimum() + map.originY);
+                       te.xMaximum() - map.originX, 1000, -te.yMinimum() + map.originY);
   testChunkEntity = new ChunkedEntity(terrainRootBbox, 2.f, 3.f, 3, loaderFactory);
   testChunkEntity->setShowBoundingBoxes(map.showBoundingBoxes);
   //testChunkEntity->setEnabled(false);

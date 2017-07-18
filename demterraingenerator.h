@@ -2,6 +2,7 @@
 #define DEMTERRAINGENERATOR_H
 
 #include "terraingenerator.h"
+#include "terrainchunkloader.h"
 
 #include <memory>
 
@@ -14,7 +15,7 @@ class QgsRasterLayer;
 /**
  * Implementation of terrain generator that uses a raster layer with DEM to build terrain.
  */
-class DemTerrainGenerator : public TerrainGenerator
+class DemTerrainGenerator : public TerrainGenerator, public ChunkLoaderFactory
 {
 public:
   DemTerrainGenerator();
@@ -33,6 +34,8 @@ public:
   virtual void writeXml(QDomElement& elem) const override;
   virtual void readXml(const QDomElement& elem) override;
   virtual void resolveReferences(const QgsProject& project) override;
+
+  virtual ChunkLoader* createChunkLoader(ChunkNode* node) const override;
 
 private:
   void updateGenerator();
@@ -81,6 +84,9 @@ public:
 
   //! asynchronous terrain read for a tile (array of floats)
   int render(int x, int y, int z);
+
+  //! synchronous terrain read for a tile
+  QByteArray renderSynchronously(int x, int y, int z);
 
   int resolution() const { return res; }
 

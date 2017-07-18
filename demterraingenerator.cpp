@@ -10,6 +10,10 @@
 
 #include "qgsrasterlayer.h"
 
+#include "chunknode.h"
+
+
+
 static QByteArray _temporaryHeightMap(int res)
 {
   QByteArray heightMap;
@@ -34,6 +38,82 @@ static void _heightMapMinMax(const QByteArray& heightMap, float& zMin, float& zM
     zMax = qMax(zMax, z);
   }
 }
+
+
+// ------------
+
+
+class DemTerrainChunkLoader : public TerrainChunkLoader
+{
+public:
+  DemTerrainChunkLoader(Terrain* terrain, ChunkNode* node)
+    : TerrainChunkLoader(terrain, node)
+    , resolution(0)
+  {
+  }
+
+  virtual void load() override
+  {
+    const Map3D& map = mTerrain->map3D();
+    DemTerrainGenerator* generator = static_cast<DemTerrainGenerator*>(map.terrainGenerator.get());
+
+    heightMap = generator->heightMapGenerator()->renderSynchronously(node->x, node->y, node->z);
+    resolution = generator->heightMapGenerator()->resolution();
+
+    //epsilon = side / map.tileTextureSize;  // use texel size as the error
+
+    loadTexture();
+  }
+
+  virtual Qt3DCore::QEntity* createEntity(Qt3DCore::QEntity* parent)
+  {
+    Qt3DCore::QEntity* entity = new Qt3DCore::QEntity;
+
+    // create geometry renderer
+
+    Qt3DRender::QGeometryRenderer* mesh = new Qt3DRender::QGeometryRenderer;
+    mesh->setGeometry(new DemTerrainTileGeometry(resolution, heightMap, mesh));
+    entity->addComponent(mesh);  // takes ownership if the component has no parent
+
+    // create material
+
+    createTextureComponent(entity);
+
+    // create transform
+
+    Qt3DCore::QTransform* transform;
+    transform = new Qt3DCore::QTransform();
+    entity->addComponent(transform);
+
+    float zMin, zMax;
+    _heightMapMinMax(heightMap, zMin, zMax);
+
+    const Map3D& map = mTerrain->map3D();
+    QgsRectangle extent = map.terrainGenerator->terrainTilingScheme.tileToExtent(node->x, node->y, node->z);  //node->extent;
+    double x0 = extent.xMinimum() - map.originX;
+    double y0 = extent.yMinimum() - map.originY;
+    double side = extent.width();
+    double half = side/2;
+
+    transform->setScale3D(QVector3D(side, map.zExaggeration, side));
+    transform->setTranslation(QVector3D(x0 + half,0, - (y0 + half)));
+
+    node->setExactBbox(AABB(x0, zMin*map.zExaggeration, -y0, x0 + side, zMax*map.zExaggeration, -(y0 + side)));
+
+    entity->setEnabled(false);
+    entity->setParent(parent);
+    return entity;
+  }
+
+private:
+
+  QByteArray heightMap;
+  int resolution;
+};
+
+
+// ------------
+
 
 DemTerrainTile::DemTerrainTile(Terrain* terrain, QuadTreeNode *node, Qt3DCore::QNode *parent)
   : TerrainTileEntity(terrain, node, parent)
@@ -138,6 +218,11 @@ void DemTerrainGenerator::resolveReferences(const QgsProject &project)
   updateGenerator();
 }
 
+ChunkLoader *DemTerrainGenerator::createChunkLoader(ChunkNode *node) const
+{
+  return new DemTerrainChunkLoader(mTerrain, node);
+}
+
 void DemTerrainGenerator::updateGenerator()
 {
   QgsRasterLayer* dem = layer();
@@ -214,6 +299,30 @@ int DemHeightMapGenerator::render(int x, int y, int z)
   qDebug() << "[TT] added job: " << jd.jobId << " " << x << "|" << y << "|" << z << "  .... in queue: " << jobs.count();
 
   return jd.jobId;
+}
+
+QByteArray DemHeightMapGenerator::renderSynchronously(int x, int y, int z)
+{
+  // extend the rect by half-pixel on each side? to get the values in "corners"
+  QgsRectangle extent = tilingScheme.tileToExtent(x, y, z);
+  float mapUnitsPerPixel = extent.width() / res;
+  extent.grow( mapUnitsPerPixel / 2);
+  // but make sure not to go beyond the full extent (returns invalid values)
+  QgsRectangle fullExtent = tilingScheme.tileToExtent(0, 0, 0);
+  extent = extent.intersect(&fullExtent);
+
+  QgsRasterBlock* block = dtm->dataProvider()->block(1, extent, res, res);
+
+  QByteArray data;
+  if (block)
+  {
+    block->convert(Qgis::Float32);   // currently we expect just floats
+    data = block->data();
+    data.detach();  // this should make a deep copy
+    delete block;
+  }
+
+  return data;
 }
 
 void DemHeightMapGenerator::onFutureFinished()

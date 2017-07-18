@@ -38,6 +38,9 @@ public:
   //! turn a loaded chunk into skeleton
   void unloadChunk();
 
+  //! called when bounding box
+  void setExactBbox(const AABB& box);
+
   AABB bbox;      //!< bounding box in world coordinates
   float error;    //!< error of the node in world coordinates
 
