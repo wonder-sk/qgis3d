@@ -14,6 +14,7 @@
 #include "pointentity.h"
 #include "polygonentity.h"
 #include "terrain.h"
+#include "terraingenerator.h"
 #include "testchunkloader.h"
 #include "chunkedentity.h"
 
@@ -21,14 +22,9 @@
 #include <Qt3DRender/QSceneLoader>
 #include <Qt3DExtras/QPhongMaterial>
 
-#include "demterraingenerator.h"
-#include "flatterraingenerator.h"
-#include "quantizedmeshterraingenerator.h"
-
 
 Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, Qt3DRender::QRenderSettings *renderSettings, Qt3DRender::QCamera *camera, const QRect& viewportRect, Qt3DCore::QNode* parent)
   : Qt3DCore::QEntity(parent)
-  , testChunkEntity(nullptr)
 {
   defaultFrameGraph->setClearColor(map.backgroundColor);
 
@@ -52,16 +48,14 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
   mCameraController->setCameraData(0, 0, 1000);
 
   // create terrain entity
-  mTerrain = new Terrain(map);
-  mTerrain->setEnabled(false);
+  mTerrain = new Terrain(3, map);
+  //mTerrain->setEnabled(false);
   mTerrain->setParent(this);
-  mTerrain->setMaxLevel(3);
-  mTerrain->setCamera(camera);
-  connect(mCameraController, &CameraController::cameraChanged, mTerrain, &Terrain::cameraViewMatrixChanged);
-  mTerrain->setViewport(viewportRect);
   // add camera control's terrain picker as a component to be able to capture height where mouse was
   // pressed in order to correcly pan camera when draggin mouse
   mTerrain->addComponent(mCameraController->terrainPicker());
+  if (map.showBoundingBoxes)
+    mTerrain->setShowBoundingBoxes(true);
 
   Q_FOREACH (const PolygonRenderer& pr, map.polygonRenderers)
   {
@@ -94,23 +88,14 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
     le->setParent(this);
   }
 
-  //testChunkEntity = new ChunkedEntity(AABB(-500, 0, -500, 500, 100, 500), 2.f, 3.f, 7, new TestChunkLoaderFactory);
-
-  map.terrainGenerator->setTerrain(mTerrain);
-  FlatTerrainGenerator* loaderFactory = static_cast<FlatTerrainGenerator*>(map.terrainGenerator.get());
-  //DemTerrainGenerator* loaderFactory = static_cast<DemTerrainGenerator*>(map.terrainGenerator.get());
-  //QuantizedMeshTerrainGenerator* loaderFactory = static_cast<QuantizedMeshTerrainGenerator*>(map.terrainGenerator.get());
-  QgsRectangle te = loaderFactory->extent();
-  // TODO: how to estimate min/max height?
-  AABB terrainRootBbox(te.xMinimum() - map.originX, 0, -te.yMaximum() + map.originY,
-                       te.xMaximum() - map.originX, 1000, -te.yMinimum() + map.originY);
-  testChunkEntity = new ChunkedEntity(terrainRootBbox, 2.f, 3.f, 3, loaderFactory);
-  testChunkEntity->setShowBoundingBoxes(map.showBoundingBoxes);
-  //testChunkEntity->setEnabled(false);
+  ChunkedEntity* testChunkEntity = new ChunkedEntity(AABB(-500, 0, -500, 500, 100, 500), 2.f, 3.f, 7, new TestChunkLoaderFactory);
+  testChunkEntity->setEnabled(false);
   testChunkEntity->setParent(this);
 
   connect(mCameraController, &CameraController::cameraChanged, this, &Scene::onCameraChanged);
   connect(mCameraController, &CameraController::viewportChanged, this, &Scene::onCameraChanged);
+
+  chunkEntities << testChunkEntity << mTerrain;
 
 #if 0
   // experiments with loading of existing 3D models.
@@ -149,7 +134,7 @@ Scene::Scene(const Map3D& map, Qt3DExtras::QForwardRenderer *defaultFrameGraph, 
     // it _somehow_ works even when frustum culling is enabled with some camera positions,
     // but then when zoomed in more it would disappear - so let's keep frustum culling disabled
     defaultFrameGraph->setFrustumCullingEnabled(false);
-    }
+  }
 }
 
 SceneState _sceneState(CameraController* cameraController)
@@ -166,17 +151,23 @@ SceneState _sceneState(CameraController* cameraController)
 
 void Scene::onCameraChanged()
 {
-  if (testChunkEntity && testChunkEntity->isEnabled())
-    testChunkEntity->update(_sceneState(mCameraController));
+  Q_FOREACH (ChunkedEntity* entity, chunkEntities)
+  {
+    if (entity->isEnabled())
+      entity->update(_sceneState(mCameraController));
+  }
 }
 
 void Scene::onFrameTriggered(float dt)
 {
   mCameraController->frameTriggered(dt);
 
-  if (testChunkEntity && testChunkEntity->isEnabled() && testChunkEntity->needsUpdate)
+  Q_FOREACH (ChunkedEntity* entity, chunkEntities)
   {
-    qDebug() << "need for update";
-    testChunkEntity->update(_sceneState(mCameraController));
+    if (entity->isEnabled() && entity->needsUpdate)
+    {
+      qDebug() << "need for update";
+      entity->update(_sceneState(mCameraController));
+    }
   }
 }

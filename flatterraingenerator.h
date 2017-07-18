@@ -12,7 +12,7 @@ namespace Qt3DExtras
   class QPlaneGeometry;
 }
 
-class FlatTerrainGenerator : public TerrainGenerator, public ChunkLoaderFactory
+class FlatTerrainGenerator : public TerrainGenerator
 {
 public:
   FlatTerrainGenerator();
@@ -21,7 +21,7 @@ public:
 
   Type type() const override;
   QgsRectangle extent() const override;
-  TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const override;
+  virtual void rootChunkHeightRange(float& hMin, float& hMax) const override;
   virtual void writeXml(QDomElement& elem) const override;
   virtual void readXml(const QDomElement& elem) override;
 

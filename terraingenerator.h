@@ -1,56 +1,14 @@
 #ifndef FLATTERRAINTILE_H
 #define FLATTERRAINTILE_H
 
-#include <Qt3DCore/QEntity>
-#include <Qt3DCore/QTransform>
-
-#if QT_VERSION >= 0x050900
-#include <Qt3DExtras/QTextureMaterial>
-#else
-#include <Qt3DExtras/QDiffuseMapMaterial>
-#endif
-
-#include "aabb.h"
 #include "tilingscheme.h"
+#include "chunkloader.h"
 
-class QuadTreeNode;
-class FlatTerrainTileMesh;
+class AABB;
 class Map3D;
 class QgsRectangle;
 class Terrain;
 
-/**
- * Base class for all kinds of terrain tiles.
- * This is an Qt 3D entity meant for inclusion in the 3D scene.
- *
- * It automatically creates transform component and texture material
- * with texture rendered from the map's layers.
- */
-class TerrainTileEntity : public Qt3DCore::QEntity
-{
-  Q_OBJECT
-public:
-  TerrainTileEntity(Terrain* terrain, QuadTreeNode* node, Qt3DCore::QNode *parent = nullptr);
-
-  Terrain* mTerrain;
-  AABB bbox;  //!< bounding box
-  float epsilon;  //!< (geometric) error of this tile (in world coordinates)
-  bool m_textureReady;  //!< whether tile's texture is available -> ready to be displayed
-
-private slots:
-  void onTextureReady();
-
-signals:
-  void textureReady();
-
-protected:
-#if QT_VERSION >= 0x050900
-  Qt3DExtras::QTextureMaterial* material;
-#else
-  Qt3DExtras::QDiffuseMapMaterial* material;
-#endif
-  Qt3DCore::QTransform* transform;
-};
 
 class QDomElement;
 class QDomDocument;
@@ -62,7 +20,7 @@ class QgsProject;
  * by the generator itself. Terrain generators are asked to produce new terrain tiles
  * whenever that is deemed necessary by the terrain controller (that caches generated tiles).
  */
-class TerrainGenerator
+class TerrainGenerator : public ChunkLoaderFactory
 {
 public:
 
@@ -83,8 +41,14 @@ public:
   //! extent of the terrain in terrain's CRS
   virtual QgsRectangle extent() const = 0;
 
-  //! Factory method to create tile entity for given [x,y,z] tile coordinates
-  virtual TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const = 0;
+  //! Returns bounding box of the root chunk
+  virtual AABB rootChunkBbox(const Map3D& map) const;
+
+  //! Returns error of the root chunk in world coordinates
+  virtual float rootChunkError(const Map3D& map) const;
+
+  //! Returns height range of the root chunk in world coordinates
+  virtual void rootChunkHeightRange(float& hMin, float& hMax) const;
 
   //! Write terrain generator's configuration to XML
   virtual void writeXml(QDomElement& elem) const = 0;

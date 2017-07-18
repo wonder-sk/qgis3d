@@ -67,9 +67,9 @@ int main(int argc, char *argv[])
   map.drawTerrainTileInfo = true;
 
   TerrainGenerator::Type tt;
-  tt = TerrainGenerator::Flat;
+  //tt = TerrainGenerator::Flat;
   //tt = TerrainGenerator::Dem;
-  //tt = TerrainGenerator::QuantizedMesh;
+  tt = TerrainGenerator::QuantizedMesh;
 
   if (tt == TerrainGenerator::Flat)
   {

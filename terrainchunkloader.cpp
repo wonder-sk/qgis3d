@@ -9,6 +9,12 @@
 
 #include <Qt3DRender/QTexture>
 
+#if QT_VERSION >= 0x050900
+#include <Qt3DExtras/QTextureMaterial>
+#else
+#include <Qt3DExtras/QDiffuseMapMaterial>
+#endif
+
 #include "quantizedmeshterraingenerator.h"
 
 

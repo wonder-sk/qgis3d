@@ -40,6 +40,7 @@ Map3D::Map3D()
   , backgroundColor(Qt::black)
   , zExaggeration(1)
   , tileTextureSize(512)
+  , maxTerrainError(3.f)
   , skybox(false)
   , showBoundingBoxes(false)
   , drawTerrainTileInfo(false)
@@ -61,6 +62,7 @@ void Map3D::readXml(const QDomElement &elem, const QgsReadWriteContext &context)
   QDomElement elemTerrain = elem.firstChildElement("terrain");
   zExaggeration = elemTerrain.attribute("exaggeration", "1").toFloat();
   tileTextureSize = elemTerrain.attribute("texture-size", "512").toInt();
+  maxTerrainError = elemTerrain.attribute("max-terrain-error", "3").toFloat();
   QDomElement elemMapLayers = elemTerrain.firstChildElement("layers");
   QDomElement elemMapLayer = elemMapLayers.firstChildElement("layer");
   QList<QgsMapLayerRef> mapLayers;
@@ -143,8 +145,9 @@ QDomElement Map3D::writeXml(QDomDocument &doc, const QgsReadWriteContext &contex
   elem.appendChild(elemCrs);
 
   QDomElement elemTerrain = doc.createElement("terrain");
-  elemTerrain.setAttribute("exaggeration", zExaggeration);
+  elemTerrain.setAttribute("exaggeration", QString::number(zExaggeration));
   elemTerrain.setAttribute("texture-size", tileTextureSize);
+  elemTerrain.setAttribute("max-terrain-error", QString::number(maxTerrainError));
   QDomElement elemMapLayers = doc.createElement("layers");
   Q_FOREACH (const QgsMapLayerRef& layerRef, mLayers)
   {

@@ -34,7 +34,6 @@ void Window3D::resizeEvent(QResizeEvent *ev)
   Qt3DExtras::Qt3DWindow::resizeEvent(ev);
   QRect viewportRect(QPoint(0,0), size());
   scene->cameraController()->setViewport(viewportRect);
-  scene->terrain()->setViewport(viewportRect);
 }
 
 void Window3D::onTimeout()

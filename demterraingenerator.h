@@ -15,7 +15,7 @@ class QgsRasterLayer;
 /**
  * Implementation of terrain generator that uses a raster layer with DEM to build terrain.
  */
-class DemTerrainGenerator : public TerrainGenerator, public ChunkLoaderFactory
+class DemTerrainGenerator : public TerrainGenerator
 {
 public:
   DemTerrainGenerator();
@@ -30,7 +30,6 @@ public:
 
   Type type() const override;
   QgsRectangle extent() const override;
-  virtual TerrainTileEntity* createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const override;
   virtual void writeXml(QDomElement& elem) const override;
   virtual void readXml(const QDomElement& elem) override;
   virtual void resolveReferences(const QgsProject& project) override;
@@ -46,24 +45,6 @@ private:
   QgsMapLayerRef mLayer;
   //! how many vertices to place on one side of the tile
   int mResolution;
-};
-
-
-class DemTerrainTileGeometry;
-
-//! tile made from DEM
-class DemTerrainTile : public TerrainTileEntity
-{
-  Q_OBJECT
-public:
-  DemTerrainTile(Terrain* terrain, QuadTreeNode* node, Qt3DCore::QNode *parent = nullptr);
-
-private slots:
-  void onHeightMapReady(int jobId, const QByteArray& heightMap);
-
-private:
-  int jobId;
-  DemTerrainTileGeometry* geometry;
 };
 
 

@@ -45,7 +45,7 @@ private:
   Qt3DLogic::QFrameAction* mFrameAction;
   CameraController* mCameraController;
   Terrain* mTerrain;
-  ChunkedEntity* testChunkEntity;
+  QList<ChunkedEntity*> chunkEntities;
 };
 
 #endif // SCENE_H

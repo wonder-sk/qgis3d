@@ -35,6 +35,8 @@ static float screenSpaceError(ChunkNode* node, const SceneState& state)
 {
   float dist = node->bbox.distanceFromPoint(state.cameraPos);
 
+  // TODO: what to do when distance == 0 ?
+
   float sse = screenSpaceError(node->error, dist, state.screenSizePx, state.cameraFov);
   return sse;
 }
@@ -205,7 +207,7 @@ void ChunkedEntity::setShowBoundingBoxes(bool enabled)
 
 void ChunkedEntity::update(ChunkNode *node, const SceneState &state)
 {
-  // TODO: re-enable frustum culling
+  // TODO: fix and re-enable frustum culling
   if (0 && !isInFrustum(node->bbox, state.viewProjectionMatrix))
   {
     ++frustumCulled;
@@ -224,6 +226,8 @@ void ChunkedEntity::update(ChunkNode *node, const SceneState &state)
     qDebug() << "BOOM!";
     return;
   }
+
+  //qDebug() << node->x << "|" << node->y << "|" << node->z << "  " << tau << "  " << screenSpaceError(node, state);
 
   if (screenSpaceError(node, state) <= tau)
   {

@@ -1,7 +1,6 @@
 #include "demterraingenerator.h"
 
 #include "map3d.h"
-#include "quadtree.h"
 #include "demterraintilegeometry.h"
 #include "maptexturegenerator.h"
 #include "terrain.h"
@@ -13,7 +12,7 @@
 #include "chunknode.h"
 
 
-
+#if 0
 static QByteArray _temporaryHeightMap(int res)
 {
   QByteArray heightMap;
@@ -24,6 +23,7 @@ static QByteArray _temporaryHeightMap(int res)
     bits[i] = 0;
   return heightMap;
 }
+#endif
 
 static void _heightMapMinMax(const QByteArray& heightMap, float& zMin, float& zMax)
 {
@@ -59,8 +59,6 @@ public:
 
     heightMap = generator->heightMapGenerator()->renderSynchronously(node->x, node->y, node->z);
     resolution = generator->heightMapGenerator()->resolution();
-
-    //epsilon = side / map.tileTextureSize;  // use texel size as the error
 
     loadTexture();
   }
@@ -112,60 +110,6 @@ private:
 };
 
 
-// ------------
-
-
-DemTerrainTile::DemTerrainTile(Terrain* terrain, QuadTreeNode *node, Qt3DCore::QNode *parent)
-  : TerrainTileEntity(terrain, node, parent)
-{
-  const Map3D& map = terrain->map3D();
-  DemTerrainGenerator* generator = static_cast<DemTerrainGenerator*>(map.terrainGenerator.get());
-
-  // generate a temporary heightmap
-  // TODO: use upsampled heightmap from parent
-  QByteArray heightMap = _temporaryHeightMap(generator->resolution());
-
-  // async request for heightmap
-  jobId = generator->heightMapGenerator()->render(node->x, node->y, node->level);
-  connect(generator->heightMapGenerator(), &DemHeightMapGenerator::heightMapReady, this, &DemTerrainTile::onHeightMapReady);
-
-  float zMin, zMax;
-  _heightMapMinMax(heightMap, zMin, zMax);
-
-  Qt3DRender::QGeometryRenderer* mesh = new Qt3DRender::QGeometryRenderer;
-  geometry = new DemTerrainTileGeometry(generator->heightMapGenerator()->resolution(), heightMap, mesh);
-  mesh->setGeometry(geometry);
-  addComponent(mesh);  // takes ownership if the component has no parent
-
-  QgsRectangle extent = node->extent;
-  double x0 = extent.xMinimum() - map.originX;
-  double y0 = extent.yMinimum() - map.originY;
-  double side = extent.width();
-  double half = side/2;
-
-  transform->setScale3D(QVector3D(side, map.zExaggeration, side));
-  transform->setTranslation(QVector3D(x0 + half,0, - (y0 + half)));
-
-  bbox = AABB(x0, zMin*map.zExaggeration, -y0, x0 + side, zMax*map.zExaggeration, -(y0 + side));
-  epsilon = side / map.tileTextureSize;  // use texel size as the error
-}
-
-void DemTerrainTile::onHeightMapReady(int jobId, const QByteArray &heightMap)
-{
-  if (jobId == this->jobId)
-  {
-    geometry->setHeightMap(heightMap);
-
-    // also update our bbox!
-    float zMin, zMax;
-    _heightMapMinMax(heightMap, zMin, zMax);
-    const Map3D& map = mTerrain->map3D();
-    bbox.yMin = zMin*map.zExaggeration;
-    bbox.yMax = zMax*map.zExaggeration;
-  }
-}
-
-
 // ---------------
 
 
@@ -193,11 +137,6 @@ TerrainGenerator::Type DemTerrainGenerator::type() const
 QgsRectangle DemTerrainGenerator::extent() const
 {
   return terrainTilingScheme.tileToExtent(0, 0, 0);
-}
-
-TerrainTileEntity *DemTerrainGenerator::createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const
-{
-  return new DemTerrainTile(terrain, n, parent);
 }
 
 void DemTerrainGenerator::writeXml(QDomElement& elem) const

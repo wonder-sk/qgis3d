@@ -141,6 +141,7 @@ public:
   QList<QgsMapLayer*> layers() const;
 
   int tileTextureSize;   //!< size of map textures of tiles in pixels (width/height)
+  int maxTerrainError;   //!< maximum allowed terrain error in pixels
   std::unique_ptr<TerrainGenerator> terrainGenerator;  //!< implementation of the terrain generation
 
   //

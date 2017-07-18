@@ -9,7 +9,6 @@ SOURCES += main.cpp \
     sidepanel.cpp \
     maptexturegenerator.cpp \
     maptextureimage.cpp \
-    quadtree.cpp \
     terrain.cpp \
     tilingscheme.cpp \
     quantizedmeshgeometry.cpp \
@@ -87,7 +86,6 @@ HEADERS += \
     sidepanel.h \
     maptexturegenerator.h \
     maptextureimage.h \
-    quadtree.h \
     terrain.h \
     tilingscheme.h \
     quantizedmeshgeometry.h \

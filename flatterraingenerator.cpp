@@ -4,7 +4,6 @@
 #include <Qt3DExtras/QPlaneGeometry>
 
 #include "map3d.h"
-#include "quadtree.h"
 #include "terrain.h"
 
 #include "chunknode.h"
@@ -72,42 +71,6 @@ Qt3DCore::QEntity *FlatTerrainChunkLoader::createEntity(Qt3DCore::QEntity *paren
 }
 
 
-//---------------
-
-
-//! just a simple quad with a map texture
-class FlatTerrainTile : public TerrainTileEntity
-{
-public:
-  FlatTerrainTile(Qt3DExtras::QPlaneGeometry* tileGeometry, Terrain* terrain, QuadTreeNode* node, Qt3DCore::QNode *parent = nullptr);
-
-private:
-};
-
-FlatTerrainTile::FlatTerrainTile(Qt3DExtras::QPlaneGeometry *tileGeometry, Terrain* terrain, QuadTreeNode *node, Qt3DCore::QNode *parent)
-  : TerrainTileEntity(terrain, node, parent)
-{
-  const Map3D& map = terrain->map3D();
-  Qt3DRender::QGeometryRenderer* mesh = new Qt3DRender::QGeometryRenderer;
-  mesh->setGeometry(tileGeometry);  // does not take ownership - geometry is already owned by FlatTerrain entity
-  addComponent(mesh);  // takes ownership if the component has no parent
-
-  // set up transform according to the extent covered by the quad geometry
-  QgsRectangle extent = node->extent;
-
-  double x0 = extent.xMinimum() - map.originX;
-  double y0 = extent.yMinimum() - map.originY;
-  double side = extent.width();
-  double half = side/2;
-
-  transform->setScale(extent.width());
-  transform->setTranslation(QVector3D(x0 + half,0, - (y0 + half)));
-
-  bbox = AABB(x0, 0, -y0, x0 + side, 0, -(y0 + side));
-  epsilon = side / map.tileTextureSize;  // no geometric error - use texel size as the error
-}
-
-
 // ---------------
 
 
@@ -133,9 +96,10 @@ QgsRectangle FlatTerrainGenerator::extent() const
   return terrainTilingScheme.tileToExtent(0, 0, 0);
 }
 
-TerrainTileEntity *FlatTerrainGenerator::createTile(Terrain* terrain, QuadTreeNode *n, Qt3DCore::QNode *parent) const
+void FlatTerrainGenerator::rootChunkHeightRange(float &hMin, float &hMax) const
 {
-  return new FlatTerrainTile(tileGeometry, terrain, n, parent);
+  hMin = 0;
+  hMax = 0;
 }
 
 void FlatTerrainGenerator::writeXml(QDomElement &elem) const

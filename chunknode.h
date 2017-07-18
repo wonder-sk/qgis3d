@@ -18,7 +18,7 @@ class ChunkNode
 {
 public:
   //! constructs a skeleton chunk
-  ChunkNode(int x, int y, int z, const AABB& bbox, float error);
+  ChunkNode(int x, int y, int z, const AABB& bbox, float error, ChunkNode* parent = nullptr);
 
   ~ChunkNode();
 

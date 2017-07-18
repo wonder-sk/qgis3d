@@ -1,70 +1,37 @@
 #include "terraingenerator.h"
 
-#include <Qt3DRender/QTexture>
-
-#include "qgscoordinatetransform.h"
-
+#include "aabb.h"
 #include "map3d.h"
-#include "maptexturegenerator.h"
-#include "maptextureimage.h"
-#include "quadtree.h"
-#include "quantizedmeshterraingenerator.h"
-#include "terrain.h"
 
 
-TerrainTileEntity::TerrainTileEntity(Terrain* terrain, QuadTreeNode* node, Qt3DCore::QNode *parent)
-  : Qt3DCore::QEntity(parent)
-  , mTerrain(terrain)
-  , m_textureReady(false)
+AABB TerrainGenerator::rootChunkBbox(const Map3D& map) const
 {
-  const Map3D& map = terrain->map3D();
-  int tx, ty, tz;
-  if (map.terrainGenerator->type() == TerrainGenerator::QuantizedMesh)
-  {
-    // TODO: sort out - should not be here
-    QuantizedMeshTerrainGenerator* generator = static_cast<QuantizedMeshTerrainGenerator*>(map.terrainGenerator.get());
-    generator->quadTreeTileToBaseTile(node->x, node->y, node->level, tx, ty, tz);
-  }
-  else
-  {
-    tx = node->x;
-    ty = node->y;
-    tz = node->level;
-  }
+  QgsRectangle te = extent();
+  QgsCoordinateTransform terrainToMapTransform(crs(), map.crs);
+  te = terrainToMapTransform.transformBoundingBox(te);
 
-  QgsRectangle extentTerrainCrs = map.terrainGenerator->terrainTilingScheme.tileToExtent(tx, ty, tz);
-  QgsRectangle extentMapCrs = terrain->terrainToMapTransform().transformBoundingBox(extentTerrainCrs);
-  QString tileDebugText = map.drawTerrainTileInfo ? QString("%1 | %2 | %3").arg(tx).arg(ty).arg(tz) : QString();
-
-  Qt3DRender::QTexture2D* texture = new Qt3DRender::QTexture2D(this);
-  MapTextureImage* image = new MapTextureImage(terrain->mapTextureGenerator(), extentMapCrs, tileDebugText);
-  connect(image, &MapTextureImage::textureReady, this, &TerrainTileEntity::onTextureReady);
-  texture->addTextureImage(image);
-  texture->setMinificationFilter(Qt3DRender::QTexture2D::Linear);
-  texture->setMagnificationFilter(Qt3DRender::QTexture2D::Linear);
-#if QT_VERSION >= 0x050900
-  material = new Qt3DExtras::QTextureMaterial;
-  material->setTexture(texture);
-#else
-  material = new Qt3DExtras::QDiffuseMapMaterial;
-  material->setDiffuse(texture);
-  material->setShininess(1);
-  material->setAmbient(Qt::white);
-#endif
-  addComponent(material);  // takes ownership if the component has no parent
-
-  // create transform for derived classes
-  transform = new Qt3DCore::QTransform();
-  addComponent(transform);
+  float hMin, hMax;
+  rootChunkHeightRange(hMin, hMax);
+  return AABB(te.xMinimum() - map.originX, hMin * map.zExaggeration, -te.yMaximum() + map.originY,
+              te.xMaximum() - map.originX, hMax * map.zExaggeration, -te.yMinimum() + map.originY);
 }
 
-void TerrainTileEntity::onTextureReady()
+float TerrainGenerator::rootChunkError(const Map3D &map) const
 {
-  m_textureReady = true;
-  emit textureReady();
+  QgsRectangle te = extent();
+  QgsCoordinateTransform terrainToMapTransform(crs(), map.crs);
+  te = terrainToMapTransform.transformBoundingBox(te);
+
+  // use texel size as the error
+  return te.width() / map.tileTextureSize;
 }
 
-// -------------------
+void TerrainGenerator::rootChunkHeightRange(float &hMin, float &hMax) const
+{
+  // TODO: makes sense to have kind of default implementation?
+  hMin = 0;
+  hMax = 400;
+}
 
 QString TerrainGenerator::typeToString(TerrainGenerator::Type type)
 {
