@@ -88,11 +88,20 @@ ChunkedEntity::ChunkedEntity(const AABB &rootBbox, float rootError, float tau, i
   rootNode = new ChunkNode(0, 0, 0, rootBbox, rootError);
   chunkLoaderQueue = new ChunkList;
   replacementQueue = new ChunkList;
+
+  loaderThread = new LoaderThread(chunkLoaderQueue, loaderMutex, loaderWaitCondition);
+  connect(loaderThread, &LoaderThread::nodeLoaded, this, &ChunkedEntity::onNodeLoaded);
+  loaderThread->start();
 }
 
 
 ChunkedEntity::~ChunkedEntity()
 {
+  loaderThread->setStopping(true);
+  loaderWaitCondition.wakeOne();  // may be waiting
+  loaderThread->wait();
+  delete loaderThread;
+
   // TODO: delete any entries in the loader queue
   delete chunkLoaderQueue;
 
@@ -161,28 +170,6 @@ void ChunkedEntity::update(const SceneState &state)
   needsUpdate = false;  // just updated
 
   qDebug() << "update: active " << activeNodes.count() << " enabled " << enabled << " disabled " << disabled << " | culled " << frustumCulled << " | loading " << chunkLoaderQueue->count() << " loaded " << replacementQueue->count() << " | unloaded " << unloaded;
-
-  // now process queue requests (for now in main thread)
-  // TODO: move to worker thread
-  while (!chunkLoaderQueue->isEmpty())
-  {
-    ChunkListEntry* entry = chunkLoaderQueue->takeFirst();
-    ChunkNode* node = entry->chunk;
-
-    Q_ASSERT(node->state == ChunkNode::Loading);
-    Q_ASSERT(node->loader);
-
-    // do the work (should be in worker thread)
-    node->loader->load();
-
-    // load into node (should be in main thread again)
-    node->setLoaded(node->loader->createEntity(this), entry);
-
-    replacementQueue->insertFirst(entry);
-
-    // now we need an update!
-    needsUpdate = true;
-  }
 }
 
 void ChunkedEntity::setShowBoundingBoxes(bool enabled)
@@ -263,18 +250,91 @@ void ChunkedEntity::requestResidency(ChunkNode *node)
   else if (node->state == ChunkNode::Loading)
   {
     // move to the front of loading queue
+    loaderMutex.lock();
     Q_ASSERT(node->loaderQueueEntry);
     Q_ASSERT(node->loader);
-    chunkLoaderQueue->takeEntry(node->loaderQueueEntry);
-    chunkLoaderQueue->insertFirst(node->loaderQueueEntry);
+    if (node->loaderQueueEntry->prev || node->loaderQueueEntry->next)
+    {
+      chunkLoaderQueue->takeEntry(node->loaderQueueEntry);
+      chunkLoaderQueue->insertFirst(node->loaderQueueEntry);
+    }
+    else
+    {
+      // the entry is being currently processed by the loading thread
+      // (or it is at the head of 1-entry list)
+    }
+    loaderMutex.unlock();
   }
   else if (node->state == ChunkNode::Skeleton)
   {
     // add to the loading queue
+    loaderMutex.lock();
     ChunkListEntry* entry = new ChunkListEntry(node);
     node->setLoading(chunkLoaderFactory->createChunkLoader(node), entry);
     chunkLoaderQueue->insertFirst(entry);
+    if (chunkLoaderQueue->count() == 1)
+      loaderWaitCondition.wakeOne();
+    loaderMutex.unlock();
   }
   else
     Q_ASSERT(false && "impossible!");
+}
+
+void ChunkedEntity::onNodeLoaded(ChunkNode *node)
+{
+  Qt3DCore::QEntity* entity = node->loader->createEntity(this);
+
+  loaderMutex.lock();
+  ChunkListEntry* entry = node->loaderQueueEntry;
+
+  // load into node (should be in main thread again)
+  node->setLoaded(entity, entry);
+  loaderMutex.unlock();
+
+  replacementQueue->insertFirst(entry);
+
+  // now we need an update!
+  needsUpdate = true;
+}
+
+
+// -------
+
+
+LoaderThread::LoaderThread(ChunkList *list, QMutex &mutex, QWaitCondition& waitCondition)
+  : loadList(list)
+  , mutex(mutex)
+  , waitCondition(waitCondition)
+  , stopping(false)
+{
+}
+
+void LoaderThread::run()
+{
+  while (!stopping)
+  {
+    ChunkListEntry* entry = nullptr;
+    mutex.lock();
+    if (loadList->isEmpty())
+      waitCondition.wait(&mutex);
+
+    // we can get woken up also when we need to stop
+    if (stopping)
+    {
+      mutex.unlock();
+      break;
+    }
+
+    Q_ASSERT(!loadList->isEmpty());
+    entry = loadList->takeFirst();
+    mutex.unlock();
+
+    qDebug() << "[THR] loading! " << entry->chunk->x << " | " << entry->chunk->y << " | " << entry->chunk->z;
+
+    entry->chunk->loader->load();
+
+    qDebug() << "[THR] done!";
+
+    emit nodeLoaded(entry->chunk);
+  }
 }

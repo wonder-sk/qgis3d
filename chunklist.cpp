@@ -74,6 +74,8 @@ void ChunkList::takeEntry(ChunkListEntry *entry)
     entry->prev = nullptr;
   }
   --mCount;
+  Q_ASSERT(!entry->prev);
+  Q_ASSERT(!entry->next);
 }
 
 ChunkListEntry *ChunkList::takeFirst()

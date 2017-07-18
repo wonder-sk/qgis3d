@@ -2,12 +2,15 @@
 #define CHUNKEDENTITY_H
 
 #include <Qt3DCore/QEntity>
+#include <QMutex>
+#include <QWaitCondition>
 
 class AABB;
 class ChunkNode;
 class ChunkList;
 class ChunkLoaderFactory;
 class TerrainBoundsEntity;
+class LoaderThread;
 
 #include <QVector3D>
 #include <QMatrix4x4>
@@ -28,6 +31,7 @@ public:
 //! based on data error and unloading of data when data are not necessary anymore
 class ChunkedEntity : public Qt3DCore::QEntity
 {
+  Q_OBJECT
 public:
   ChunkedEntity(const AABB& rootBbox, float rootError, float tau, int maxLevel, ChunkLoaderFactory* loaderFactory, Qt3DCore::QNode* parent = nullptr);
   ~ChunkedEntity();
@@ -44,6 +48,9 @@ private:
 
   //! make sure that the chunk will be loaded soon (if not loaded yet) and not unloaded anytime soon (if loaded already)
   void requestResidency(ChunkNode* node);
+
+private slots:
+  void onNodeLoaded(ChunkNode* node);
 
 private:
   //! root node of the quadtree hierarchy
@@ -70,7 +77,33 @@ private:
   int maxLoadedChunks;
 
   TerrainBoundsEntity* bboxesEntity;
+
+  LoaderThread* loaderThread;
+  QMutex loaderMutex;
+  QWaitCondition loaderWaitCondition;
 };
 
+
+#include <QThread>
+
+class LoaderThread : public QThread
+{
+  Q_OBJECT
+public:
+  LoaderThread(ChunkList* list, QMutex& mutex, QWaitCondition& waitCondition);
+
+  void setStopping(bool stop) { stopping = stop; }
+
+  void run() override;
+
+signals:
+  void nodeLoaded(ChunkNode* node);
+
+private:
+  ChunkList* loadList;
+  QMutex& mutex;
+  QWaitCondition& waitCondition;
+  bool stopping;
+};
 
 #endif // CHUNKEDENTITY_H
