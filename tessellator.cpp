@@ -70,7 +70,7 @@ static bool _isRingCounterClockWise(const QgsCurve& ring)
   return a > 0; // clockwise if a is negative
 }
 
-static void _makeWalls(const QgsCurve& ring, bool ccw, float height, float extrusionHeight, QVector<float>& data, bool addNormals, double originX, double originY)
+static void _makeWalls(const QgsCurve& ring, bool ccw, float extrusionHeight, QVector<float>& data, bool addNormals, double originX, double originY)
 {
   // we need to find out orientation of the ring so that the triangles we generate
   // face the right direction
@@ -87,15 +87,19 @@ static void _makeWalls(const QgsCurve& ring, bool ccw, float height, float extru
     ring.pointAt(is_counter_clockwise == ccw ? i : ring.numPoints() - i - 1, pt, vt);
     float x0 = ptPrev.x() - originX, y0 = ptPrev.y() - originY;
     float x1 = pt.x() - originX, y1 = pt.y() - originY;
+    float height = pt.z();
     // make a quad
     make_quad(x0, y0, x1, y1, height, height+extrusionHeight, data, addNormals);
     ptPrev = pt;
   }
 }
 
-void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float extrusionHeight)
+void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float extrusionHeight)
 {
   const QgsCurve* exterior = polygon.exteriorRing();
+
+  QList< std::vector<p2t::Point*> > polylinesToDelete;
+  QHash<p2t::Point*, float> z;
 
   std::vector<p2t::Point*> polyline;
   polyline.reserve(exterior->numPoints());
@@ -106,8 +110,12 @@ void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float ex
   for (int i = 0; i < exterior->numPoints() - 1; ++i)
   {
     exterior->pointAt(i, pt, vt);
-    polyline.push_back(new p2t::Point(pt.x() - originX, pt.y() - originY));
+    p2t::Point* pt2 = new p2t::Point(pt.x() - originX, pt.y() - originY);
+    polyline.push_back(pt2);
+    float zPt = qIsNaN( pt.z() ) ? 0 : pt.z();
+    z[pt2] = zPt;
   }
+  polylinesToDelete << polyline;
 
   p2t::CDT* cdt = new p2t::CDT(polyline);
 
@@ -120,9 +128,13 @@ void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float ex
     for (int j = 0; j < hole->numPoints() - 1; ++j)
     {
       hole->pointAt(j, pt, vt);
-      holePolyline.push_back(new p2t::Point(pt.x() - originX, pt.y() - originY));
+      p2t::Point* pt2 = new p2t::Point(pt.x() - originX, pt.y() - originY);
+      holePolyline.push_back(pt2);
+      float zPt = qIsNaN( pt.z() ) ? 0 : pt.z();
+      z[pt2] = zPt;
     }
     cdt->AddHole(holePolyline);
+    polylinesToDelete << holePolyline;
   }
 
   // TODO: robustness (no duplicate / nearly duplicate points, ...)
@@ -137,21 +149,23 @@ void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float height, float ex
     for (int j = 0; j < 3; ++j)
     {
       p2t::Point* p = t->GetPoint(j);
-      data << p->x << extrusionHeight+height << -p->y;
+      float zPt = z[p];
+      data << p->x << extrusionHeight + zPt << -p->y;
       if (addNormals)
         data << 0.f << 1.f << 0.f;
     }
   }
 
   delete cdt;
-  qDeleteAll(polyline);
+  for (int i = 0; i < polylinesToDelete.count(); ++i)
+    qDeleteAll(polylinesToDelete[i]);
 
   // add walls if extrusion is enabled
   if (extrusionHeight != 0)
   {
-    _makeWalls(*exterior, false, height, extrusionHeight, data, addNormals, originX, originY);
+    _makeWalls(*exterior, false, extrusionHeight, data, addNormals, originX, originY);
 
     for (int i = 0; i < polygon.numInteriorRings(); ++i)
-      _makeWalls(*polygon.interiorRing(i), true, height, extrusionHeight, data, addNormals, originX, originY);
+      _makeWalls(*polygon.interiorRing(i), true, extrusionHeight, data, addNormals, originX, originY);
   }
 }

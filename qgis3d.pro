@@ -35,7 +35,8 @@ SOURCES += main.cpp \
     chunklist.cpp \
     testchunkloader.cpp \
     chunkloader.cpp \
-    terrainchunkloader.cpp
+    terrainchunkloader.cpp \
+    utils.cpp
 
 RESOURCES += qml.qrc \
     data.qrc
@@ -115,4 +116,5 @@ HEADERS += \
     chunklist.h \
     testchunkloader.h \
     chunkloader.h \
-    terrainchunkloader.h
+    terrainchunkloader.h \
+    utils.h

@@ -23,6 +23,7 @@
 #include <QVector3D>
 
 #include "map3d.h"
+#include "terraingenerator.h"
 
 #include "qgsvectorlayer.h"
 #include "qgspoint.h"
@@ -51,7 +52,8 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
     {
       QgsPoint* pt = static_cast<QgsPoint*>(g);
       // TODO: use Z coordinates if the point is 3D
-      positions.append(QVector3D(pt->x() - map.originX, settings.height, -(pt->y() - map.originY)));
+      float h = map.terrainGenerator->heightAt(pt->x(), pt->y(), map) * map.zExaggeration;
+      positions.append(QVector3D(pt->x() - map.originX, h + settings.height, -(pt->y() - map.originY)));
       //qDebug() << positions.last();
     }
     else

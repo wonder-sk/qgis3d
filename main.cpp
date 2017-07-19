@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
 
   TerrainGenerator::Type tt;
   //tt = TerrainGenerator::Flat;
-  //tt = TerrainGenerator::Dem;
-  tt = TerrainGenerator::QuantizedMesh;
+  tt = TerrainGenerator::Dem;
+  //tt = TerrainGenerator::QuantizedMesh;
 
   if (tt == TerrainGenerator::Flat)
   {
@@ -172,7 +172,8 @@ int main(int argc, char *argv[])
   lr.setLayer(vlLines);
   lr.material.setAmbient(Qt::yellow);
   lr.material.setShininess(0);
-  lr.height = 0.5;
+  lr.altBinding = AltBindVertex;  // follow terrain
+  lr.height = 1.5;
   lr.distance = 2.5;
   map.lineRenderers << lr;
 

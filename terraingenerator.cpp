@@ -33,6 +33,14 @@ void TerrainGenerator::rootChunkHeightRange(float &hMin, float &hMax) const
   hMax = 400;
 }
 
+float TerrainGenerator::heightAt(double x, double y, const Map3D &map) const
+{
+  Q_UNUSED(x);
+  Q_UNUSED(y);
+  Q_UNUSED(map);
+  return 0.f;
+}
+
 QString TerrainGenerator::typeToString(TerrainGenerator::Type type)
 {
   switch (type)

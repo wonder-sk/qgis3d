@@ -2,6 +2,8 @@
 
 #include "polygongeometry.h"
 #include "map3d.h"
+#include "terraingenerator.h"
+#include "utils.h"
 
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DRender/QGeometryRenderer>
@@ -9,6 +11,7 @@
 
 #include "qgsvectorlayer.h"
 #include "qgsmultipolygon.h"
+
 
 
 PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, Qt3DCore::QNode* parent)
@@ -35,10 +38,13 @@ PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, 
       continue;
 
     QgsAbstractGeometry* g = f.geometry().geometry();
+
     if (QgsWkbTypes::flatType(g->wkbType()) == QgsWkbTypes::Polygon)
     {
       QgsPolygonV2* poly = static_cast<QgsPolygonV2*>(g);
-      polygons.append(poly->clone());
+      QgsPolygonV2* polyClone = poly->clone();
+      Utils::clampAltitudes(polyClone, settings.altClamping, settings.altBinding, settings.height, map);
+      polygons.append(polyClone);
     }
     else if (QgsWkbTypes::flatType(g->wkbType()) == QgsWkbTypes::MultiPolygon)
     {
@@ -47,7 +53,9 @@ PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, 
       {
         QgsAbstractGeometry* g2 = mpoly->geometryN(i);
         Q_ASSERT(QgsWkbTypes::flatType(g2->wkbType()) == QgsWkbTypes::Polygon);
-        polygons.append(static_cast<QgsPolygonV2*>(g2)->clone());
+        QgsPolygonV2* polyClone = static_cast<QgsPolygonV2*>(g2)->clone();
+        Utils::clampAltitudes(polyClone, settings.altClamping, settings.altBinding, settings.height, map);
+        polygons.append(polyClone);
       }
     }
     else
@@ -55,7 +63,7 @@ PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, 
   }
 
   geometry = new PolygonGeometry;
-  geometry->setPolygons(polygons, origin, settings.height, settings.extrusionHeight);
+  geometry->setPolygons(polygons, origin, settings.extrusionHeight);
 
   Qt3DRender::QGeometryRenderer* renderer = new Qt3DRender::QGeometryRenderer;
   renderer->setGeometry(geometry);

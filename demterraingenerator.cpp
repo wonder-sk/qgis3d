@@ -139,6 +139,12 @@ QgsRectangle DemTerrainGenerator::extent() const
   return terrainTilingScheme.tileToExtent(0, 0, 0);
 }
 
+float DemTerrainGenerator::heightAt(double x, double y, const Map3D &map) const
+{
+  Q_UNUSED(map);
+  return mHeightMapGenerator->heightAt(x, y);
+}
+
 void DemTerrainGenerator::writeXml(QDomElement& elem) const
 {
   elem.setAttribute("layer", mLayer.layerId);
@@ -262,6 +268,29 @@ QByteArray DemHeightMapGenerator::renderSynchronously(int x, int y, int z)
   }
 
   return data;
+}
+
+float DemHeightMapGenerator::heightAt(double x, double y)
+{
+  // TODO: this is quite a primitive implementation: better to use heightmaps currently in use
+  int res = 1024;
+  QgsRectangle rect = dtm->extent();
+  if (dtmCoarseData.isEmpty())
+  {
+    QgsRasterBlock* block = dtm->dataProvider()->block(1, rect, res, res);
+    block->convert(Qgis::Float32);
+    dtmCoarseData = block->data();
+    dtmCoarseData.detach();  // make a deep copy
+    delete block;
+  }
+
+  int cellX = (int) ( (x - rect.xMinimum()) / rect.width() * res + .5f);
+  int cellY = (int) ( (rect.yMaximum() - y) / rect.height() * res + .5f);
+  cellX = qBound(0, cellX, res-1);
+  cellY = qBound(0, cellY, res-1);
+
+  const float* data = (const float*) dtmCoarseData.constData();
+  return data[cellX + cellY*res];
 }
 
 void DemHeightMapGenerator::onFutureFinished()

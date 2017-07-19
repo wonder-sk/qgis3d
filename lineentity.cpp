@@ -2,6 +2,8 @@
 
 #include "polygongeometry.h"
 #include "map3d.h"
+#include "terraingenerator.h"
+#include "utils.h"
 
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DRender/QGeometryRenderer>
@@ -47,7 +49,9 @@ LineEntity::LineEntity(const Map3D &map, const LineRenderer &settings, Qt3DCore:
 
     if (QgsWkbTypes::flatType(buffered->wkbType()) == QgsWkbTypes::Polygon)
     {
-      polygons.append(static_cast<QgsPolygonV2*>(buffered));
+      QgsPolygonV2* polyBuffered = static_cast<QgsPolygonV2*>(buffered);
+      Utils::clampAltitudes(polyBuffered, settings.altClamping, settings.altBinding, settings.height, map);
+      polygons.append(polyBuffered);
     }
     else if (QgsWkbTypes::flatType(buffered->wkbType()) == QgsWkbTypes::MultiPolygon)
     {
@@ -56,14 +60,16 @@ LineEntity::LineEntity(const Map3D &map, const LineRenderer &settings, Qt3DCore:
       {
         QgsAbstractGeometry* partBuffered = mpolyBuffered->geometryN(i);
         Q_ASSERT(QgsWkbTypes::flatType(partBuffered->wkbType()) == QgsWkbTypes::Polygon);
-        polygons.append(static_cast<QgsPolygonV2*>(partBuffered)->clone());  // need to clone individual geometry parts
+        QgsPolygonV2* polyBuffered = static_cast<QgsPolygonV2*>(partBuffered)->clone();   // need to clone individual geometry parts
+        Utils::clampAltitudes(polyBuffered, settings.altClamping, settings.altBinding, settings.height, map);
+        polygons.append(polyBuffered);
       }
       delete buffered;
     }
   }
 
   geometry = new PolygonGeometry;
-  geometry->setPolygons(polygons, origin, settings.height, settings.extrusionHeight);
+  geometry->setPolygons(polygons, origin, /*settings.height,*/ settings.extrusionHeight);
 
   Qt3DRender::QGeometryRenderer* renderer = new Qt3DRender::QGeometryRenderer;
   renderer->setGeometry(geometry);

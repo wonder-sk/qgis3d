@@ -60,7 +60,7 @@ PolygonGeometry::~PolygonGeometry()
   qDeleteAll(mPolygons);
 }
 
-void PolygonGeometry::setPolygons(const QList<QgsPolygonV2*> &polygons, const QgsPointXY& origin, float height, float extrusionHeight)
+void PolygonGeometry::setPolygons(const QList<QgsPolygonV2*> &polygons, const QgsPointXY& origin, float extrusionHeight)
 {
   qDeleteAll(mPolygons);
   mPolygons = polygons;
@@ -69,7 +69,8 @@ void PolygonGeometry::setPolygons(const QList<QgsPolygonV2*> &polygons, const Qg
   Tessellator tesselator(origin.x(), origin.y(), m_withNormals);
   Q_FOREACH (QgsPolygonV2* polygon, polygons)
   {
-    tesselator.addPolygon(*polygon, height, extrusionHeight);
+    tesselator.addPolygon(*polygon, extrusionHeight);
+    ++i;
   }
 
   QByteArray data((const char*)tesselator.data.constData(), tesselator.data.count() * sizeof(float));

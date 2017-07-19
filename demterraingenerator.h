@@ -30,6 +30,7 @@ public:
 
   Type type() const override;
   QgsRectangle extent() const override;
+  float heightAt(double x, double y, const Map3D &map) const override;
   virtual void writeXml(QDomElement& elem) const override;
   virtual void readXml(const QDomElement& elem) override;
   virtual void resolveReferences(const QgsProject& project) override;
@@ -71,6 +72,9 @@ public:
 
   int resolution() const { return res; }
 
+  //! returns height at given position (in terrain's CRS)
+  float heightAt(double x, double y);
+
 signals:
   //! emitted when a previously requested heightmap is ready
   void heightMapReady(int jobId, const QByteArray& heightMap);
@@ -97,6 +101,9 @@ private:
   };
 
   QHash<QFutureWatcher<QByteArray>*, JobData> jobs;
+
+  //! used for height queries
+  QByteArray dtmCoarseData;
 };
 
 #endif // DEMTERRAINGENERATOR_H

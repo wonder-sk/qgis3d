@@ -32,6 +32,45 @@ static QMatrix4x4 _stringToMatrix4x4(const QString& str)
   return m;
 }
 
+QString altClampingToString(AltitudeClamping altClamp)
+{
+  switch (altClamp)
+  {
+    case AltClampAbsolute: return QStringLiteral("absolute");
+    case AltClampRelative: return QStringLiteral("relative");
+    case AltClampTerrain: return QStringLiteral("terrain");
+    default: Q_ASSERT(false); return QString();
+  }
+}
+
+AltitudeClamping altClampingFromString(const QString& str)
+{
+  if (str == "absolute")
+    return AltClampAbsolute;
+  else if (str == "terrain")
+    return AltClampTerrain;
+  else   // "relative"  (default)
+    return AltClampRelative;
+}
+
+QString altBindingToString(AltitudeBinding altBind)
+{
+  switch (altBind)
+  {
+    case AltBindVertex: return QStringLiteral("vertex");
+    case AltBindCentroid: return QStringLiteral("centroid");
+    default: Q_ASSERT(false); return QString();
+  }
+}
+
+AltitudeBinding altBindingFromString(const QString& str)
+{
+  if (str == "vertex")
+    return AltBindVertex;
+  else  // "centroid"  (default)
+    return AltBindCentroid;
+}
+
 
 Map3D::Map3D()
   : originX(0)
@@ -256,7 +295,9 @@ QList<QgsMapLayer *> Map3D::layers() const
 // ---------------
 
 PolygonRenderer::PolygonRenderer()
-  : height(0)
+  : altClamping(AltClampRelative)
+  , altBinding(AltBindCentroid)
+  , height(0)
   , extrusionHeight(0)
 {
 }
@@ -277,6 +318,8 @@ void PolygonRenderer::writeXml(QDomElement &elem) const
 
   QDomElement elemDataProperties = doc.createElement("data");
   elemDataProperties.setAttribute("layer", layerRef.layerId);
+  elemDataProperties.setAttribute("alt-clamping", altClampingToString(altClamping));
+  elemDataProperties.setAttribute("alt-binding", altBindingToString(altBinding));
   elemDataProperties.setAttribute("height", height);
   elemDataProperties.setAttribute("extrusion-height", extrusionHeight);
   elem.appendChild(elemDataProperties);
@@ -290,6 +333,8 @@ void PolygonRenderer::readXml(const QDomElement &elem)
 {
   QDomElement elemDataProperties = elem.firstChildElement("data");
   layerRef = QgsMapLayerRef(elemDataProperties.attribute("layer"));
+  altClamping = altClampingFromString(elemDataProperties.attribute("alt-clamping"));
+  altBinding = altBindingFromString(elemDataProperties.attribute("alt-binding"));
   height = elemDataProperties.attribute("height").toFloat();
   extrusionHeight = elemDataProperties.attribute("extrusion-height").toFloat();
 
@@ -365,7 +410,9 @@ void PointRenderer::resolveReferences(const QgsProject &project)
 // ---------------
 
 LineRenderer::LineRenderer()
-  : height(0)
+  : altClamping(AltClampRelative)
+  , altBinding(AltBindCentroid)
+  , height(0)
   , extrusionHeight(0)
   , distance(1)
 {
@@ -388,6 +435,8 @@ void LineRenderer::writeXml(QDomElement &elem) const
 
   QDomElement elemDataProperties = doc.createElement("data");
   elemDataProperties.setAttribute("layer", layerRef.layerId);
+  elemDataProperties.setAttribute("alt-clamping", altClampingToString(altClamping));
+  elemDataProperties.setAttribute("alt-binding", altBindingToString(altBinding));
   elemDataProperties.setAttribute("height", height);
   elemDataProperties.setAttribute("extrusion-height", extrusionHeight);
   elemDataProperties.setAttribute("distance", distance);
@@ -402,6 +451,8 @@ void LineRenderer::readXml(const QDomElement &elem)
 {
   QDomElement elemDataProperties = elem.firstChildElement("data");
   layerRef = QgsMapLayerRef(elemDataProperties.attribute("layer"));
+  altClamping = altClampingFromString(elemDataProperties.attribute("alt-clamping"));
+  altBinding = altBindingFromString(elemDataProperties.attribute("alt-binding"));
   height = elemDataProperties.attribute("height").toFloat();
   extrusionHeight = elemDataProperties.attribute("extrusion-height").toFloat();
   distance = elemDataProperties.attribute("distance").toFloat();

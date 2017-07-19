@@ -15,6 +15,29 @@ class QgsVectorLayer;
 class MapTextureGenerator;
 class TerrainGenerator;
 
+
+//! how to handle altitude of vector features
+enum AltitudeClamping
+{
+  AltClampAbsolute,   //!< z_final = z_geometry
+  AltClampRelative,   //!< z_final = z_terrain + z_geometry
+  AltClampTerrain,    //!< z_final = z_terrain
+};
+
+QString altClampingToString(AltitudeClamping altClamp);
+AltitudeClamping altClampingFromString(const QString& str);
+
+//! how to handle clamping of vertices of individual features
+enum AltitudeBinding
+{
+  AltBindVertex,      //!< clamp every vertex of feature
+  AltBindCentroid,    //!< clamp just centroid of feature
+};
+
+QString altBindingToString(AltitudeBinding altBind);
+AltitudeBinding altBindingFromString(const QString& str);
+
+
 //! Basic shading material used for rendering
 class PhongMaterialSettings
 {
@@ -47,6 +70,7 @@ private:
   float mShininess;
 };
 
+
 class PolygonRenderer
 {
 public:
@@ -58,6 +82,9 @@ public:
   void writeXml(QDomElement& elem) const;
   void readXml(const QDomElement& elem);
   void resolveReferences(const QgsProject& project);
+
+  AltitudeClamping altClamping;  //! how to handle altitude of vector features
+  AltitudeBinding altBinding;    //! how to handle clamping of vertices of individual features
 
   float height;           //!< base height of polygons
   float extrusionHeight;  //!< how much to extrude (0 means no walls)
@@ -99,6 +126,9 @@ public:
   void writeXml(QDomElement& elem) const;
   void readXml(const QDomElement& elem);
   void resolveReferences(const QgsProject& project);
+
+  AltitudeClamping altClamping;  //! how to handle altitude of vector features
+  AltitudeBinding altBinding;    //! how to handle clamping of vertices of individual features
 
   float height;           //!< base height of polygons
   float extrusionHeight;  //!< how much to extrude (0 means no walls)

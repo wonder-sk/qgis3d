@@ -50,6 +50,9 @@ public:
   //! Returns height range of the root chunk in world coordinates
   virtual void rootChunkHeightRange(float& hMin, float& hMax) const;
 
+  //! Returns height at (x,y) in terrain's CRS
+  virtual float heightAt(double x, double y, const Map3D& map) const;
+
   //! Write terrain generator's configuration to XML
   virtual void writeXml(QDomElement& elem) const = 0;
 
