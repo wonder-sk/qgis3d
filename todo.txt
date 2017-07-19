@@ -1,0 +1,37 @@
+
+terrain:
+- skirts for DEM-based terrain to hide cracks between tiles
+- improved clamping of objects to terrain to avoid artefacts
+- cull terrain tiles on horizon that are far
+
+frustum culling:
+- fix bounding box of point entities so that it works correctly
+- re-enable frustum culling for chunked entities - bug sometimes culls incorrectly
+- disable qt3d frustum culling for chunked entities (already explicitly done in qgis3d)
+
+chunks:
+- load points / lines / polygons with chunked entity if requested (for bigger data)
+- loading queue using multiple threads
+
+renderers:
+- points as billboards
+- polygons draped on terrain using shadow volumes
+- lines 
+- point clouds (as points / splats)
+- 3D tiles
+
+camera control:
+- setup near/far plane to best utilize depth buffer (and distant stuff does not get culled)
+- when zooming, zoom centered on mouse position rather than on center of the map
+- detect collisions with terrain and do not let user go under terrain (if desired)
+- animated transitions (zoom, move with keys)
+
+appearance:
+- use layer's single/categorized/graduated/rule-based renderers
+- transparency
+- shadows
+
+QGIS integration:
+- new library in src/3d
+- test app in tests/src/3d
+- GUI widgets for configuration (in src/app)
