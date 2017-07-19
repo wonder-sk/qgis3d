@@ -34,23 +34,25 @@ int main(int argc, char *argv[])
 {
   // TODO: why it does not work to create ordinary QApplication and then just call initQgis()
 
+  QString thisDir = "/home/martin/tmp/qgis3d";
+
   qputenv("QGIS_PREFIX_PATH", "/home/martin/qgis/git-master/build59/output");
   QgsApplication app(argc, argv, true);
   QgsApplication::initQgis();
 
-  QgsRasterLayer* rlDtm = new QgsRasterLayer("/home/martin/tmp/qgis3d/dtm.tif", "dtm", "gdal");
+  QgsRasterLayer* rlDtm = new QgsRasterLayer(thisDir + "/dtm.tif", "dtm", "gdal");
   Q_ASSERT( rlDtm->isValid() );
 
-  QgsRasterLayer* rlSat = new QgsRasterLayer("/home/martin/tmp/qgis3d/ap.tif", "ap", "gdal");
+  QgsRasterLayer* rlSat = new QgsRasterLayer(thisDir + "/ap.tif", "ap", "gdal");
   Q_ASSERT( rlSat->isValid() );
 
-  QgsVectorLayer* vlPolygons = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/buildings.shp", "buildings", "ogr");
+  QgsVectorLayer* vlPolygons = new QgsVectorLayer(thisDir + "/data/buildings.shp", "buildings", "ogr");
   Q_ASSERT( vlPolygons->isValid() );
 
-  QgsVectorLayer* vlPoints = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/trees.shp", "trees", "ogr");
+  QgsVectorLayer* vlPoints = new QgsVectorLayer(thisDir + "/data/trees.shp", "trees", "ogr");
   Q_ASSERT( vlPoints->isValid() );
 
-  QgsVectorLayer* vlLines = new QgsVectorLayer("/home/martin/tmp/qgis3d/data/roads.shp", "roads", "ogr");
+  QgsVectorLayer* vlLines = new QgsVectorLayer(thisDir + "/data/roads.shp", "roads", "ogr");
   Q_ASSERT( vlLines->isValid() );
 
   QList<QgsMapLayer*> layers;
@@ -180,7 +182,7 @@ int main(int argc, char *argv[])
   // skybox
 
   map.skybox = true;
-  map.skyboxFileBase = "file:///home/martin/tmp/qgis3d/skybox/miramar";
+  map.skyboxFileBase = "file://" + thisDir + "/skybox/miramar";
   map.skyboxFileExtension = ".jpg";
 
   //
