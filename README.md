@@ -1,9 +1,8 @@
 # QGIS 3D
 
-This repository contains initial work to build a 3D framework for QGIS.
+**UPDATE: The work on 3D support in QGIS has been merged to QGIS master branch and will be included in 3.0 release.**
 
-Work on integration into QGIS codebase has recently started and the most recent progress can be found in "3d" branch in wonder-sk/QGIS repository:
-https://github.com/wonder-sk/QGIS/tree/3d
+This repository contains initial work to build a 3D framework for QGIS.
 
 To build with 3D support, set `WITH_3D=TRUE` in CMake.
 
