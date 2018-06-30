@@ -43,7 +43,7 @@ RESOURCES += qml.qrc \
 
 QGIS_SOURCE_PATH = /home/martin/qgis/git-master
 #QGIS_BUILD_PATH = $${QGIS_SOURCE_PATH}/creator
-QGIS_BUILD_PATH = $${QGIS_SOURCE_PATH}/build59
+QGIS_BUILD_PATH = $${QGIS_SOURCE_PATH}/build-debug
 
 INCLUDEPATH += \
   $${QGIS_SOURCE_PATH}/src/core \
@@ -51,7 +51,7 @@ INCLUDEPATH += \
   $${QGIS_SOURCE_PATH}/src/core/geometry \
   $${QGIS_SOURCE_PATH}/src/core/metadata \
   $${QGIS_SOURCE_PATH}/src/core/raster \
-  $${QGIS_SOURCE_PATH}/src/core/symbology-ng \
+  $${QGIS_SOURCE_PATH}/src/core/symbology \
   $${QGIS_BUILD_PATH} \
   $${QGIS_BUILD_PATH}/src/core
 

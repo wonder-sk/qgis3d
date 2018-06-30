@@ -5,7 +5,6 @@ terrain:
 - cull terrain tiles on horizon that are far
 
 frustum culling:
-- fix bounding box of point entities so that it works correctly
 - re-enable frustum culling for chunked entities - bug sometimes culls incorrectly
 - disable qt3d frustum culling for chunked entities (already explicitly done in qgis3d)
 
@@ -30,8 +29,3 @@ appearance:
 - use layer's single/categorized/graduated/rule-based renderers
 - transparency
 - shadows
-
-QGIS integration:
-- new library in src/3d
-- test app in tests/src/3d
-- GUI widgets for configuration (in src/app)

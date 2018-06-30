@@ -1,7 +1,7 @@
 #ifndef TESSELLATOR_H
 #define TESSELLATOR_H
 
-class QgsPolygonV2;
+class QgsPolygon;
 
 #include <QVector>
 
@@ -10,7 +10,7 @@ class Tessellator
 public:
   Tessellator(double originX, double originY, bool addNormals);
 
-  void addPolygon(const QgsPolygonV2& polygon, float extrusionHeight);
+  void addPolygon(const QgsPolygon& polygon, float extrusionHeight);
 
   // input:
   // - origin X/Y

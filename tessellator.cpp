@@ -94,7 +94,7 @@ static void _makeWalls(const QgsCurve& ring, bool ccw, float extrusionHeight, QV
   }
 }
 
-void Tessellator::addPolygon(const QgsPolygonV2 &polygon, float extrusionHeight)
+void Tessellator::addPolygon(const QgsPolygon &polygon, float extrusionHeight)
 {
   const QgsCurve* exterior = polygon.exteriorRing();
 

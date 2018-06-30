@@ -40,17 +40,17 @@ PointEntity::PointEntity(const Map3D& map, const PointRenderer& settings, Qt3DCo
   QList<QVector3D> positions;
   QgsFeature f;
   QgsFeatureRequest request;
-  request.setDestinationCrs(map.crs);
+  request.setDestinationCrs(map.crs, QgsCoordinateTransformContext());
   QgsFeatureIterator fi = settings.layer()->getFeatures(request);
   while (fi.nextFeature(f))
   {
     if (f.geometry().isNull())
       continue;
 
-    QgsAbstractGeometry* g = f.geometry().geometry();
+    const QgsAbstractGeometry* g = f.geometry().constGet();
     if (QgsWkbTypes::flatType(g->wkbType()) == QgsWkbTypes::Point)
     {
-      QgsPoint* pt = static_cast<QgsPoint*>(g);
+      const QgsPoint* pt = static_cast<const QgsPoint*>(g);
       // TODO: use Z coordinates if the point is 3D
       float h = map.terrainGenerator->heightAt(pt->x(), pt->y(), map) * map.zExaggeration;
       positions.append(QVector3D(pt->x() - map.originX, h + settings.height, -(pt->y() - map.originY)));

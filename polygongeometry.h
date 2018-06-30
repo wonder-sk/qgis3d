@@ -17,10 +17,10 @@ public:
   ~PolygonGeometry();
 
   // takes ownership of passed polygon geometries
-  void setPolygons(const QList<QgsPolygonV2*>& polygons, const QgsPointXY& origin, float extrusionHeight);
+  void setPolygons(const QList<QgsPolygon*>& polygons, const QgsPointXY& origin, float extrusionHeight);
 
 private:
-  QList<QgsPolygonV2*> mPolygons;
+  QList<QgsPolygon*> mPolygons;
 
   Qt3DRender::QAttribute *m_positionAttribute;
   Qt3DRender::QAttribute *m_normalAttribute;

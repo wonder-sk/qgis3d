@@ -36,7 +36,7 @@ void Utils::clampAltitudes(QgsLineString* lineString, AltitudeClamping altClamp,
 }
 
 
-bool Utils::clampAltitudes(QgsPolygonV2* polygon, AltitudeClamping altClamp, AltitudeBinding altBind, float height, const Map3D& map)
+bool Utils::clampAltitudes(QgsPolygon* polygon, AltitudeClamping altClamp, AltitudeBinding altBind, float height, const Map3D& map)
 {
   if (!polygon->is3D())
     polygon->addZValue(0);

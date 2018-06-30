@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
   QString thisDir = "/home/martin/tmp/qgis3d";
 
-  qputenv("QGIS_PREFIX_PATH", "/home/martin/qgis/git-master/build59/output");
+  qputenv("QGIS_PREFIX_PATH", "/home/martin/qgis/git-master/build-debug/output");
   QgsApplication app(argc, argv, true);
   QgsApplication::initQgis();
 

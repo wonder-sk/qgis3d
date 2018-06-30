@@ -27,33 +27,33 @@ PolygonEntity::PolygonEntity(const Map3D& map, const PolygonRenderer& settings, 
   material->setShininess(settings.material.shininess());
   addComponent(material);
 
-  QList<QgsPolygonV2*> polygons;
+  QList<QgsPolygon*> polygons;
   QgsFeature f;
   QgsFeatureRequest request;
-  request.setDestinationCrs(map.crs);
+  request.setDestinationCrs(map.crs, QgsCoordinateTransformContext());
   QgsFeatureIterator fi = layer->getFeatures(request);
   while (fi.nextFeature(f))
   {
     if (f.geometry().isNull())
       continue;
 
-    QgsAbstractGeometry* g = f.geometry().geometry();
+    const QgsAbstractGeometry* g = f.geometry().constGet();
 
     if (QgsWkbTypes::flatType(g->wkbType()) == QgsWkbTypes::Polygon)
     {
-      QgsPolygonV2* poly = static_cast<QgsPolygonV2*>(g);
-      QgsPolygonV2* polyClone = poly->clone();
+      const QgsPolygon* poly = static_cast<const QgsPolygon*>(g);
+      QgsPolygon* polyClone = poly->clone();
       Utils::clampAltitudes(polyClone, settings.altClamping, settings.altBinding, settings.height, map);
       polygons.append(polyClone);
     }
     else if (QgsWkbTypes::flatType(g->wkbType()) == QgsWkbTypes::MultiPolygon)
     {
-      QgsMultiPolygonV2* mpoly = static_cast<QgsMultiPolygonV2*>(g);
+      const QgsMultiPolygon* mpoly = static_cast<const QgsMultiPolygon*>(g);
       for (int i = 0; i < mpoly->numGeometries(); ++i)
       {
-        QgsAbstractGeometry* g2 = mpoly->geometryN(i);
+        const QgsAbstractGeometry* g2 = mpoly->geometryN(i);
         Q_ASSERT(QgsWkbTypes::flatType(g2->wkbType()) == QgsWkbTypes::Polygon);
-        QgsPolygonV2* polyClone = static_cast<QgsPolygonV2*>(g2)->clone();
+        QgsPolygon* polyClone = static_cast<const QgsPolygon*>(g2)->clone();
         Utils::clampAltitudes(polyClone, settings.altClamping, settings.altBinding, settings.height, map);
         polygons.append(polyClone);
       }

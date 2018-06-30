@@ -32,35 +32,35 @@ LineEntity::LineEntity(const Map3D &map, const LineRenderer &settings, Qt3DCore:
   QgsGeometry::JoinStyle joinStyle = QgsGeometry::JoinStyleRound;
   double mitreLimit = 0;
 
-  QList<QgsPolygonV2*> polygons;
+  QList<QgsPolygon*> polygons;
   QgsFeature f;
   QgsFeatureRequest request;
-  request.setDestinationCrs(map.crs);
+  request.setDestinationCrs(map.crs, QgsCoordinateTransformContext());
   QgsFeatureIterator fi = layer->getFeatures(request);
   while (fi.nextFeature(f))
   {
     if (f.geometry().isNull())
       continue;
 
-    QgsAbstractGeometry* g = f.geometry().geometry();
+    const QgsAbstractGeometry* g = f.geometry().constGet();
 
     QgsGeos engine(g);
     QgsAbstractGeometry *buffered = engine.buffer(settings.distance, nSegments, endCapStyle, joinStyle, mitreLimit);  // factory
 
     if (QgsWkbTypes::flatType(buffered->wkbType()) == QgsWkbTypes::Polygon)
     {
-      QgsPolygonV2* polyBuffered = static_cast<QgsPolygonV2*>(buffered);
+      QgsPolygon* polyBuffered = static_cast<QgsPolygon*>(buffered);
       Utils::clampAltitudes(polyBuffered, settings.altClamping, settings.altBinding, settings.height, map);
       polygons.append(polyBuffered);
     }
     else if (QgsWkbTypes::flatType(buffered->wkbType()) == QgsWkbTypes::MultiPolygon)
     {
-      QgsMultiPolygonV2* mpolyBuffered = static_cast<QgsMultiPolygonV2*>(buffered);
+      QgsMultiPolygon* mpolyBuffered = static_cast<QgsMultiPolygon*>(buffered);
       for (int i = 0; i < mpolyBuffered->numGeometries(); ++i)
       {
         QgsAbstractGeometry* partBuffered = mpolyBuffered->geometryN(i);
         Q_ASSERT(QgsWkbTypes::flatType(partBuffered->wkbType()) == QgsWkbTypes::Polygon);
-        QgsPolygonV2* polyBuffered = static_cast<QgsPolygonV2*>(partBuffered)->clone();   // need to clone individual geometry parts
+        QgsPolygon* polyBuffered = static_cast<QgsPolygon*>(partBuffered)->clone();   // need to clone individual geometry parts
         Utils::clampAltitudes(polyBuffered, settings.altClamping, settings.altBinding, settings.height, map);
         polygons.append(polyBuffered);
       }
